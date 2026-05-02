@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: auth-service
+  config:
+    import: optional:file:/home/alamgir/Alamgir/workingProject/MBSTU_DiningPass/services/auth-service/.env[.properties]
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  web:
+    error:
+      include-stacktrace: never
+      include-message: always
+      include-binding-errors: never
+      include-exception: false
+
+server:
+  port: 8081
