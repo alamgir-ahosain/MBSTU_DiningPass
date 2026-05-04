@@ -9,7 +9,6 @@ public record AdminResponse(
         UUID id,
         String fullName,
         String email,
-        String password,
         String phone,
         Role role,
         UUID hallId,

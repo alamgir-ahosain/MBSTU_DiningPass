@@ -42,7 +42,7 @@ public class HallServiceImpl implements HallService {
         Hall newHall = Hall.builder()
 
                 .fullName(request.fullName())
-                .shortName(request.shortName())
+                .shortName(sanitizedShortName)
                 .genderType(request.genderType())
                 .bkashNumber(request.bkashNumber())
                 .nagadNumber(request.nagadNumber())
@@ -132,6 +132,8 @@ public class HallServiceImpl implements HallService {
         existingHall.setNagadNumber(request.nagadNumber());
         existingHall.setHallAdminId(request.hallAdminId());
 
+        hallRepository.save(existingHall);
+        logger.info("Hall updated successfully: {}", existingHall.getFullName());
         return mapToResponse(hallRepository.save(existingHall));
     }
 

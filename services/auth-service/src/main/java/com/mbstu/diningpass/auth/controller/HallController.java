@@ -22,6 +22,9 @@ public class HallController {
     private final HallService hallService;
     private static final Logger logger = LoggerFactory.getLogger(HallController.class);
 
+    public void tes(){
+        System.out.println("hall test");
+    }
     // 1. Create a Hall
     @PostMapping
     public ResponseEntity<HallResponse> createHall(@Valid @RequestBody CreateHallRequest request) {

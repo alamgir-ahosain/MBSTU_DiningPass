@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: api-gateway
+
+  config:
+    import: optional:file:/home/alamgir/Alamgir/workingProject/MBSTU_DiningPass/services/api-gateway/.env[.properties]
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          enabled: true
+          default-filters: []
+
+
+firebase:
+  service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON}
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    com.mbstu.diningpass: INFO
+    org.springframework.cloud.gateway: INFO

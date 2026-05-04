@@ -17,6 +17,10 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    //  Firebase link
+    @Column(name = "firebase_uid", nullable = false, unique = true, length = 128)
+    private String firebaseUid;
+
     @Column(name = "student_id", nullable = false,unique = true, length = 20)
     private String studentId; //CE21012
 
@@ -29,8 +33,8 @@ public class Student {
     @Column(nullable = false, unique = true, length = 150)
     private String email; // university email
 
-    @Column(nullable = false)
-    private String password;
+//    @Column(nullable = false)
+//    private String password;
 
 
     @Enumerated(EnumType.STRING)
@@ -56,11 +60,11 @@ public class Student {
 
 
     // others
-    @Column(name = "otp_code", length = 6)
-    private String otpCode;
-
-    @Column(name = "otp_expires_at")
-    private LocalDateTime otpExpiresAt;
+//    @Column(name = "otp_code", length = 6)
+//    private String otpCode;
+//
+//    @Column(name = "otp_expires_at")
+//    private LocalDateTime otpExpiresAt;
 
     @Column(name = "fcm_token", columnDefinition = "TEXT")
     private String fcmToken;

@@ -1,8 +1,8 @@
 package com.mbstu.diningpass.auth.controller;
 
-
-
 import com.mbstu.diningpass.auth.dto.request.admin.CreateAdminRequest;
+import com.mbstu.diningpass.auth.dto.request.student.SuspendStudentRequest;
+import com.mbstu.diningpass.auth.dto.response.MessageResponse;
 import com.mbstu.diningpass.auth.dto.response.admin.AdminResponse;
 import com.mbstu.diningpass.auth.service.abstraction.AdminService;
 import jakarta.validation.Valid;
@@ -25,34 +25,44 @@ public class AdminController {
     private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     /**
-       Create a new Admin or Staff account.
-        Access: SUPER_ADMIN
+      Create Admin
+     Access: SUPER_ADMIN (validated at gateway via Firebase claims)
      */
     @PostMapping
-    public ResponseEntity<AdminResponse> createAdmin(@Valid @RequestBody CreateAdminRequest request) {
-        logger.info("Super Admin creating new {} account: {}", request.role(), request.email());
-        return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createAdminRequest(request));
+    public ResponseEntity<AdminResponse> createAdmin(
+            @RequestHeader("X-User-Id") UUID superAdminId,
+            @RequestHeader("X-User-Role") String role,
+            @Valid @RequestBody CreateAdminRequest request) {
+
+        logger.info("Super Admin {} creating admin: {}", superAdminId, request.email());
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createAdmin(request));
     }
 
+
+
+
     /**
-       List all administrator accounts (active and inactive).
-       Access: SUPER_ADMIN
+      Get all admins
      */
     @GetMapping
-    public ResponseEntity<List<AdminResponse>> getAllAdmins() {
+    public ResponseEntity<List<AdminResponse>> getAllAdmins(
+            @RequestHeader("X-User-Role") String role) {
+
         logger.info("Fetching all admin accounts");
         return ResponseEntity.ok(adminService.getAllAdmin());
     }
 
-    /**
-       Soft delete/Deactivate an admin account.
-       Access: SUPER_ADMIN
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deactivateAdmin(@PathVariable UUID id) {
-        logger.warn("Request to deactivate Admin account ID: {}", id);
-        adminService.deleteAdmin(id);
-        return ResponseEntity.noContent().build();
-    }
 
+    /**
+      Soft delete (suspend) admin
+     */
+    @PutMapping("/{id}/suspend")
+    public ResponseEntity<MessageResponse> suspendAdmin(
+            @RequestHeader("X-User-Id") UUID superAdminId,
+            @PathVariable UUID id,
+            @Valid @RequestBody SuspendStudentRequest request) {
+
+        logger.warn("Super Admin {} suspending admin ID: {}", superAdminId, id);
+        return ResponseEntity.ok(adminService.deleteAdmin(id, request));
+    }
 }
