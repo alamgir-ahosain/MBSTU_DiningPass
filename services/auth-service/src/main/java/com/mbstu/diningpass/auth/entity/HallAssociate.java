@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "admins")
+@Table(name = "hall_associates")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Admin {
+public class HallAssociate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -40,7 +40,7 @@ public class Admin {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;             // SUPER_ADMIN | HALL_ADMIN | COUNTER_STAFF
+    private Role role;             // SUPER_ADMIN | HALL_ADMIN | HALL_STAFF
 
     @Column(name = "hall_id", nullable = false)
     private UUID hallId; // 1 for JAMH // NULL for SUPER_ADMIN

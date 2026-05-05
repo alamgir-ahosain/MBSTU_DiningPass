@@ -206,7 +206,7 @@ export default function FirebaseTestApp() {
 
     const handleRegister = async () => {
         try {
-            const res = await apiCall("POST", "/api/v1/students/register", reg);
+            const res = await apiCall("POST", "/api/v1/students", reg);
             ok(res);
         } catch (e) {
             err(e);
@@ -236,7 +236,7 @@ export default function FirebaseTestApp() {
     // ── 3. GET PROFILE (calls backend with Firebase token) ───────────────
     const handleGetProfile = async () => {
         try {
-            const res = await apiCall("GET", "/api/v1/students/profile");
+            const res = await apiCall("GET", "/api/v1/students/me");
             ok(res);
         } catch (e) {
             err(e);

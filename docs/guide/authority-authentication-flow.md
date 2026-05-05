@@ -111,19 +111,19 @@ Status:  CORRECT
 
 ---
 
-### Scenario 2: Protected Path with Valid Token (/api/v1/admin/accounts)
+### Scenario 2: Protected Path with Valid Token (/api/v1/hallAssociate/accounts)
 
 **Request**:
 
 ```
-GET /api/v1/admin/accounts
+GET /api/v1/hallAssociate/accounts
 Authorization: Bearer eyJhbGc...valid...
 ```
 
 **Gateway Flow**:
 
 ```
-1. Check: "/api/v1/admin/accounts" in PUBLIC_PATHS? NO
+1. Check: "/api/v1/hallAssociate/accounts" in PUBLIC_PATHS? NO
 2. Extract: "Bearer eyJhbGc...valid..."
 3. Extract token: "eyJhbGc...valid...
 4. Verify: FirebaseAuth.verifyIdToken() → Success 
@@ -174,14 +174,14 @@ Status:  CORRECT
 **Request**:
 
 ```
-GET /api/v1/admin/accounts
+GET /api/v1/hallAssociate/accounts
 Authorization: Bearer invalid_token
 ```
 
 **Gateway Flow**:
 
 ```
-1. Check: "/api/v1/admin/accounts" in PUBLIC_PATHS? NO
+1. Check: "/api/v1/hallAssociate/accounts" in PUBLIC_PATHS? NO
 2. Extract: "Bearer invalid_token"
 3. Extract token: "invalid_token"
 4. Verify: FirebaseAuth.verifyIdToken() → Exception ✗
@@ -223,14 +223,14 @@ Status:  CORRECT
 **Request**:
 
 ```
-GET /api/v1/admin/accounts
+GET /api/v1/hallAssociate/accounts
 (No Authorization header)
 ```
 
 **Gateway Flow**:
 
 ```
-1. Check: "/api/v1/admin/accounts" in PUBLIC_PATHS? NO
+1. Check: "/api/v1/hallAssociate/accounts" in PUBLIC_PATHS? NO
 2. Extract: Authorization header → NULL
 3. Check: authHeader == null || !startsWith("Bearer ")? YES 
 4. Log: "Missing or malformed Authorization header"

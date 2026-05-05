@@ -9,11 +9,14 @@ import com.mbstu.diningpass.auth.dto.request.student.StudentRegistrationRequest;
 import com.mbstu.diningpass.auth.dto.request.student.UpdateStudentProfileRequest;
 import com.mbstu.diningpass.auth.dto.response.student.StudentResponse;
 import com.mbstu.diningpass.auth.entity.Hall;
+import com.mbstu.diningpass.auth.entity.HallAssociate;
 import com.mbstu.diningpass.auth.entity.Student;
 import com.mbstu.diningpass.auth.enums.Role;
 import com.mbstu.diningpass.auth.exception.BadRequestException;
 import com.mbstu.diningpass.auth.exception.DuplicateResourceException;
+import com.mbstu.diningpass.auth.exception.ForbiddenException;
 import com.mbstu.diningpass.auth.exception.ResourceNotFoundException;
+import com.mbstu.diningpass.auth.repository.HallAssociateRepository;
 import com.mbstu.diningpass.auth.repository.HallRepository;
 import com.mbstu.diningpass.auth.repository.StudentRepository;
 import com.mbstu.diningpass.auth.service.abstraction.StudentService;
@@ -34,6 +37,7 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final HallRepository hallRepository;
+    private final HallAssociateRepository hallAssociateRepository;
     private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
 
 
@@ -145,44 +149,96 @@ public class StudentServiceImpl implements StudentService {
 
 
 
-
-
     @Override
-    public StudentResponse updateStudent(UUID id, UpdateStudentProfileRequest request){
+    public StudentResponse updateMyProfile(UUID requesterId, Role role, UpdateStudentProfileRequest request) {
 
-        Student existingStudent=studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + id));
-        if (!existingStudent.isActive()){
-            logger.warn("Student {} is already inactive", id);
-            throw new IllegalStateException("Inactive student cannot be updated");        }
+        if (role != Role.STUDENT) {
+            throw new ForbiddenException("Only students can update their profile");
+        }
 
-        existingStudent.setFullName(request.fullName());
-        existingStudent.setRoomNumber(request.roomNumber());
-        studentRepository.save(existingStudent);
-        logger.info("Student updated successfully: {}", existingStudent.getFullName());
-        return mapToResponse(existingStudent);
+        Student student = studentRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+        if (!student.isActive()) {
+            logger.warn("Student {} is inactive", requesterId);
+            throw new BadRequestException("Inactive student cannot be updated");
+        }
+
+        student.setFullName(request.fullName());
+        student.setRoomNumber(request.roomNumber());
+
+        studentRepository.save(student);
+        logger.info("[PROFILE_UPDATED] student={}", requesterId);
+        return mapToResponse(student);
     }
 
 
 
+
+
+
     @Override
-    public MessageResponse suspendStudent(UUID id, SuspendStudentRequest request){
-        Student student=studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + id));
-        if (!student.isActive()){
-            logger.warn("Student {} is already inactive", id);
+    public StudentResponse getMyProfile(UUID requesterId, Role role) {
+
+        if (role != Role.STUDENT) {
+            throw new ForbiddenException("Only students can access their profile");
+        }
+
+        Student student = studentRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        return mapToResponse(student);
+    }
+
+
+
+
+
+
+
+
+    @Override
+    public MessageResponse suspendStudent(UUID requesterId, Role role, UUID targetId, SuspendStudentRequest request) {
+
+        Student student = studentRepository.findById(targetId).orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + targetId));
+
+        // ================= SUPER ADMIN =================
+        if (role == Role.SUPER_ADMIN) {
+            return doSuspendWithFirebase(student, request);
+        }
+
+        // ================= HALL ADMIN =================
+        if (role == Role.HALL_ADMIN) {
+
+            HallAssociate requester = hallAssociateRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Requester not found"));
+
+            //  restrict to same hall
+            if (!requester.getHallId().equals(student.getHallId())) {
+                throw new ForbiddenException("Cannot suspend student from another hall");
+            }
+
+            return doSuspendWithFirebase(student, request);
+        }
+
+        // ================= OTHERS =================
+        throw new ForbiddenException("Not allowed to suspend student");
+    }
+
+
+
+    private MessageResponse doSuspendWithFirebase(Student student, SuspendStudentRequest request) {
+
+        if (!student.isActive()) {
+            logger.warn("Student {} is already inactive", student.getId());
             return new MessageResponse("Student is already inactive", false);
         }
+
         student.setActive(false);
         student.setUpdatedAt(LocalDateTime.now());
 
-
-        // Also disable the Firebase account so all tokens are immediately invalidated
-        // (Firebase tokens expire in 1 hour, but disabling blocks them right away)
+        //  Firebase disable (your original logic)
         try {
             FirebaseAuth.getInstance().updateUser(new UserRecord.UpdateRequest(student.getFirebaseUid()).setDisabled(true));
         } catch (FirebaseAuthException e) {
-            logger.warn("Could not disable Firebase account for student {}: {}", id, e.getMessage());
+            logger.warn("Could not disable Firebase account for student {}: {}", student.getId(), e.getMessage());
         }
-
 
         studentRepository.save(student);
         logger.info("Student suspended: {}, reason: {}", student.getFullName(), request.reason());
@@ -191,45 +247,55 @@ public class StudentServiceImpl implements StudentService {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
     @Override
-    public StudentResponse getStudentById(UUID id){
-        return mapToResponse(studentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + id))
-        );
+    public List<StudentResponse> getAllStudents(UUID requesterId, Role role, UUID hallId, boolean activeOnly) {
+
+        // ================= SUPER ADMIN =================
+        if (role == Role.SUPER_ADMIN) {
+
+            List<Student> students;
+
+            if (hallId != null) {students = studentRepository.findByHallId(hallId);}
+            else {students = studentRepository.findAll();}
+            if (activeOnly) {students = students.stream().filter(Student::isActive).toList();}
+
+            return students.stream()
+                    .map(this::mapToResponse)
+                    .toList();
+        }
+
+        // ================= HALL ADMIN =================
+        if (role == Role.HALL_ADMIN) {
+
+            HallAssociate requester = hallAssociateRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Requester not found"));
+
+            UUID myHallId = requester.getHallId();
+
+            //  prevent accessing other hall
+            if (hallId != null && !hallId.equals(myHallId)) {
+                throw new ForbiddenException("Cannot access students from another hall");
+            }
+
+            List<Student> students = studentRepository.findByHallId(myHallId);
+
+            if (activeOnly) {
+                students = students.stream()
+                        .filter(Student::isActive)
+                        .toList();
+            }
+
+            return students.stream()
+                    .map(this::mapToResponse)
+                    .toList();
+        }
+
+        // ================= OTHERS =================
+        throw new ForbiddenException("Not allowed to view students");
     }
 
 
 
-    @Override
-    public List<StudentResponse> getAllStudent(){
-        return studentRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
 
-
-
-
-    @Override
-    public List<StudentResponse> getAllActiveStudent(){
-        return studentRepository.findAll()
-                .stream()
-                .filter(Student::isActive)
-                .map(this::mapToResponse)
-                .toList();
-    }
 
 
 

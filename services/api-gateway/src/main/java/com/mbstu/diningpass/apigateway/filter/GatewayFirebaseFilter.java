@@ -4,12 +4,12 @@ package com.mbstu.diningpass.apigateway.filter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * GatewayFirebaseFilter
@@ -48,10 +48,10 @@ public class GatewayFirebaseFilter implements GlobalFilter, Ordered {
 
     private  static final Logger log= LoggerFactory.getLogger(GatewayFirebaseFilter.class);
 
-    // ── Paths that skip token verification ───────────────────────────────
-    private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/v1/students/register",      // Student registration
-            "/api/v1/halls"                   // Hall dropdown on registration page
+    // Only documented public auth endpoint + temporary legacy registration path.
+    private static final Set<String> PUBLIC_POST_PATHS = Set.of(
+            "/api/v1/students",
+            "/api/v1/students/register"
     );
 
     @Override
@@ -68,9 +68,9 @@ public class GatewayFirebaseFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        // 2. Skip public paths
-        if (PUBLIC_PATHS.stream().anyMatch(path::startsWith)) {
-            log.info(" Skipping public path (no auth required): {}", path);
+        // 2. Skip documented public endpoint(s) only
+        if (HttpMethod.POST.matches(method) && PUBLIC_POST_PATHS.contains(path)) {
+            log.info(" Skipping public endpoint (no auth required): {} {}", method, path);
             return chain.filter(exchange);
         }
 
@@ -101,9 +101,14 @@ public class GatewayFirebaseFilter implements GlobalFilter, Ordered {
 
                     // 5. Forward as trusted headers — strip any client-supplied values first
                     ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-                            .header("X-User-Id",      dbId)
-                            .header("X-User-Role",    role)
-                            .header("X-Firebase-Uid", decoded.getUid())
+                            .headers(headers -> {
+                                headers.remove("X-User-Id");
+                                headers.remove("X-User-Role");
+                                headers.remove("X-Firebase-Uid");
+                                headers.set("X-User-Id", dbId);
+                                headers.set("X-User-Role", role);
+                                headers.set("X-Firebase-Uid", decoded.getUid());
+                            })
                             .build();
 
                     log.debug("Authenticated request: dbId={}, role={}, path={}", dbId, role, path);

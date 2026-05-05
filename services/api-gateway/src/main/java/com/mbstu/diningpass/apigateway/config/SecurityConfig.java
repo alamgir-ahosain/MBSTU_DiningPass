@@ -2,6 +2,7 @@ package com.mbstu.diningpass.apigateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
@@ -30,9 +31,9 @@ public class SecurityConfig {
                 // Disable CSRF (stateless API with JWT)
                 .csrf(csrf -> csrf.disable())
                 
-                // Disable Spring Security's CORS (we use CorsHeaderFilter instead)
-                .cors(cors -> cors.disable())
-                
+                // Keep CORS enabled so preflight requests are handled consistently.
+                .cors(Customizer.withDefaults())
+
                 // Allow all requests — authentication is done in GatewayFirebaseFilter
                 .authorizeExchange(authz -> authz.anyExchange().permitAll())
                 

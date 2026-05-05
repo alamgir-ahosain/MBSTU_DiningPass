@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -24,7 +23,6 @@ import reactor.core.publisher.Mono;
 
 
 @Slf4j
-@Component
 public class CorsHeaderFilter implements GlobalFilter, Ordered {
 
     @Override

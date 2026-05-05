@@ -1,12 +1,11 @@
-package com.mbstu.diningpass.auth.dto.request.admin;
+package com.mbstu.diningpass.auth.dto.request.hallassociate;
 
-import com.mbstu.diningpass.auth.enums.GenderType;
 import com.mbstu.diningpass.auth.enums.Role;
 import jakarta.validation.constraints.*;
 
 import java.util.UUID;
 
-public record CreateAdminRequest(
+public record HallAssociateRegistrationRequest(
 
 
 

@@ -2,6 +2,7 @@ package com.mbstu.diningpass.auth.controller;
 
 import com.mbstu.diningpass.auth.dto.request.hall.CreateHallRequest;
 import com.mbstu.diningpass.auth.dto.response.hall.HallResponse;
+import com.mbstu.diningpass.auth.enums.Role;
 import com.mbstu.diningpass.auth.service.abstraction.HallService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,48 +23,95 @@ public class HallController {
     private final HallService hallService;
     private static final Logger logger = LoggerFactory.getLogger(HallController.class);
 
-    public void tes(){
-        System.out.println("hall test");
-    }
-    // 1. Create a Hall
+    // ==============================
+    // CREATE HALL (SUPER ADMIN ONLY)
+    // ==============================
     @PostMapping
-    public ResponseEntity<HallResponse> createHall(@Valid @RequestBody CreateHallRequest request) {
-        logger.info("Admin creating new hall: {}", request.shortName());
-        return ResponseEntity.status(HttpStatus.CREATED).body(hallService.createHall(request));
+    public ResponseEntity<HallResponse> createHall(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") String requesterRoleStr,
+            @Valid @RequestBody CreateHallRequest request) {
+
+        Role role = Role.valueOf(requesterRoleStr);
+        logger.info("[CREATE_HALL] requester={} role={}", requesterId, role);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(hallService.createHall(requesterId, role, request));
     }
 
-    // 2. Update Hall (Supports re-activation if already inactive)
+    // ==============================
+    // UPDATE HALL (SUPER ADMIN ONLY)
+    // ==============================
     @PutMapping("/{id}")
-    public ResponseEntity<HallResponse> updateHall(@PathVariable UUID id, @Valid @RequestBody CreateHallRequest request) {
-        logger.info("Updating hall details for ID: {}", id);
-        return ResponseEntity.ok(hallService.updateHall(id, request));
+    public ResponseEntity<HallResponse> updateHall(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") String requesterRoleStr,
+            @PathVariable UUID id,
+            @Valid @RequestBody CreateHallRequest request) {
+
+        Role role = Role.valueOf(requesterRoleStr);
+        logger.info("[UPDATE_HALL] requester={} role={} hallId={}", requesterId, role, id);
+
+        return ResponseEntity.ok(hallService.updateHall(requesterId, role, id, request));
     }
 
-    // 3. Get All Halls (with optional filtering)
+    // ==============================
+    // GET ALL HALLS (SUPER ADMIN ONLY)
+    // ==============================
     @GetMapping
-    public ResponseEntity<List<HallResponse>> getAllHalls(@RequestParam(required = false, defaultValue = "false") boolean activeOnly) {
-        if (activeOnly) {return ResponseEntity.ok(hallService.getAllActiveHall());}
-        return ResponseEntity.ok(hallService.getAllHall());
+    public ResponseEntity<List<HallResponse>> getAllHalls(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") String requesterRoleStr,
+            @RequestParam(defaultValue = "false") boolean activeOnly) {
+
+        Role role = Role.valueOf(requesterRoleStr);
+        logger.info("[GET_ALL_HALLS] requester={} role={}", requesterId, role);
+
+        return ResponseEntity.ok(hallService.getAllHalls(requesterId, role, activeOnly));
     }
 
-    // 4. Get Hall By ID
+    // ==============================
+    // GET BY ID
+    // ==============================
     @GetMapping("/{id}")
-    public ResponseEntity<HallResponse> getHallById(@PathVariable UUID id) {
-        return ResponseEntity.ok(hallService.getHallById(id));
+    public ResponseEntity<HallResponse> getHallById(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") String requesterRoleStr,
+            @PathVariable UUID id) {
+
+        Role role = Role.valueOf(requesterRoleStr);
+        logger.info("[GET_HALL_BY_ID] requester={} role={} target={}", requesterId, role, id);
+
+        return ResponseEntity.ok(hallService.getHallById(requesterId, role, id));
     }
 
-    // 5. Get Hall By Short Name
+    // ==============================
+    // GET BY SHORT NAME
+    // ==============================
     @GetMapping("/short-name/{shortName}")
-    public ResponseEntity<HallResponse> getHallByShortName(@PathVariable String shortName) {
-        return ResponseEntity.ok(hallService.getHallByShortName(shortName));
+    public ResponseEntity<HallResponse> getHallByShortName(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") String requesterRoleStr,
+            @PathVariable String shortName) {
+
+        Role role = Role.valueOf(requesterRoleStr);
+        logger.info("[GET_HALL_BY_SHORT] requester={} role={} shortName={}", requesterId, role, shortName);
+
+        return ResponseEntity.ok(hallService.getHallByShortName(requesterId, role, shortName));
     }
 
-    // 6. Soft Delete (Deactivate)
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHall(@PathVariable UUID id) {
-        logger.warn("Soft-deletion (deactivation) requested for hall ID: {}", id);
-        hallService.deleteHall(id);
+    // ==============================
+    // SUSPEND HALL (SUPER ADMIN ONLY)
+    // ==============================
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> suspendHall(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") String requesterRoleStr,
+            @PathVariable UUID id) {
+
+        Role role = Role.valueOf(requesterRoleStr);
+        logger.warn("[SUSPEND_HALL] requester={} role={} target={}", requesterId, role, id);
+
+        hallService.suspendHall(requesterId, role, id);
         return ResponseEntity.noContent().build();
     }
-
 }

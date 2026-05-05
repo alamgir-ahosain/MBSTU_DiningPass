@@ -53,7 +53,7 @@
 <!--			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>-->
 <!--		</dependency>-->
 
-		<!-- Source: https://mvnrepository.com/artifact/com.google.firebase/firebase-admin -->
+		<!-- Firebase Admin SDK -->
 		<dependency>
 			<groupId>com.google.firebase</groupId>
 			<artifactId>firebase-admin</artifactId>

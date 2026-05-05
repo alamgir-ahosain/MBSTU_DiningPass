@@ -15,11 +15,6 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "http://127.0.0.1:5173"
-        ));
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:*",
                 "http://127.0.0.1:*"
@@ -33,18 +28,8 @@ public class CorsConfig {
                 "OPTIONS",
                 "HEAD"
         ));
-        configuration.setAllowedHeaders(List.of(
-                "Content-Type",
-                "Authorization",
-                "X-Requested-With",
-                "Accept",
-                "Origin",
-                "Cache-Control",
-                "Pragma",
-                "X-User-Id",
-                "X-User-Role",
-                "X-Firebase-Uid"
-        ));
+        // Reflect requested preflight headers to avoid browser-side CORS mismatches.
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of(
                 "Content-Type",
                 "Authorization",

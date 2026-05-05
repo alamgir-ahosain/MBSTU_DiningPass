@@ -3,9 +3,12 @@ package com.mbstu.diningpass.auth.controller;
 
 import com.mbstu.diningpass.auth.dto.request.hall.CreateHallRequest;
 import com.mbstu.diningpass.auth.dto.request.student.StudentRegistrationRequest;
+import com.mbstu.diningpass.auth.dto.request.student.SuspendStudentRequest;
 import com.mbstu.diningpass.auth.dto.request.student.UpdateStudentProfileRequest;
+import com.mbstu.diningpass.auth.dto.response.MessageResponse;
 import com.mbstu.diningpass.auth.dto.response.hall.HallResponse;
 import com.mbstu.diningpass.auth.dto.response.student.StudentResponse;
+import com.mbstu.diningpass.auth.enums.Role;
 import com.mbstu.diningpass.auth.service.abstraction.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,31 +31,76 @@ public class StudentController {
 
 
 
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<StudentResponse> register(
             @Valid @RequestBody StudentRegistrationRequest req) {
         logger.info("Student registering: {}", req.studentId());
         return ResponseEntity.status(HttpStatus.CREATED).body(studentService.register(req));
     }
 
+    // ==============================
+    // GET MY PROFILE
+    // ==============================
+    @GetMapping("/me")
+    public ResponseEntity<StudentResponse> getProfile(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader("X-User-Role") String roleStr) {
 
-    @GetMapping("/profile")
-    public ResponseEntity<StudentResponse> getProfile(@RequestHeader("X-User-Id") UUID userId) {
-        logger.info("Fetching student profile for user ID: {}", userId);
-        return ResponseEntity.ok(studentService.getStudentById(userId));
+        Role role = Role.valueOf(roleStr);
+        logger.info("[GET_PROFILE] user={} role={}", userId, role);
+
+        return ResponseEntity.ok(studentService.getMyProfile(userId, role));
     }
 
 
 
-
-    @PutMapping("/profile")
+    // ==============================
+    // UPDATE MY PROFILE
+    // ==============================
+    @PutMapping("/me")
     public ResponseEntity<StudentResponse> updateProfile(
             @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader("X-User-Role") String roleStr,
             @Valid @RequestBody UpdateStudentProfileRequest req) {
-        logger.info("Updating student profile for user ID: {}", userId);
-        return ResponseEntity.ok(studentService.updateStudent(userId, req));
+
+        Role role = Role.valueOf(roleStr);
+        logger.info("[UPDATE_PROFILE] user={} role={}", userId, role);
+
+        return ResponseEntity.ok(studentService.updateMyProfile(userId, role, req));
     }
 
+
+    // ==============================
+    // GET ALL  STUDENT
+    // ==============================
+    @GetMapping
+    public ResponseEntity<List<StudentResponse>> getAllStudents(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") String roleStr,
+            @RequestParam(required = false) UUID hallId,
+            @RequestParam(defaultValue = "false") boolean activeOnly) {
+
+        Role role = Role.valueOf(roleStr);
+        logger.info("[GET_ALL_STUDENTS] requester={} role={} hallId={} activeOnly={}", requesterId, role, hallId, activeOnly);
+        return ResponseEntity.ok(studentService.getAllStudents(requesterId, role, hallId, activeOnly));
+    }
+
+    // ==============================
+    // SUSPEND STUDENT
+    // ==============================
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<MessageResponse> suspendStudent(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") String roleStr,
+            @PathVariable UUID id,
+            @Valid @RequestBody SuspendStudentRequest request) {
+
+        Role role = Role.valueOf(roleStr);
+        logger.warn("[SUSPEND_STUDENT] requester={} role={} target={}", requesterId, role, id);
+
+        return ResponseEntity.ok(studentService.suspendStudent(requesterId, role, id, request));
+    }
 
 
 }
