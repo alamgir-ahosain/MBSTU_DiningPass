@@ -236,7 +236,11 @@ export default function FirebaseTestApp() {
     // ── 3. GET PROFILE (calls backend with Firebase token) ───────────────
     const handleGetProfile = async () => {
         try {
-            const res = await apiCall("GET", "/api/v1/students/me");
+            const user = auth.currentUser;
+            if (!user) {
+                throw new Error("No user logged in");
+            }
+            const res = await apiCall("GET", `/api/v1/students/me`);
             ok(res);
         } catch (e) {
             err(e);

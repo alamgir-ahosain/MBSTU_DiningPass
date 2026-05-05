@@ -30,8 +30,9 @@ public record StudentRegistrationRequest(
         String password,
 
 
-        @NotNull(message = "Hall ID is required")
-        UUID hallId,
+       @NotBlank(message = "Short name cannot be blank")
+        @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
+        String hallShortName,
 
         @Size(max = 15, message = "Room number must not exceed 15 characters")
         String roomNumber,

@@ -7,7 +7,8 @@ import com.mbstu.diningpass.auth.dto.request.student.SuspendStudentRequest;
 import com.mbstu.diningpass.auth.dto.response.MessageResponse;
 import com.mbstu.diningpass.auth.dto.request.student.StudentRegistrationRequest;
 import com.mbstu.diningpass.auth.dto.request.student.UpdateStudentProfileRequest;
-import com.mbstu.diningpass.auth.dto.response.student.StudentResponse;
+import com.mbstu.diningpass.auth.dto.response.student.StudentProfileAdminResponse;
+import com.mbstu.diningpass.auth.dto.response.student.StudentProfileResponse;
 import com.mbstu.diningpass.auth.entity.Hall;
 import com.mbstu.diningpass.auth.entity.HallAssociate;
 import com.mbstu.diningpass.auth.entity.Student;
@@ -46,7 +47,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Transactional
     @Override
-    public StudentResponse register(StudentRegistrationRequest request) {
+    public StudentProfileResponse register(StudentRegistrationRequest request) {
 
         //  Step 0: Validation
         if (studentRepository.existsByStudentId(request.studentId())) {
@@ -59,16 +60,11 @@ public class StudentServiceImpl implements StudentService {
             throw new DuplicateResourceException("Student with email already exists");
         }
 
-        Hall hall = hallRepository.findById(request.hallId())
-                .orElseThrow(() -> {
-                    logger.error("Hall with ID {} not found", request.hallId());
-                    return new ResourceNotFoundException("Hall not found with ID: " + request.hallId());
-                });
+        Hall hall=hallRepository.findByShortNameAndIsActiveTrue(request.hallShortName()).orElseThrow(() -> {
+            logger.error("Hall not found with short name: {}", request.hallShortName());
+            return new ResourceNotFoundException("Hall not found with short name: " + request.hallShortName());
+        });
 
-        if (!hall.isActive()) {
-            logger.error("Hall {} is inactive", request.hallId());
-            throw new BadRequestException("Hall is inactive");
-        }
 
         if (request.gender() != hall.getGenderType()) {
             logger.error("Gender mismatch: {} vs {}", request.gender(), hall.getGenderType());
@@ -105,7 +101,7 @@ public class StudentServiceImpl implements StudentService {
                     .fullName(request.fullName())
                     .email(request.email())
                     .role(Role.STUDENT)
-                    .hallId(request.hallId())
+                    .hallId(hall.getId())
                     .roomNumber(request.roomNumber())
                     .department(request.department())
                     .gender(request.gender())
@@ -124,7 +120,7 @@ public class StudentServiceImpl implements StudentService {
             FirebaseAuth.getInstance().setCustomUserClaims(firebaseUser.getUid(), claims);
             logger.info("Custom claims set for Firebase user: {}", firebaseUser.getUid());
 
-            return mapToResponse(savedStudent);
+            return mapToResponse(savedStudent,hall);
 
         } catch (Exception e) {
 
@@ -150,14 +146,15 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public StudentResponse updateMyProfile(UUID requesterId, Role role, UpdateStudentProfileRequest request) {
+    public StudentProfileResponse updateMyProfile(UUID requesterId, Role role, UpdateStudentProfileRequest request) {
 
         if (role != Role.STUDENT) {
             throw new ForbiddenException("Only students can update their profile");
         }
 
         Student student = studentRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-
+        Hall hall = hallRepository.findById(student.getHallId()).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+        
         if (!student.isActive()) {
             logger.warn("Student {} is inactive", requesterId);
             throw new BadRequestException("Inactive student cannot be updated");
@@ -168,7 +165,7 @@ public class StudentServiceImpl implements StudentService {
 
         studentRepository.save(student);
         logger.info("[PROFILE_UPDATED] student={}", requesterId);
-        return mapToResponse(student);
+        return mapToResponse(student,hall);
     }
 
 
@@ -177,14 +174,15 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public StudentResponse getMyProfile(UUID requesterId, Role role) {
+    public StudentProfileResponse getMyProfile(UUID requesterId, Role role) {
 
         if (role != Role.STUDENT) {
             throw new ForbiddenException("Only students can access their profile");
         }
 
         Student student = studentRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-        return mapToResponse(student);
+        Hall hall = hallRepository.findById(student.getHallId()).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+        return mapToResponse(student,hall);
     }
 
 
@@ -248,7 +246,7 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public List<StudentResponse> getAllStudents(UUID requesterId, Role role, UUID hallId, boolean activeOnly) {
+    public List<StudentProfileAdminResponse> getAllStudents(UUID requesterId, Role role, UUID hallId, boolean activeOnly) {
 
         // ================= SUPER ADMIN =================
         if (role == Role.SUPER_ADMIN) {
@@ -260,7 +258,7 @@ public class StudentServiceImpl implements StudentService {
             if (activeOnly) {students = students.stream().filter(Student::isActive).toList();}
 
             return students.stream()
-                    .map(this::mapToResponse)
+                    .map(this::mapToResponseAdmin)
                     .toList();
         }
 
@@ -285,7 +283,7 @@ public class StudentServiceImpl implements StudentService {
             }
 
             return students.stream()
-                    .map(this::mapToResponse)
+                    .map(this::mapToResponseAdmin)
                     .toList();
         }
 
@@ -300,14 +298,35 @@ public class StudentServiceImpl implements StudentService {
 
 
 
-    private StudentResponse mapToResponse(Student student){
-        return new StudentResponse(
+    private StudentProfileResponse mapToResponse(Student student,Hall hall){
+        return new StudentProfileResponse(
+                
+                student.getStudentId(),
+                student.getFullName(),
+                student.getEmail(),
+                student.getRole(),
+                hall.getShortName(),
+                student.getRoomNumber(),
+                student.getDepartment(),
+                student.getGender(),
+                student.isActive(),
+                student.getCreatedAt(),
+                student.getUpdatedAt()
+        );
+    }
+
+
+    private StudentProfileAdminResponse mapToResponseAdmin(Student student){
+
+        Hall hall = hallRepository.findById(student.getHallId()).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+        return new StudentProfileAdminResponse(
+
                 student.getId(),
                 student.getStudentId(),
                 student.getFullName(),
                 student.getEmail(),
                 student.getRole(),
-                student.getHallId(),
+                hall.getShortName(),
                 student.getRoomNumber(),
                 student.getDepartment(),
                 student.getGender(),
