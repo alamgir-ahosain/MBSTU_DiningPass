@@ -1,12 +1,11 @@
-package com.mbstu.diningpass.auth.dto.request.admin;
+package com.mbstu.diningpass.auth.dto.request.hallassociate;
 
-import com.mbstu.diningpass.auth.enums.GenderType;
 import com.mbstu.diningpass.auth.enums.Role;
 import jakarta.validation.constraints.*;
 
 import java.util.UUID;
 
-public record CreateAdminRequest(
+public record HallAssociateRegistrationRequest(
 
 
 
@@ -18,9 +17,6 @@ public record CreateAdminRequest(
         @Email(message = "Invalid email format")
         String email,
 
-        @NotBlank(message = "Password cannot be blank")
-        @Size(min = 6, message = "Password must be at least 6 characters long")
-        String password,
 
         @Size(max = 15, message = "phone number must not exceed 15 characters")
         String phone,
@@ -28,6 +24,6 @@ public record CreateAdminRequest(
         @NotNull(message = "Role is required")
         Role role,
 
-        @NotBlank(message = "Hall ID cannot be null")
+        @NotNull(message = "Hall ID cannot be null")
         UUID hallId
 ){}

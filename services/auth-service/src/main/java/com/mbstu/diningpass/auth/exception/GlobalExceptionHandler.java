@@ -3,6 +3,7 @@ package com.mbstu.diningpass.auth.exception;
 import com.mbstu.diningpass.auth.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,16 @@ public class GlobalExceptionHandler {
     })
     public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
+    }
+
+    //  ACCESS DENIED (FORBIDDEN)
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                "Forbidden",
+                ex.getMessage()
+        );
     }
 
     //  VALIDATION ERROR

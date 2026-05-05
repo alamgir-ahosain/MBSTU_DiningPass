@@ -3,7 +3,6 @@ spring:
     name: auth-service
   config:
     import: optional:file:/home/alamgir/Alamgir/workingProject/MBSTU_DiningPass/services/auth-service/.env[.properties]
-
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
     username: ${DB_USER}
@@ -27,3 +26,5 @@ spring:
 
 server:
   port: 8081
+firebase:
+  service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON}
