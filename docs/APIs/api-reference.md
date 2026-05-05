@@ -5,10 +5,11 @@
 **Base path:** `/api/v1/admins`
 
 | REST Method | URL Path       | Headers (Auth)             | Role Access                         | Description                                                                    |
-| ----------- | -------------- | -------------------------- | ----------------------------------- | ------------------------------------------------------------------------------ |
+| ----------- |----------------| -------------------------- |-------------------------------------| ------------------------------------------------------------------------------ |
 | POST        | `/`            | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN             | Create account. SUPER_ADMIN can create any role, HALL_ADMIN → only HALL_STAFF. |
 | GET         | `/`            | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN, HALL_STAFF | Get accounts (filter: `role`, `hallId`). Access scope depends on role.         |
-| GET         | `/{id}`        | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN, HALL_STAFF | Get by ID. SUPER_ADMIN = all, HALL_ADMIN = same hall, STAFF = self only.       |
+| GET         | `/me`          | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN, HALL_STAFF | Get own profile only.     |
+| PUT         | `/me`          | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF              | Update own profile only.                                     |
 | PATCH       | `/{id}/status` | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN             | Suspend account. HALL_ADMIN limited to own hall.                               |
 
 ---

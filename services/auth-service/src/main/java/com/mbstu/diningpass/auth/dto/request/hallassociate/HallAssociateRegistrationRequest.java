@@ -24,6 +24,7 @@ public record HallAssociateRegistrationRequest(
         @NotNull(message = "Role is required")
         Role role,
 
-        @NotNull(message = "Hall ID cannot be null")
-        UUID hallId
+        @NotBlank(message = "Short name cannot be blank")
+        @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
+        String hallShortName
 ){}

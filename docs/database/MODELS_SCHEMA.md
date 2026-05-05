@@ -155,7 +155,7 @@ Returned when retrieving or creating hall information.
 
 ---
 
-### **HallAssociateResponse**
+### **HallAssociateAdminResponse**
 
 Returned when retrieving or creating hall associate/staff information.
 
@@ -166,13 +166,28 @@ Returned when retrieving or creating hall associate/staff information.
 | `email`     | String        | Email address                                            |
 | `phone`     | String        | Phone number                                             |
 | `role`      | Enum          | Role: SUPER_ADMIN, HALL_ADMIN, COUNTER_STAFF, HALL_STAFF |
-| `hallId`    | UUID          | Assigned hall UUID                                       |
+| `hallShortName`| String        | Short name of the student's hall (e.g. "JAMH") |
 | `isActive`  | boolean       | Whether account is active                                |
 | `createdAt` | LocalDateTime | Account creation timestamp                               |
 | `updatedAt` | LocalDateTime | Last update timestamp                                    |
 
 ---
+### **HallAssociateProfileesponse**
 
+Returned when retrieving or creating hall associate/staff information.
+
+| Field       | Type          | Description                                              |
+| ----------- | ------------- | -------------------------------------------------------- |
+| `fullName`  | String        | Full name of the associate                               |
+| `email`     | String        | Email address                                            |
+| `phone`     | String        | Phone number                                             |
+| `role`      | Enum          | Role: SUPER_ADMIN, HALL_ADMIN, COUNTER_STAFF, HALL_STAFF |
+| `hallShortName`| String        | Short name of the student's hall (e.g. "JAMH") |
+| `isActive`  | boolean       | Whether account is active                                |
+| `createdAt` | LocalDateTime | Account creation timestamp                               |
+| `updatedAt` | LocalDateTime | Last update timestamp                                    |
+
+---
 
 ### **StudentProfileResponse**
 

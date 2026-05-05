@@ -4,14 +4,20 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import com.mbstu.diningpass.auth.dto.request.hallassociate.HallAssociateRegistrationRequest;
+import com.mbstu.diningpass.auth.dto.request.hallassociate.UpdateHallAssociateProfileRequest;
 import com.mbstu.diningpass.auth.dto.request.student.SuspendStudentRequest;
+import com.mbstu.diningpass.auth.dto.request.student.UpdateStudentProfileRequest;
 import com.mbstu.diningpass.auth.dto.response.MessageResponse;
-import com.mbstu.diningpass.auth.dto.response.hallassociate.HallAssociateResponse;
+import com.mbstu.diningpass.auth.dto.response.hallassociate.HallAssociateAdminResponse;
+import com.mbstu.diningpass.auth.dto.response.hallassociate.HallAssociateProfileResponse;
+import com.mbstu.diningpass.auth.dto.response.student.StudentProfileResponse;
 import com.mbstu.diningpass.auth.entity.Hall;
 import com.mbstu.diningpass.auth.entity.HallAssociate;
+import com.mbstu.diningpass.auth.entity.Student;
 import com.mbstu.diningpass.auth.enums.Role;
 import com.mbstu.diningpass.auth.exception.BadRequestException;
 import com.mbstu.diningpass.auth.exception.DuplicateResourceException;
+import com.mbstu.diningpass.auth.exception.ForbiddenException;
 import com.mbstu.diningpass.auth.exception.ResourceNotFoundException;
 import com.mbstu.diningpass.auth.repository.HallAssociateRepository;
 import com.mbstu.diningpass.auth.repository.HallRepository;
@@ -41,7 +47,7 @@ public class HallAssociateServiceImpl implements HallAssociateService {
 
     @Override
     @Transactional
-    public HallAssociateResponse create(UUID requesterId, Role requesterRole, HallAssociateRegistrationRequest request) {
+    public HallAssociateAdminResponse create(UUID requesterId, Role requesterRole, HallAssociateRegistrationRequest request) {
 
         logger.info("[SERVICE_CREATE] requester={} role={} targetRole={}", requesterId, requesterRole, request.role());
 
@@ -73,14 +79,15 @@ public class HallAssociateServiceImpl implements HallAssociateService {
         }
 
         // STEP 3: HALL VALIDATION
-        Hall hall = hallRepository.findById(request.hallId()).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+        Hall hall=hallRepository.findByShortNameAndIsActiveTrue(request.hallShortName()).orElseThrow(() -> {
+            logger.error("Hall not found with short name: {}", request.hallShortName());
+            return new ResourceNotFoundException("Hall not found with short name: " + request.hallShortName());
+        });
 
-        if (!hall.isActive()) {
-            throw new BadRequestException("Hall is inactive");
-        }
+
 
         // Only one HALL_ADMIN per hall
-        if (finalRole == Role.HALL_ADMIN && hallAssociateRepository.existsByHallIdAndRole(request.hallId(), Role.HALL_ADMIN)) {
+        if (finalRole == Role.HALL_ADMIN && hallAssociateRepository.existsByHallIdAndRole(hall.getId(), Role.HALL_ADMIN)) {
             throw new DuplicateResourceException("Hall already has an admin");
         }
 
@@ -104,7 +111,7 @@ public class HallAssociateServiceImpl implements HallAssociateService {
                     .email(request.email())
                     .phone(request.phone())
                     .role(finalRole)
-                    .hallId(request.hallId())
+                    .hallId(hall.getId())
                     .firebaseUid(firebaseUser.getUid())
                     .build();
 
@@ -119,7 +126,7 @@ public class HallAssociateServiceImpl implements HallAssociateService {
             FirebaseAuth.getInstance().setCustomUserClaims(firebaseUser.getUid(), claims);
 
             logger.info("[SUCCESS] Created {} with id={}", finalRole, saved.getId());
-            return mapToResponse(saved);
+            return mapToResponseAdmin(saved,hall);
 
         } catch (Exception e) {
 
@@ -146,36 +153,44 @@ public class HallAssociateServiceImpl implements HallAssociateService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<HallAssociateResponse> getAccounts(UUID requesterId, Role requesterRole, Role filterRole, UUID hallId) {
+    public List<HallAssociateAdminResponse> getAccounts(UUID requesterId, Role requesterRole, Role filterRole, UUID hallId) {
 
         // ================= SUPER ADMIN =================
         if (requesterRole == Role.SUPER_ADMIN) {
 
             if (filterRole != null) {
-                return hallAssociateRepository.findByRole(filterRole)
-                        .stream()
-                        .map(HallAssociateServiceImpl::mapToResponse)
+
+                List<HallAssociate> list= hallAssociateRepository.findByRole(filterRole);
+                Hall hall = hallRepository.findById(hallId).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+
+                return list.stream()
+                        .map(a -> mapToResponseAdmin(a, hall))
                         .toList();
             }
 
             if (hallId != null) {
-                return hallAssociateRepository.findByHallId(hallId)
-                        .stream()
-                        .map(HallAssociateServiceImpl::mapToResponse)
+
+                List<HallAssociate> list = hallAssociateRepository.findByHallId(hallId);
+                Hall hall = hallRepository.findById(hallId).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+
+                return list.stream()
+                        .map(a -> mapToResponseAdmin(a, hall))
                         .toList();
             }
 
-            return hallAssociateRepository.findAll()
-                    .stream()
-                    .map(HallAssociateServiceImpl::mapToResponse)
+
+            List<HallAssociate> list=hallAssociateRepository.findAll();
+            Hall hall = hallRepository.findById(hallId).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+            return list.stream()
+                    .map(a -> mapToResponseAdmin(a, hall))
                     .toList();
+
         }
 
         // ================= HALL ADMIN =================
         if (requesterRole == Role.HALL_ADMIN) {
 
             HallAssociate requester = hallAssociateRepository.findById(requesterId).orElseThrow();
-
             UUID myHall = requester.getHallId();
 
             if (hallId != null && !hallId.equals(myHall)) {
@@ -190,17 +205,13 @@ public class HallAssociateServiceImpl implements HallAssociateService {
                         .toList();
             }
 
+
+            Hall hall = hallRepository.findById(hallId).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
             return result.stream()
-                    .map(HallAssociateServiceImpl::mapToResponse)
+                    .map(a -> mapToResponseAdmin(a, hall))
                     .toList();
         }
 
-        // ================= HALL STAFF =================
-        if (requesterRole == Role.HALL_STAFF) {
-
-            HallAssociate self = hallAssociateRepository.findById(requesterId).orElseThrow();
-            return List.of(mapToResponse(self));
-        }
 
         throw new AccessDeniedException("Invalid role");
     }
@@ -212,39 +223,34 @@ public class HallAssociateServiceImpl implements HallAssociateService {
 
     @Override
     @Transactional(readOnly = true)
-    public HallAssociateResponse getById(UUID requesterId, Role role, UUID targetId) {
+    public HallAssociateProfileResponse getMyProfile(UUID requesterId, Role role) {
 
-        HallAssociate target = hallAssociateRepository.findById(targetId).orElseThrow(() -> new ResourceNotFoundException("Not found"));
-
-        // SUPER ADMIN → allow all
-        if (role == Role.SUPER_ADMIN) {
-            return mapToResponse(target);
-        }
-
-        // STAFF → only self
-        if (role == Role.HALL_STAFF) {
-            if (!requesterId.equals(targetId)) {
-                throw new AccessDeniedException("You can only view your own profile");
-            }
-            return mapToResponse(target);
-        }
-
-        // HALL ADMIN → same hall or self
-        if (role == Role.HALL_ADMIN) {
-
-            HallAssociate requester = hallAssociateRepository.findById(requesterId).orElseThrow();
-            boolean sameHall = requester.getHallId().equals(target.getHallId());
-
-            if (!requesterId.equals(targetId) && !sameHall) {
-                throw new AccessDeniedException("Not allowed");
-            }
-
-            return mapToResponse(target);
-        }
-
-        throw new AccessDeniedException("Invalid role");
+        HallAssociate target = hallAssociateRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Not found"));
+        Hall hall = hallRepository.findById(target.getHallId()).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+        return mapToResponse(target,hall);
     }
 
+
+
+
+    @Override
+    public HallAssociateProfileResponse updateMyProfile(UUID requesterId, Role role, UpdateHallAssociateProfileRequest request) {
+
+
+        HallAssociate associate=hallAssociateRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Not found"));
+        Hall hall = hallRepository.findById(associate.getHallId()).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+
+        if(!associate.isActive()){
+            logger.warn("Associate {} is inactive", requesterId);
+            throw new BadRequestException("Inactive associate cannot be updated");
+        }
+        associate.setFullName(request.fullName());
+        associate.setPhone(request.phone());
+
+        hallAssociateRepository.save(associate);
+        logger.info("[PROFILE_UPDATED] student={}", requesterId);
+        return mapToResponse(associate,hall);
+    }
 
 
 
@@ -300,14 +306,29 @@ public class HallAssociateServiceImpl implements HallAssociateService {
 
 
 
-    public static HallAssociateResponse mapToResponse(HallAssociate associate) {
-        return new HallAssociateResponse(
+    private HallAssociateAdminResponse mapToResponseAdmin(HallAssociate associate, Hall hall) {
+
+        return new HallAssociateAdminResponse(
                 associate.getId(),
                 associate.getFullName(),
                 associate.getEmail(),
                 associate.getPhone(),
                 associate.getRole(),
-                associate.getHallId(),
+                hall.getShortName(),
+                associate.isActive(),
+                associate.getCreatedAt(),
+                associate.getUpdatedAt()
+        );
+    }
+
+    private HallAssociateProfileResponse mapToResponse(HallAssociate associate, Hall hall) {
+
+        return new HallAssociateProfileResponse(
+                associate.getFullName(),
+                associate.getEmail(),
+                associate.getPhone(),
+                associate.getRole(),
+                hall.getShortName(),
                 associate.isActive(),
                 associate.getCreatedAt(),
                 associate.getUpdatedAt()

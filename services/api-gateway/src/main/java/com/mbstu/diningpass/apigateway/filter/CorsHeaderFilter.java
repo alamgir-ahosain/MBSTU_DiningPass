@@ -43,7 +43,7 @@ public class CorsHeaderFilter implements GlobalFilter, Ordered {
 
         // For OPTIONS (preflight) requests, respond immediately with 200 OK
         if ("OPTIONS".equalsIgnoreCase(method)) {
-            log.info("📌 OPTIONS preflight request detected, responding with 200 OK");
+            log.info(" OPTIONS preflight request detected, responding with 200 OK");
             addCorsHeaders(exchange.getResponse(), origin);
             exchange.getResponse().setStatusCode(HttpStatus.OK);
             log.info(" CORS headers added to preflight response");
@@ -51,7 +51,7 @@ public class CorsHeaderFilter implements GlobalFilter, Ordered {
         }
 
         // For other requests, decorate the response to add headers
-        log.info("🔗 Decorating response for {} {}", method, path);
+        log.info(" Decorating response for {} {}", method, path);
         ServerHttpResponse originalResponse = exchange.getResponse();
         ServerHttpResponseDecorator decoratedResponse = new ServerHttpResponseDecorator(originalResponse) {
             @Override
@@ -61,7 +61,7 @@ public class CorsHeaderFilter implements GlobalFilter, Ordered {
                 // this decorator, because that would re-enter this method and cause
                 // a StackOverflowError.
                 HttpHeaders headers = super.getHeaders();
-                log.info("📝 Adding CORS headers to response for: {}", path);
+                log.info(" Adding CORS headers to response for: {}", path);
                 addCorsHeaders(headers, origin);
                 return headers;
             }
@@ -100,7 +100,7 @@ public class CorsHeaderFilter implements GlobalFilter, Ordered {
      * Use this from the response decorator to avoid recursive getHeaders() calls.
      */
     private void addCorsHeaders(HttpHeaders headers, String origin) {
-        log.info("🛠️  Setting CORS headers for origin: {}", origin);
+        log.info("  Setting CORS headers for origin: {}", origin);
 
         // Use set() to avoid duplicates (replaces if exists)
         headers.set("Access-Control-Allow-Origin", origin);

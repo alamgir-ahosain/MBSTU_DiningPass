@@ -5,13 +5,12 @@ import com.mbstu.diningpass.auth.enums.Role;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record HallAssociateResponse(
-        UUID id,
+public record HallAssociateProfileResponse (
         String fullName,
         String email,
         String phone,
         Role role,
-        UUID hallId,
+        String hallShortName,
         boolean isActive,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

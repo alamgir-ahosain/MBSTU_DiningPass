@@ -1,5 +1,9 @@
 import apiClient from "./apiClient";
 
+
+
+
+
 // Student API calls
 export const studentAPI = {
   register: (studentData) => {
@@ -8,13 +12,13 @@ export const studentAPI = {
 
   getProfile: () => {
     // Gets the current user's profile using /me endpoint
-    // Backend extracts user ID from JWT custom claims
+    // Backend extracts user ID from firebase custom claims
     return apiClient.get("/api/v1/students/me");
   },
 
   updateProfile: (studentData) => {
     // Updates the current user's profile using /me endpoint
-    // Backend extracts user ID from JWT custom claims
+    // Backend extracts user ID from firebase custom claims
     return apiClient.put("/api/v1/students/me", studentData);
   },
 
@@ -34,10 +38,24 @@ export const studentAPI = {
   },
 };
 
+
+
+
+
+
+
+
+
+
 // Hall Admin API calls
 export const hallAdminAPI = {
-  getProfile: (adminId) => {
-    return apiClient.get(`/api/v1/admins/${adminId}`);
+
+  getProfile: () => {
+    return apiClient.get(`/api/v1/admins/me`);
+  },
+
+  updateProfile: (adminData) => {
+    return apiClient().put(`/api/v1/admins/me`, adminData);
   },
 
   createHallStaff: (staffData) => {
@@ -55,7 +73,14 @@ export const hallAdminAPI = {
   getById: (id) => {
     return apiClient.get(`/api/v1/admins/${id}`);
   },
+
 };
+
+
+
+
+
+
 
 // Hall API calls
 export const hallAPI = {
@@ -86,11 +111,20 @@ export const hallAPI = {
   },
 };
 
+
+
+
+
+
+
 // Super Admin API calls (all the above, plus hall creation)
 export const superAdminAPI = {
   ...hallAPI,
   createHall: (hallData) => {
     return apiClient.post("/api/v1/halls", hallData);
+  },
+  getProfile: () => {
+    return apiClient.get(`/api/v1/admins/me`);
   },
 
   getAllAdmins: (filters = {}) => {
@@ -118,10 +152,19 @@ export const superAdminAPI = {
   },
 };
 
+
+
+
+
+
 // Hall Staff API calls
 export const hallStaffAPI = {
   getProfile: (staffId) => {
-    return apiClient.get(`/api/v1/staff/${staffId}`);
+    return apiClient.get(`/api/v1/staff/me`);
+  },
+
+  updateProfile: (staffData) => {
+    return apiClient().put(`/api/v1/staff/me`, staffData);
   },
 
   getStudents: (filters = {}) => {

@@ -240,8 +240,6 @@ API communication uses Axios with automatic token attachment:
    - Password
    - Confirm Password
 4. On Submit:
-   a. Firebase: createUserWithEmailAndPassword()
-   b. If success:
       - Firebase creates account
       - Get Firebase ID token
       - API Call: POST /api/v1/students
