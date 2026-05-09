@@ -42,3 +42,40 @@
 | PATCH       | `/{id}/status`       | `X-User-Id`, `X-User-Role` | SUPER_ADMIN             | Suspend (soft delete) hall.                         |
 
 ---
+
+# Meal Service API (v1)
+
+
+
+## Meal Config Service API (v1)
+
+**Base path:** `/api/v1/meal-configs`
+
+| REST Method | URL Path     | Headers (Auth)             | Role Access                  | Description |
+|-------------|--------------|----------------------------|------------------------------|-------------|
+| POST        | `/`          | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Create a meal configuration for a hall meal/date. |
+| GET         | `/`          | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Get all meal configurations accessible to requester. |
+| PUT         | `/{configId}`| `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Update an existing meal configuration. |
+
+---
+
+
+## Meal Token Service API (v1)
+
+**Base path:** `/api/v1/meal-tokens`
+
+| REST Method | URL Path | Headers (Auth)             | Role Access | Description |
+|-------------|----------|----------------------------|--------------|-------------|
+| POST        | `/`      | `X-User-Id`, `X-User-Role` | STUDENT      | Cut/book meal token and submit payment information. |
+
+---
+
+## Payment Service API (v1)
+
+**Base path:** `/api/v1/payments`
+
+| REST Method | URL Path         | Headers (Auth)             | Role Access                  | Description |
+|-------------|------------------|----------------------------|------------------------------|-------------|
+| PATCH       | `/{id}/approve`  | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Approve payment and generate QR meal tokens. |
+| PATCH       | `/{id}/reject`   | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Reject submitted payment with rejection reason. |
+

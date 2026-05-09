@@ -31,7 +31,9 @@ public class GatewayConfig {
     public RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
 
-                // Auth Service routes
+
+                // _______________ Auth Service routes _________________-
+
                 .route("auth-service-students", r -> r
                         .path("/api/v1/students", "/api/v1/students/**")
                         .uri("http://localhost:8081"))
@@ -53,6 +55,21 @@ public class GatewayConfig {
                 .route("auth-service-admins", r -> r
                         .path("/api/v1/admins", "/api/v1/admins/**")
                         .uri("http://localhost:8081"))
+
+
+                // _______________ Meal Service routes ___________________-
+
+                .route("meal-service-configs", r -> r
+                        .path("/api/v1/meal-configs", "/api/v1/meal-configs/**")
+                        .uri("http://localhost:8082"))
+
+                .route("meal-service-tokens", r -> r
+                        .path("/api/v1/meal-tokens", "/api/v1/meal-tokens/**")
+                        .uri("http://localhost:8082"))
+
+                .route("meal-service-payments", r -> r
+                        .path("/api/v1/payments", "/api/v1/payments/**")
+                        .uri("http://localhost:8082"))
 
                 .build();
     }

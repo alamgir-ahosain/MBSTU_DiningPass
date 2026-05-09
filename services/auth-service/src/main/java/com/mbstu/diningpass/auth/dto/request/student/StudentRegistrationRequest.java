@@ -2,10 +2,7 @@ package com.mbstu.diningpass.auth.dto.request.student;
 
 import com.mbstu.diningpass.auth.enums.GenderType;
 import com.mbstu.diningpass.auth.enums.Role;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.util.UUID;
 
@@ -22,6 +19,10 @@ public record StudentRegistrationRequest(
 
         @NotBlank(message = "Email cannot be blank")
         @Email(message = "Invalid email format")
+        @Pattern(
+                regexp = "^[a-zA-Z0-9._%+-]+@mbstu\\.ac\\.bd$",
+                message = "Email must be a valid MBSTU university email (@mbstu.ac.bd)"
+        )
         @Size(max = 150)
         String email,
 

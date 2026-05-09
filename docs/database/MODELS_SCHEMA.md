@@ -288,13 +288,286 @@ Returned when retrieving a student's profile for administrative views (includes 
 
 ## ENUMS 
 
-
-- **GenderType:** MALE, FEMALE )
-- **Role:** SUPER_ADMIN, HALL_ADMIN, COUNTER_STAFF, HALL_STAFF, STUDENT 
-- **StudentStatus:** ACTIVE, SUSPEND 
+- **GenderType:** `MALE`, `FEMALE`
+- **Role:** `SUPER_ADMIN`, `HALL_ADMIN`, `COUNTER_STAFF`, `HALL_STAFF`, `STUDENT`
+- **MealType:** `LUNCH`, `DINNER`
+- **PaymentMethod:** `BKASH`, `NAGAD`
+- **PaymentStatus:** `SUBMITTED`, `VERIFIED`, `REJECTED`
+- **TokenStatus:** `PAYMENT_SUBMITTED`, `APPROVED`, `USED`, `CANCELLED`
+- **ScanMode:** `STAFF_SCANNED`, `STUDENT_SCANNED`
 
 ---
 
-**Version:** 1.0  
-**Last Updated:** May 5, 2026  
-**Auth Service:** 0.0.1-SNAPSHOT
+
+## Table: `meal_configs`
+
+The `meal_configs` table stores daily meal planning information for each hall.  
+Hall staff/admin creates one row per meal (`LUNCH` or `DINNER`) for a specific date.  
+Students can view and cut meal tokens until the `cut_token_before` deadline.
+
+| Column Name         | Type          | Constraints                                             | Description |
+|---------------------|---------------|---------------------------------------------------------|-------------|
+| `id`                | UUID          | PRIMARY KEY, AUTO-GENERATED                             | Unique identifier |
+| `hall_short_name`   | VARCHAR(255)  | NOT NULL                                                | Hall short name (e.g. `JAMH`) |
+| `meal_date`         | DATE          | NOT NULL                                                | Date the meal will be served |
+| `meal_type`         | ENUM (`MealType`) | NOT NULL                                            | Meal type: `LUNCH` or `DINNER` |
+| `meal_menu`         | VARCHAR(255)  | NULLABLE                                                | Meal menu description (e.g. `"Rice, Fish, Dal"`) |
+| `meal_price`        | BIGINT        | NOT NULL                                                | Meal price in BDT/TK |
+| `cut_token_before`  | TIME          | NOT NULL, DEFAULT `23:59`                               | Students must cut tokens before this time |
+| `token_expires`     | TIME          | NOT NULL                                                | QR/token becomes invalid after this time on `meal_date` |
+| `is_active`         | BOOLEAN       | NOT NULL, DEFAULT `true`                                | `false` means meal/token booking is disabled |
+| `feast_note`        | VARCHAR(100)  | NULLABLE                                                | Optional special note (e.g. `"Eid Special"`) |
+| `created_by`        | UUID          | NOT NULL                                                | UUID of the hall staff/admin who created the config |
+| `updated_by`        | UUID          | NOT NULL                                                | UUID of the hall staff/admin who last updated the config |
+| `created_by_name`   | VARCHAR(255)  | NOT NULL                                                | Snapshot of creator name at creation time |
+| `updated_by_name`   | VARCHAR(255)  | NOT NULL                                                | Snapshot of last updater name |
+| `created_at`        | TIMESTAMP     | NOT NULL, AUTO-SET                                      | Record creation timestamp |
+| `updated_at`        | TIMESTAMP     | NOT NULL, AUTO-SET                                      | Last update timestamp |
+
+### Unique Constraints
+
+| Constraint Name | Columns |
+|-----------------|---------|
+| `uq_hall_meal_date_type` | (`hall_short_name`, `meal_date`, `meal_type`) |
+
+---
+
+# Table: `meal_tokens`
+
+The `meal_tokens` table stores individual student meal bookings.  
+Each row represents exactly one meal token for one student.
+QR codes are generated only after payment verification.
+
+| Column Name       | Type                     | Constraints                                | Description |
+|-------------------|--------------------------|--------------------------------------------|-------------|
+| `id`              | UUID                     | PRIMARY KEY, AUTO-GENERATED                | Unique token identifier |
+| `payment_id`      | UUID                     | NOT NULL                                   | Linked payment identifier |
+| `student_id`      | UUID                     | NOT NULL                                   | Student who booked the meal |
+| `hall_short_name` | VARCHAR(255)             | NOT NULL                                   | Hall snapshot at booking time |
+| `meal_date`       | DATE                     | NOT NULL                                   | Date the meal is for |
+| `meal_type`       | ENUM (`MealType`)        | NOT NULL                                   | `LUNCH` or `DINNER` |
+| `meal_price`      | BIGINT                   | NOT NULL                                   | Price snapshot at booking time |
+| `token_status`    | ENUM (`TokenStatus`)     | NOT NULL, DEFAULT `PAYMENT_SUBMITTED`      | Current token state |
+| `qr_code_data`    | TEXT                     | NULLABLE                                   | Signed QR payload / token data |
+| `qr_generated_at` | TIMESTAMP                | NULLABLE                                   | QR generation timestamp |
+| `scan_mode`       | ENUM (`ScanMode`)        | NULLABLE                                   | `STAFF_SCANNED` or `STUDENT_SCANNED` |
+| `scanned_by_id`   | UUID                     | NULLABLE                                   | Staff UUID if scanned by hall staff |
+| `used_at`         | TIMESTAMP                | NULLABLE                                   | Meal consumption timestamp |
+| `created_at`      | TIMESTAMP                | NOT NULL, AUTO-SET                         | Token creation timestamp |
+| `updated_at`      | TIMESTAMP                | NOT NULL, AUTO-SET                         | Last token update timestamp |
+
+
+---
+
+# Table: `payments`
+
+The `payments` table stores submitted payment information from students.  
+One payment may contain one or multiple meal types (`LUNCH`, `DINNER`) for the same date.
+
+| Column Name        | Type                          | Constraints                                | Description |
+|--------------------|-------------------------------|--------------------------------------------|-------------|
+| `id`               | UUID                          | PRIMARY KEY, AUTO-GENERATED                | Unique payment identifier |
+| `student_id`       | UUID                          | NOT NULL                                   | Student who submitted payment |
+| `hall_short_name`  | VARCHAR(255)                  | NOT NULL                                   | Hall associated with the payment |
+| `meal_date`        | DATE                          | NOT NULL                                   | Meal serving date |
+| `meal_types`       | LIST<ENUM (`MealType`)>       | NOT NULL                                   | Selected meal types (`LUNCH`, `DINNER`) |
+| `total_amount`     | BIGINT                        | NOT NULL                                   | Total payment amount |
+| `payment_method`   | ENUM (`PaymentMethod`)        | NOT NULL                                   | `BKASH` or `NAGAD` |
+| `sender_number`    | VARCHAR(20)                   | NOT NULL                                   | Student payment wallet number |
+| `screenshot_url`   | TEXT                          | NULLABLE                                   | Uploaded payment proof image URL |
+| `payment_status`   | ENUM (`PaymentStatus`)        | NOT NULL, DEFAULT `SUBMITTED`              | `SUBMITTED`, `VERIFIED`, `REJECTED` |
+| `rejection_reason` | TEXT                          | NULLABLE                                   | Reason for rejection |
+| `verified_by_name` | VARCHAR(100)                  | NULLABLE                                   | Snapshot of verifier name |
+| `verified_at`      | TIMESTAMP                     | NULLABLE                                   | Verification timestamp |
+| `submitted_at`     | TIMESTAMP                     | NOT NULL, AUTO-SET                         | Payment submission timestamp |
+
+---
+
+
+
+# Request DTO Documentation
+
+# DTO: `CreateMealConfigRequest`
+
+Used by hall admin/staff to create a new meal configuration.
+
+## Validation Rules
+
+| Field Name | Type | Validation | Description |
+|------------|------|------------|-------------|
+| `mealDate` | `LocalDate` | `@NotNull`, `@FutureOrPresent` | Meal serving date |
+| `mealType` | `MealType` | `@NotNull` | `LUNCH` or `DINNER` |
+| `mealMenu` | `String` | `@NotBlank`, `@Size(max = 255)` | Meal menu description |
+| `mealPrice` | `Long` | `@NotNull` | Meal price in BDT/TK |
+| `cutTokenBefore` | `LocalTime` | `@NotNull` | Token booking deadline |
+| `tokenExpires` | `LocalTime` | `@NotNull` | QR/token expiry time |
+| `feastNote` | `String` | `@Size(max = 255)` | Optional special note |
+
+---
+
+# DTO: `UpdateMealConfigRequest`
+
+Used by hall admin/staff to update an existing meal configuration.
+
+| Field Name | Type | Validation | Description |
+|------------|------|------------|-------------|
+| `mealMenu` | `String` | `@NotBlank`, `@Size(max = 255)` | Updated meal menu |
+| `mealPrice` | `Long` | Optional | Updated meal price |
+| `cutTokenBefore` | `LocalTime` | Optional | Updated token booking deadline |
+| `tokenExpires` | `LocalTime` | Optional | Updated token expiry time |
+| `isActive` | `Boolean` | Optional | Enable/disable meal booking |
+| `feastNote` | `String` | `@Size(max = 255)` | Optional feast/special note |
+
+---
+
+# DTO: `CutTokenRequest`
+
+Used by students to request meal token booking and submit payment information.
+
+| Field Name | Type | Validation | Description |
+|------------|------|------------|-------------|
+| `paymentMethod` | `PaymentMethod` | `@NotNull` | `BKASH` or `NAGAD` |
+| `senderNumber` | `String` | `@NotBlank`, `@Pattern(^01[3-9]\\d{8}$)` | Student payment wallet number |
+| `mealDate` | `LocalDate` | `@NotNull`, `@FutureOrPresent` | Requested meal date |
+| `mealTypes` | `List<MealType>` | `@NotEmpty`, `@Size(max = 2)` | Selected meal types |
+| `screenshotUrl` | `String` | Optional | Payment proof image URL |
+
+---
+
+# DTO: `ApprovePaymentRequest`
+
+Used by hall admin/staff to approve a submitted payment.
+
+
+| Field Name | Type | Validation | Description |
+|------------|------|------------|-------------|
+| `paymentId` | `UUID` | `@NotNull` | Payment identifier to approve |
+
+---
+
+# DTO: `RejectPaymentRequest`
+
+Used by hall admin/staff to reject a submitted payment.
+
+| Field Name | Type | Validation | Description |
+|------------|------|------------|-------------|
+| `paymentId` | `UUID` | `@NotNull` | Payment identifier to reject |
+| `rejectionReason` | `String` | `@NotBlank`, `@Size(max = 255)` | Reason for rejection |
+
+---
+
+# Response DTO Documentation
+
+---
+
+# DTO: `MealConfigAdminResponse`
+
+Returned to hall admin/staff when viewing detailed meal configuration information.
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `id` | `UUID` | Unique meal configuration identifier |
+| `hallShortName` | `String` | Hall short name |
+| `mealDate` | `LocalDate` | Meal serving date |
+| `mealType` | `MealType` | `LUNCH` or `DINNER` |
+| `mealMenu` | `String` | Meal menu description |
+| `mealPrice` | `Long` | Meal price in BDT/TK |
+| `cutTokenBefore` | `LocalTime` | Token booking deadline |
+| `tokenExpires` | `LocalTime` | Token expiry time |
+| `isActive` | `boolean` | Whether meal booking is active |
+| `feastNote` | `String` | Optional feast/special note |
+| `isBookingOpen` | `boolean` | Computed booking availability |
+| `createdByName` | `String` | Snapshot of creator name |
+| `updatedByName` | `String` | Snapshot of last updater name |
+| `createdAt` | `LocalDateTime` | Record creation timestamp |
+| `updatedAt` | `LocalDateTime` | Last update timestamp |
+
+---
+
+# DTO: `MealConfigResponse`
+
+Returned to students when viewing available meal configurations.
+
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `id` | `UUID` | Meal configuration identifier |
+| `hallShortName` | `String` | Hall short name |
+| `mealDate` | `LocalDate` | Meal serving date |
+| `mealType` | `MealType` | `LUNCH` or `DINNER` |
+| `mealMenu` | `String` | Meal menu |
+| `mealPrice` | `Long` | Meal price |
+| `cutTokenBefore` | `LocalTime` | Booking deadline |
+| `tokenExpires` | `LocalTime` | Token expiry time |
+| `isActive` | `boolean` | Whether booking is enabled |
+| `feastNote` | `String` | Optional feast note |
+| `isBookingOpen` | `boolean` | Computed booking availability |
+| `createdAt` | `LocalDateTime` | Creation timestamp |
+
+---
+
+# DTO: `CutTokenResponse`
+
+Returned after successful token cutting/payment submission.
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `paymentStatus` | `PaymentStatus` | Initial payment state |
+| `submittedAt` | `LocalDateTime` | Payment submission timestamp |
+
+---
+
+# DTO: `MealTokenDetailResponse`
+
+Returned when viewing detailed token information.
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `id` | `UUID` | Meal token identifier |
+| `paymentId` | `UUID` | Linked payment identifier |
+| `hallShortName` | `String` | Hall short name snapshot |
+| `mealDate` | `LocalDate` | Meal serving date |
+| `mealType` | `MealType` | `LUNCH` or `DINNER` |
+| `mealPrice` | `Long` | Snapshot meal price |
+| `mealMenu` | `String` | Snapshot meal menu |
+| `tokenStatus` | `TokenStatus` | Current token state |
+| `qrCodeData` | `String` | Signed QR payload |
+| `qrGeneratedAt` | `LocalDateTime` | QR generation timestamp |
+| `scanMode` | `ScanMode` | Token scan mode |
+| `usedAt` | `LocalDateTime` | Meal consumption timestamp |
+| `createdAt` | `LocalDateTime` | Token creation timestamp |
+| `updatedAt` | `LocalDateTime` | Last update timestamp |
+
+---
+
+# DTO: `PaymentAdminResponse`
+
+Returned to admin/staff after payment verification actions.
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `verifiedByName` | `String` | Snapshot of verifier name |
+| `verifiedAt` | `LocalDateTime` | Verification timestamp |
+
+---
+
+# DTO: `PaymentResponse`
+
+Returned when viewing payment details.
+
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `id` | `UUID` | Payment identifier |
+| `hallShortName` | `String` | Hall short name |
+| `mealDate` | `LocalDate` | Meal serving date |
+| `paymentMethod` | `PaymentMethod` | `BKASH` or `NAGAD` |
+| `senderNumber` | `String` | Student wallet number |
+| `receiverNumber` | `String` | Hall/admin payment receiver number |
+| `transactionId` | `String` | Payment transaction identifier |
+| `totalAmount` | `Long` | Total submitted amount |
+| `screenshotUrl` | `String` | Uploaded payment proof |
+| `paymentStatus` | `PaymentStatus` | Current payment state |
+| `rejectionReason` | `String` | Rejection explanation |
+| `verifiedAt` | `LocalDateTime` | Verification timestamp |
+| `submittedAt` | `LocalDateTime` | Submission timestamp |

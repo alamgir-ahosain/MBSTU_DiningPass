@@ -75,7 +75,7 @@ public class HallAssociateController {
     // GET BY ID
     // ==============================
 
-    @GetMapping("me")
+    @GetMapping("/me")
     public ResponseEntity<HallAssociateProfileResponse> getById(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String requesterRoleStr) {
