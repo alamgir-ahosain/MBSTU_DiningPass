@@ -1,26 +1,25 @@
-package com.mbstu.diningpass.auth.dto.response.student;
+package com.mbstu.diningpass.meal.dto.response.client;
 
-import com.mbstu.diningpass.auth.enums.GenderType;
-import com.mbstu.diningpass.auth.enums.Role;
+
+import com.mbstu.diningpass.meal.enums.GenderType;
+import com.mbstu.diningpass.meal.enums.Role;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-public record StudentResponse (
+public record StudentProfileResponse(
 
-        UUID id,
+
         String studentId,
         String fullName,
         String email,
         Role role,
-        UUID hallId,
+        String hallShortName,
         String roomNumber,
         String department,
         GenderType gender,
         boolean isActive,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-
 ){}
 
 

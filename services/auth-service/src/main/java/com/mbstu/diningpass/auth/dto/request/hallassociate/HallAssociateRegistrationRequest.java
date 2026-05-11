@@ -17,6 +17,9 @@ public record HallAssociateRegistrationRequest(
         @Email(message = "Invalid email format")
         String email,
 
+        @NotBlank(message = "Password cannot be blank")
+        @Size(min = 6, message = "Password must be at least 6 characters long")
+        String password,
 
         @Size(max = 15, message = "phone number must not exceed 15 characters")
         String phone,
@@ -24,6 +27,7 @@ public record HallAssociateRegistrationRequest(
         @NotNull(message = "Role is required")
         Role role,
 
-        @NotNull(message = "Hall ID cannot be null")
-        UUID hallId
+        @NotBlank(message = "Short name cannot be blank")
+        @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
+        String hallShortName
 ){}

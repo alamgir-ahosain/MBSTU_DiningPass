@@ -1,19 +1,22 @@
 
+# Auth Service API (v1)
 
-#  Hall Admin & Hall Staff Service API (v1)
+
+## Hall Associative Service API (v1)
 
 **Base path:** `/api/v1/admins`
 
 | REST Method | URL Path       | Headers (Auth)             | Role Access                         | Description                                                                    |
-| ----------- | -------------- | -------------------------- | ----------------------------------- | ------------------------------------------------------------------------------ |
+| ----------- |----------------| -------------------------- |-------------------------------------| ------------------------------------------------------------------------------ |
 | POST        | `/`            | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN             | Create account. SUPER_ADMIN can create any role, HALL_ADMIN → only HALL_STAFF. |
 | GET         | `/`            | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN, HALL_STAFF | Get accounts (filter: `role`, `hallId`). Access scope depends on role.         |
-| GET         | `/{id}`        | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN, HALL_STAFF | Get by ID. SUPER_ADMIN = all, HALL_ADMIN = same hall, STAFF = self only.       |
+| GET         | `/me`          | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN, HALL_STAFF | Get own profile only.     |
+| PUT         | `/me`          | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF              | Update own profile only.                                     |
 | PATCH       | `/{id}/status` | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN             | Suspend account. HALL_ADMIN limited to own hall.                               |
 
 ---
 
-#  Student Service API (v1)
+##  Student Service API (v1)
 
 **Base path:** `/api/v1/students`
 
@@ -26,8 +29,13 @@
 | PATCH       | `/{id}/status` | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN | Suspend student. HALL_ADMIN restricted to **own hall only**. |
 
 ---
+**Errors**
+- **400 Bad Request** - Missing or invalid fields.
+- **401 Unauthorized** - Invalid email or password.
 
-#  Hall Service API (v1)
+---
+
+##  Hall Service API (v1)
 
 **Base path:** `/api/v1/halls`
 
@@ -41,3 +49,43 @@
 | PATCH       | `/{id}/status`       | `X-User-Id`, `X-User-Role` | SUPER_ADMIN             | Suspend (soft delete) hall.                         |
 
 ---
+
+# Meal Service API (v1)
+
+
+## Meal Config Service API (v1)
+
+**Base path:** `/api/v1/meal-configs`
+
+| REST Method | URL Path     | Headers (Auth)             | Role Access                  | Description |
+|-------------|--------------|----------------------------|------------------------------|-------------|
+| GET         | `/test`      | None                       | PUBLIC                       | Health/test endpoint for the meal-config controller. |
+| POST        | `/`          | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Create a meal configuration for a hall meal/date. |
+| GET         | `/`          | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Get all meal configurations accessible to requester. |
+| PUT         | `/{configId}`| `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Update an existing meal configuration. |
+
+---
+
+
+## Meal Token Service API (v1)
+
+**Base path:** `/api/v1/meal-tokens`
+
+| REST Method | URL Path | Headers (Auth)             | Role Access | Description |
+|-------------|----------|----------------------------|--------------|-------------|
+| GET         | `/test`  | None                       | PUBLIC       | Health/test endpoint for the meal-token controller. |
+| POST        | `/`      | `X-User-Id`, `X-User-Role` | STUDENT      | Cut/book meal token and submit payment information. |
+| GET         | `/my`    | `X-User-Id`, `X-User-Role` | STUDENT      | Get own approved meal tokens. |
+
+---
+
+## Payment Service API (v1)
+
+**Base path:** `/api/v1/payments`
+
+| REST Method | URL Path         | Headers (Auth)             | Role Access                  | Description |
+|-------------|------------------|----------------------------|------------------------------|-------------|
+| GET         | `/`              | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Get payments with pagination (`page`, `size`). |
+| PATCH       | `/{id}/approve`  | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Approve payment and generate QR meal tokens. |
+| GET         | `/test`          | None                       | PUBLIC                       | Health/test endpoint for the payment controller. |
+

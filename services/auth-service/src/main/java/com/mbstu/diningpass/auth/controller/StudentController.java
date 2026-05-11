@@ -1,13 +1,12 @@
 package com.mbstu.diningpass.auth.controller;
 
 
-import com.mbstu.diningpass.auth.dto.request.hall.CreateHallRequest;
 import com.mbstu.diningpass.auth.dto.request.student.StudentRegistrationRequest;
 import com.mbstu.diningpass.auth.dto.request.student.SuspendStudentRequest;
 import com.mbstu.diningpass.auth.dto.request.student.UpdateStudentProfileRequest;
 import com.mbstu.diningpass.auth.dto.response.MessageResponse;
-import com.mbstu.diningpass.auth.dto.response.hall.HallResponse;
-import com.mbstu.diningpass.auth.dto.response.student.StudentResponse;
+import com.mbstu.diningpass.auth.dto.response.student.StudentProfileAdminResponse;
+import com.mbstu.diningpass.auth.dto.response.student.StudentProfileResponse;
 import com.mbstu.diningpass.auth.enums.Role;
 import com.mbstu.diningpass.auth.service.abstraction.StudentService;
 import jakarta.validation.Valid;
@@ -30,9 +29,16 @@ public class StudentController {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StudentController.class);
 
 
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("Student-Service: Student Controller is working!");
+    }
+    // ==============================
+    // Register Student
+    // ==============================
 
     @PostMapping
-    public ResponseEntity<StudentResponse> register(
+    public ResponseEntity<StudentProfileResponse> register(
             @Valid @RequestBody StudentRegistrationRequest req) {
         logger.info("Student registering: {}", req.studentId());
         return ResponseEntity.status(HttpStatus.CREATED).body(studentService.register(req));
@@ -42,7 +48,7 @@ public class StudentController {
     // GET MY PROFILE
     // ==============================
     @GetMapping("/me")
-    public ResponseEntity<StudentResponse> getProfile(
+    public ResponseEntity<StudentProfileResponse> getProfile(
             @RequestHeader("X-User-Id") UUID userId,
             @RequestHeader("X-User-Role") String roleStr) {
 
@@ -58,7 +64,7 @@ public class StudentController {
     // UPDATE MY PROFILE
     // ==============================
     @PutMapping("/me")
-    public ResponseEntity<StudentResponse> updateProfile(
+    public ResponseEntity<StudentProfileResponse> updateProfile(
             @RequestHeader("X-User-Id") UUID userId,
             @RequestHeader("X-User-Role") String roleStr,
             @Valid @RequestBody UpdateStudentProfileRequest req) {
@@ -74,7 +80,7 @@ public class StudentController {
     // GET ALL  STUDENT
     // ==============================
     @GetMapping
-    public ResponseEntity<List<StudentResponse>> getAllStudents(
+    public ResponseEntity<List<StudentProfileAdminResponse>> getAllStudents(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String roleStr,
             @RequestParam(required = false) UUID hallId,

@@ -33,4 +33,6 @@ build/
 .vscode/
 .env
 docs/ideafrom
-docs/database
+docs/guide/page.md
+docs/guide/meal-service-flow.md
+docs/APIs/meal-service-json.md

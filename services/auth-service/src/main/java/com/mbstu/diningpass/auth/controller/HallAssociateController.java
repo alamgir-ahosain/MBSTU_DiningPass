@@ -1,9 +1,13 @@
 package com.mbstu.diningpass.auth.controller;
 
 import com.mbstu.diningpass.auth.dto.request.hallassociate.HallAssociateRegistrationRequest;
+import com.mbstu.diningpass.auth.dto.request.hallassociate.UpdateHallAssociateProfileRequest;
 import com.mbstu.diningpass.auth.dto.request.student.SuspendStudentRequest;
+import com.mbstu.diningpass.auth.dto.request.student.UpdateStudentProfileRequest;
 import com.mbstu.diningpass.auth.dto.response.MessageResponse;
-import com.mbstu.diningpass.auth.dto.response.hallassociate.HallAssociateResponse;
+import com.mbstu.diningpass.auth.dto.response.hallassociate.HallAssociateAdminResponse;
+import com.mbstu.diningpass.auth.dto.response.hallassociate.HallAssociateProfileResponse;
+import com.mbstu.diningpass.auth.dto.response.student.StudentProfileResponse;
 import com.mbstu.diningpass.auth.enums.Role;
 import com.mbstu.diningpass.auth.service.abstraction.HallAssociateService;
 import jakarta.validation.Valid;
@@ -31,7 +35,7 @@ public class HallAssociateController {
     // ==============================
 
     @PostMapping
-    public ResponseEntity<HallAssociateResponse> createAccount(
+    public ResponseEntity<HallAssociateAdminResponse> createAccount(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String requesterRoleStr,
             @Valid @RequestBody HallAssociateRegistrationRequest request) {
@@ -39,7 +43,7 @@ public class HallAssociateController {
         Role requesterRole = Role.valueOf(requesterRoleStr);
         logger.info("User {} ({}) creating Hall Admin: {}", requesterId, requesterRole, request.email());
 
-        HallAssociateResponse response =hallAssociateService.create(requesterId, requesterRole, request);
+        HallAssociateAdminResponse response =hallAssociateService.create(requesterId, requesterRole, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -52,7 +56,7 @@ public class HallAssociateController {
     // ==============================
 
     @GetMapping
-    public ResponseEntity<List<HallAssociateResponse>> getAllAccount(
+    public ResponseEntity<List<HallAssociateAdminResponse>> getAllAccount(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String requesterRoleStr,
             @RequestParam(required = false) Role role,
@@ -71,18 +75,32 @@ public class HallAssociateController {
     // GET BY ID
     // ==============================
 
-    @GetMapping("/{id}")
-    public ResponseEntity<HallAssociateResponse> getById(
+    @GetMapping("/me")
+    public ResponseEntity<HallAssociateProfileResponse> getById(
             @RequestHeader("X-User-Id") UUID requesterId,
-            @RequestHeader("X-User-Role") String requesterRoleStr,
-            @PathVariable UUID id) {
+            @RequestHeader("X-User-Role") String requesterRoleStr) {
 
         Role role = Role.valueOf(requesterRoleStr);
-        logger.info("[GET_BY_ID] requester={} role={} target={}", requesterId, role, id);
+        logger.info("[GET_BY_ID] requester={} role={} ", requesterId, role);
 
-        return ResponseEntity.ok(hallAssociateService.getById(requesterId, role, id));
+        return ResponseEntity.ok(hallAssociateService.getMyProfile(requesterId, role ));
     }
 
+
+    // ==============================
+    // UPDATE MY PROFILE
+    // ==============================
+    @PutMapping("/me")
+    public ResponseEntity<HallAssociateProfileResponse> updateProfile(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader("X-User-Role") String roleStr,
+            @Valid @RequestBody UpdateHallAssociateProfileRequest req) {
+
+        Role role = Role.valueOf(roleStr);
+        logger.info("[UPDATE_PROFILE] user={} role={}", userId, role);
+
+        return ResponseEntity.ok(hallAssociateService.updateMyProfile(userId, role, req));
+    }
 
 
 
