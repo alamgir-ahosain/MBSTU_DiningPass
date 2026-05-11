@@ -8,10 +8,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record MealTokenDetailResponse(
+public record MealTokenStudentResponse(
 
         UUID        id,
-        UUID        paymentId,
         String      hallShortName,
         LocalDate   mealDate,
         MealType    mealType,
@@ -21,8 +20,7 @@ public record MealTokenDetailResponse(
         String      qrCodeData,             // null until APPROVED
         LocalDateTime qrGeneratedAt,
         ScanMode    scanMode,               // null until scanned
-        LocalDateTime usedAt,              // null until USED
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime usedAt               // null until USED
 
 ) {}
+

@@ -2,11 +2,16 @@ package com.mbstu.diningpass.meal.controller;
 
 
 import com.mbstu.diningpass.meal.dto.response.payment.PaymentAdminResponse;
+import com.mbstu.diningpass.meal.dto.response.payment.PaymentResponse;
 import com.mbstu.diningpass.meal.enums.Role;
 import com.mbstu.diningpass.meal.service.abstraction.PaymentService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +32,7 @@ public class PaymentController {
         return ResponseEntity.ok("Meal-Service: Payment Controller is working!");
     }
 
+
     // HALL_ADMIN / HALL_STAFF approves a payment → generates QR tokens
     @PatchMapping("/{id}/approve")
     public ResponseEntity<PaymentAdminResponse> approvePayment(
@@ -34,10 +40,22 @@ public class PaymentController {
             @RequestHeader("X-User-Role") Role role,
             @PathVariable UUID id) {
 
+        logger.info("[APPROVE_PAYMENT] requester={} role={} paymentId={}", requesterId, role, id);
         PaymentAdminResponse response = paymentService.approvePayment(requesterId, role, id);
         logger.info("[APPROVE_PAYMENT] requester={} role={} paymentId={}", requesterId, role, id);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+
+    @GetMapping
+    public ResponseEntity<Page<PaymentResponse>> getAllPayments(
+            @RequestHeader("X-User-Id")   UUID requesterId,
+            @RequestHeader("X-User-Role") Role requesterRole,
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.status(HttpStatus.OK).body(paymentService.getAllPayment(requesterId,requesterRole, page, size));
+    }
+
 
 
 

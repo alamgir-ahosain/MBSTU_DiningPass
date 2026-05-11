@@ -2,6 +2,7 @@ package com.mbstu.diningpass.meal.controller;
 
 import com.mbstu.diningpass.meal.dto.request.mealtoken.CutTokenRequest;
 import com.mbstu.diningpass.meal.dto.response.mealtoken.CutTokenResponse;
+import com.mbstu.diningpass.meal.dto.response.mealtoken.MealTokenStudentResponse;
 import com.mbstu.diningpass.meal.enums.Role;
 import com.mbstu.diningpass.meal.service.abstraction.MealTokenService;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -38,6 +40,18 @@ public class MealTokenController {
         CutTokenResponse response = mealTokenService.cutToken(studentId, role, request);
         logger.info("[CUT_TOKEN] studentId={} role={} mealDate={} mealTypes={}", studentId, role, request.mealDate(), request.mealTypes());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
+    // GET /api/v1/meal-tokens/my
+    // Student views their own approved tokens
+    @GetMapping("/my")
+    public ResponseEntity<List<MealTokenStudentResponse>> getMyMealTokens(
+            @RequestHeader("X-User-Id")   UUID studentId,
+            @RequestHeader("X-User-Role") Role role) {
+        List<MealTokenStudentResponse> response = mealTokenService.getMyMealToken(studentId, role);
+        logger.info("[GET_MY_MEAL_TOKENS] studentId={} role={}", studentId, role);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 

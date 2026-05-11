@@ -18,7 +18,6 @@ public record CutTokenRequest(
         @Pattern(regexp = "^01[3-9]\\d{8}$", message = "Invalid BD phone number")
         String senderNumber,                        // student's bKash/Nagad number
 
-
         @NotNull(message = "Meal date is required")
         @FutureOrPresent(message = "Meal date must be today or a future date")
          LocalDate mealDate,

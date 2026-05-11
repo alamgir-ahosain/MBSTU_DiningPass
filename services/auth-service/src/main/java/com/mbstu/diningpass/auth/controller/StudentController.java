@@ -29,6 +29,10 @@ public class StudentController {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(StudentController.class);
 
 
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("Student-Service: Student Controller is working!");
+    }
     // ==============================
     // Register Student
     // ==============================

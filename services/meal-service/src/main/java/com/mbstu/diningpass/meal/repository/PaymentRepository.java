@@ -3,8 +3,11 @@ package com.mbstu.diningpass.meal.repository;
 import com.mbstu.diningpass.meal.entity.Payment;
 import com.mbstu.diningpass.meal.enums.MealType;
 import com.mbstu.diningpass.meal.enums.PaymentStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,5 +29,13 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
             LocalDate mealDate,
             MealType mealType,
             List<PaymentStatus> statuses
+    );
+
+
+    @Query("SELECT p FROM Payment p WHERE p.hallShortName = :hallShortName AND p.paymentStatus = :status ORDER BY p.submittedAt ASC")
+    Page<Payment> findByHallShortNameAndStatus(
+            @Param("hallShortName") String hallShortName,
+            @Param("status") PaymentStatus status,
+            Pageable pageable
     );
 }

@@ -16,4 +16,5 @@ public interface MealConfigRepository extends JpaRepository<MealConfig, UUID> {
     Optional<MealConfig> findByIdAndHallShortName(UUID id, String hallShortName);
     List<MealConfig> findByHallShortNameOrderByMealDateDesc(String hallShortName);
     Optional<MealConfig> findByHallShortNameAndMealDateAndMealType(String hallShortName, LocalDate mealDate, MealType mealType);
+    List<MealConfig> findByHallShortNameAndMealDateIn(String hallShortName, List<LocalDate> dates);
 }

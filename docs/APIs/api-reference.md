@@ -1,6 +1,8 @@
 
+# Auth Service API (v1)
 
-#  Hall Admin & Hall Staff Service API (v1)
+
+## Hall Associative Service API (v1)
 
 **Base path:** `/api/v1/admins`
 
@@ -14,7 +16,7 @@
 
 ---
 
-#  Student Service API (v1)
+##  Student Service API (v1)
 
 **Base path:** `/api/v1/students`
 
@@ -27,8 +29,13 @@
 | PATCH       | `/{id}/status` | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN | Suspend student. HALL_ADMIN restricted to **own hall only**. |
 
 ---
+**Errors**
+- **400 Bad Request** - Missing or invalid fields.
+- **401 Unauthorized** - Invalid email or password.
 
-#  Hall Service API (v1)
+---
+
+##  Hall Service API (v1)
 
 **Base path:** `/api/v1/halls`
 
@@ -46,13 +53,13 @@
 # Meal Service API (v1)
 
 
-
 ## Meal Config Service API (v1)
 
 **Base path:** `/api/v1/meal-configs`
 
 | REST Method | URL Path     | Headers (Auth)             | Role Access                  | Description |
 |-------------|--------------|----------------------------|------------------------------|-------------|
+| GET         | `/test`      | None                       | PUBLIC                       | Health/test endpoint for the meal-config controller. |
 | POST        | `/`          | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Create a meal configuration for a hall meal/date. |
 | GET         | `/`          | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Get all meal configurations accessible to requester. |
 | PUT         | `/{configId}`| `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Update an existing meal configuration. |
@@ -66,7 +73,9 @@
 
 | REST Method | URL Path | Headers (Auth)             | Role Access | Description |
 |-------------|----------|----------------------------|--------------|-------------|
+| GET         | `/test`  | None                       | PUBLIC       | Health/test endpoint for the meal-token controller. |
 | POST        | `/`      | `X-User-Id`, `X-User-Role` | STUDENT      | Cut/book meal token and submit payment information. |
+| GET         | `/my`    | `X-User-Id`, `X-User-Role` | STUDENT      | Get own approved meal tokens. |
 
 ---
 
@@ -76,6 +85,7 @@
 
 | REST Method | URL Path         | Headers (Auth)             | Role Access                  | Description |
 |-------------|------------------|----------------------------|------------------------------|-------------|
+| GET         | `/`              | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Get payments with pagination (`page`, `size`). |
 | PATCH       | `/{id}/approve`  | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Approve payment and generate QR meal tokens. |
-| PATCH       | `/{id}/reject`   | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Reject submitted payment with rejection reason. |
+| GET         | `/test`          | None                       | PUBLIC                       | Health/test endpoint for the payment controller. |
 

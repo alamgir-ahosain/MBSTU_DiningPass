@@ -29,6 +29,7 @@ public class MealConfigController {
 
     @GetMapping("/test")
     public ResponseEntity<String> test() {
+        logger.info("Meal-Service: Meal Config Controller is working!");
         return ResponseEntity.ok("Meal-Service: Meal Config Controller is working!");
     }
 

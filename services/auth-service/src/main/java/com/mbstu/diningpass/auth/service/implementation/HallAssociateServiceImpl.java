@@ -94,13 +94,12 @@ public class HallAssociateServiceImpl implements HallAssociateService {
         // STEP 4: FIREBASE USER CREATE
         UserRecord firebaseUser = null;
 
-        String tempPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 12) + "Aa1!";
 
         try {
             firebaseUser = FirebaseAuth.getInstance().createUser(
                     new UserRecord.CreateRequest()
                             .setEmail(request.email())
-                            .setPassword(tempPassword)
+                            .setPassword(request.password())
                             .setDisplayName(request.fullName())
                             .setEmailVerified(false)
             );

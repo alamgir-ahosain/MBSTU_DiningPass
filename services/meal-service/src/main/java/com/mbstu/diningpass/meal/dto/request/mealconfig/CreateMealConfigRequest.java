@@ -10,7 +10,7 @@ public record CreateMealConfigRequest(
 
 
     @NotNull(message = "Meal date is required")
-    @FutureOrPresent(message = "Meal date must be today or a future date")
+    @Future(message = "Meal date must be a future date")
     LocalDate mealDate,
 
     @NotNull(message = "Meal type is required")

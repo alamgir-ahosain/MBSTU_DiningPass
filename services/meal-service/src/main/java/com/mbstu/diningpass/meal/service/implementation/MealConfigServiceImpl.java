@@ -20,6 +20,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -48,10 +49,8 @@ public class MealConfigServiceImpl implements MealConfigService {
                 );
 
         // Business rule: booking deadline must come before token expiry
-        validateTimeWindow(request.cutTokenBefore(), request.tokenExpires());
+        validateTimeWindow(request.mealDate(), request.cutTokenBefore(), request.tokenExpires());
 
-        // Business rule: if meal is today, the booking window must not already be closed
-        validateCutoffNotPastToday(request.mealDate(), request.cutTokenBefore());
 
         // Programmatic duplicate check (fast path — avoids hitting the DB constraint on every request)
         if (mealConfigRepository.existsByHallShortNameAndMealDateAndMealType(creatorProfile.hallShortName(), request.mealDate(), request.mealType())) {
@@ -128,14 +127,14 @@ public class MealConfigServiceImpl implements MealConfigService {
         logger.info("[UPDATE_MEAL_CONFIG] requester={} configId={} hall={}", requesterId, configId, updaterProfile.hallShortName());
 
         //  Resolve final values (merge: use request value if provided, else keep existing)
+
+        LocalDate  mealDate  = config.getMealDate(); // date never changes on update
         LocalTime finalCutTokenBefore = request.cutTokenBefore() != null ? request.cutTokenBefore() : config.getCutTokenBefore();
         LocalTime finalTokenExpires = request.tokenExpires() != null ? request.tokenExpires() : config.getTokenExpires();
 
         // Business rule: booking deadline must come before token expiry
-        validateTimeWindow(finalCutTokenBefore, finalTokenExpires);
+        validateTimeWindow(mealDate, finalCutTokenBefore, finalTokenExpires);
 
-        // Business rule: if meal is today, the booking window must not already be closed
-        validateCutoffNotPastToday(config.getMealDate(), finalCutTokenBefore);
 
 
 
@@ -259,20 +258,24 @@ public class MealConfigServiceImpl implements MealConfigService {
 
 
 
-    private void validateTimeWindow(LocalTime cutTokenBefore, LocalTime tokenExpires) {
-        if (!cutTokenBefore.isBefore(tokenExpires)) {
-            throw new BadRequestException("cutTokenBefore must be earlier than tokenExpires");
+    private void validateTimeWindow(LocalDate mealDate, LocalTime cutTokenBefore, LocalTime tokenExpires) {
+        LocalDateTime cutoff = LocalDateTime.of(mealDate, cutTokenBefore);
+        LocalDateTime expiry = LocalDateTime.of(mealDate, tokenExpires);
+
+        if (!cutoff.isBefore(expiry)) {
+            throw new BadRequestException("cutTokenBefore (" + cutoff + ") must be earlier than tokenExpires (" + expiry + ")");
         }
     }
 
-    private void validateCutoffNotPastToday(LocalDate mealDate, LocalTime cutTokenBefore) {
-        if (mealDate.isEqual(LocalDate.now()) && cutTokenBefore.isBefore(LocalTime.now())) {
-            throw new BadRequestException("cutTokenBefore cannot already be in the past for today's meal");
-        }
-    }
 
     private boolean computeIsBookingOpen(MealConfig config) {
-        return !config.getMealDate().isBefore(LocalDate.now()) && LocalTime.now().isBefore(config.getCutTokenBefore());
+        LocalDateTime cutoff = LocalDateTime.of(config.getMealDate(), config.getCutTokenBefore());
+        return LocalDateTime.now().isBefore(cutoff);
+    }
+
+    private boolean computeIsTokenValid(MealConfig config) {
+        LocalDateTime expiry = LocalDateTime.of(config.getMealDate(), config.getTokenExpires());
+        return LocalDateTime.now().isBefore(expiry);
     }
 
     private MealConfigAdminResponse mapToResponse(MealConfig config) {
@@ -288,6 +291,7 @@ public class MealConfigServiceImpl implements MealConfigService {
                 config.isActive(),
                 config.getFeastNote(),
                 computeIsBookingOpen(config),
+                computeIsTokenValid(config),     // bonus field for admin UI to show if tokens are still valid
                 config.getCreatedByName(),
                 config.getUpdatedByName(),
                 config.getCreatedAt(),

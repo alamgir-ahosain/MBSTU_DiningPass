@@ -4,6 +4,7 @@ import com.mbstu.diningpass.meal.client.HallAssociateFeignClient;
 
 import com.mbstu.diningpass.meal.dto.response.client.HallAssociateProfileResponse;
 import com.mbstu.diningpass.meal.dto.response.payment.PaymentAdminResponse;
+import com.mbstu.diningpass.meal.dto.response.payment.PaymentResponse;
 import com.mbstu.diningpass.meal.entity.MealConfig;
 import com.mbstu.diningpass.meal.entity.MealToken;
 import com.mbstu.diningpass.meal.entity.Payment;
@@ -12,6 +13,7 @@ import com.mbstu.diningpass.meal.enums.PaymentStatus;
 import com.mbstu.diningpass.meal.enums.Role;
 import com.mbstu.diningpass.meal.enums.TokenStatus;
 import com.mbstu.diningpass.meal.exception.BadRequestException;
+import com.mbstu.diningpass.meal.exception.ForbiddenException;
 import com.mbstu.diningpass.meal.exception.ResourceNotFoundException;
 import com.mbstu.diningpass.meal.repository.MealConfigRepository;
 import com.mbstu.diningpass.meal.repository.MealTokenRepository;
@@ -21,6 +23,10 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -68,6 +74,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             if (exists) {
                 payment.setRejectionReason("Token already exists for " + mealType);
+                logger.info("Payment rejected for student id={} due to duplicate token", payment.getStudentId());
                 throw new BadRequestException("Token already exists for " + mealType);
             }
         }
@@ -113,12 +120,63 @@ public class PaymentServiceImpl implements PaymentService {
 
         logger.info("Payment approved for student id={}", payment.getStudentId());
         paymentRepository.save(payment);
+
         // when admin verified payment then button will be showed be varified
         return new PaymentAdminResponse(
                 payment.getVerifiedByName(),
                 payment.getVerifiedAt()
         );
 
+    }
+
+
+
+    @Override
+    public Page<PaymentResponse> getAllPayment(UUID requesterId, Role requesterRole, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("submittedAt").ascending());
+
+        // Role guard
+        if (requesterRole != Role.HALL_ADMIN && requesterRole != Role.HALL_STAFF) {
+            throw new ForbiddenException("Only Hall Admins and Hall Staff can view payments");
+        }
+
+        // Scope to requester's hall
+        HallAssociateProfileResponse profile = hallAssociateFeignClient.getMyProfile();
+
+        if (profile.hallShortName() == null) {
+            throw new ForbiddenException("Your account has no hall assigned. Contact a Super Admin.");
+        }
+
+        Page<Payment> payments = paymentRepository.findByHallShortNameAndStatus(
+                profile.hallShortName(),
+                PaymentStatus.SUBMITTED,
+                pageable
+        );
+
+        logger.info("[GET_ALL_PAYMENTS] hall={} page={} size={} total={}",
+                profile.hallShortName(),
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                payments.getTotalElements()
+        );
+
+        return payments.map(payment -> new PaymentResponse(
+                payment.getId(),
+                payment.getStudentId(),
+                payment.getHallShortName(),
+                payment.getMealDate(),
+                payment.getMealTypes(),
+                payment.getTotalAmount(),
+                payment.getPaymentMethod(),
+                payment.getSenderNumber(),
+                payment.getScreenshotUrl(),
+                payment.getPaymentStatus(),
+                payment.getRejectionReason(),
+                payment.getVerifiedByName(),
+                payment.getVerifiedAt(),
+                payment.getSubmittedAt()
+        ));
     }
 
 
@@ -130,5 +188,4 @@ public class PaymentServiceImpl implements PaymentService {
 
 
 
-
-}
+    }

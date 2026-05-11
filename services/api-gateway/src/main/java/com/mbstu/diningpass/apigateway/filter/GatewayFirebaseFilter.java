@@ -89,6 +89,17 @@ public class GatewayFirebaseFilter implements GlobalFilter, Ordered {
         return Mono.fromCallable(() -> FirebaseAuth.getInstance().verifyIdToken(idToken))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(decoded -> {
+
+                    // ── DEBUG: print all claims ──────────────────────────
+                    log.info("=== FIREBASE TOKEN CLAIMS ===");
+                    log.info("uid        : {}", decoded.getUid());
+                    log.info("email      : {}", decoded.getEmail());
+                    log.info("all claims : {}", decoded.getClaims());
+                    log.info("dbId claim : {}", decoded.getClaims().get("dbId"));
+                    log.info("role claim : {}", decoded.getClaims().get("role"));
+                    log.info("==============================");
+                    // ─────────────────────────────────────────────────────
+
                     // 4. Extract custom claims (set by auth-service during registration)
                     String dbId   = getClaimAsString(decoded, "dbId");    // your DB UUID
                     String role   = getClaimAsString(decoded, "role");    // STUDENT | HALL_ADMIN | ...
@@ -98,6 +109,13 @@ public class GatewayFirebaseFilter implements GlobalFilter, Ordered {
                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                         return exchange.getResponse().setComplete();
                     }
+
+                    // ── DEBUG: confirm headers being set ────────────────
+                    log.info("=== SETTING HEADERS ===");
+                    log.info("X-User-Id   : {}", dbId);
+                    log.info("X-User-Role : {}", role);
+                    log.info("=======================");
+                    // ────────────────────────────────────────────────────
 
                     // 5. Forward as trusted headers — strip any client-supplied values first
                     ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
