@@ -373,12 +373,18 @@ This document follows the same service order as `api-reference.md` and uses requ
 **Errors**
 - **403 Forbidden** - Not allowed for this role.
 - **404 Not Found** - Hall not found.
-### 1.3.6 Suspend Hall
+### 1.3.6 Change Hall Status (Suspend / Activate)
 **PATCH** `/api/v1/halls/{id}/status`
-**Request body:** none.
+**Request**
+```json
+{
+  "reason": "string"
+}
+```
+The endpoint toggles the hall's active state: if the hall is currently active it will be suspended (isActive -> false); if already suspended it will be activated (isActive -> true). Only `SUPER_ADMIN` may call this endpoint.
 **Response - 204 No Content**
 **Errors**
-- **403 Forbidden** - Only SUPER_ADMIN can suspend halls.
+- **403 Forbidden** - Only SUPER_ADMIN can change hall status.
 - **404 Not Found** - Hall not found.
 ---
 # 2. Meal Service API

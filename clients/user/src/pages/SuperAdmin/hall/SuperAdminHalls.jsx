@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { hallAPI } from '../../services/api';
-import './SuperAdminPages.css';
+import { hallAPI } from '../../../services/api';
+import '../SuperAdminPages.css';
 
 export const SuperAdminHalls = () => {
     const [halls, setHalls] = useState([]);
@@ -26,17 +26,6 @@ export const SuperAdminHalls = () => {
 
         fetchHalls();
     }, []);
-
-    const handleSuspend = async (hallId) => {
-        if (window.confirm('Are you sure you want to suspend this hall?')) {
-            try {
-                await hallAPI.suspendHall(hallId);
-                setHalls(halls.map(h => h.id === hallId ? { ...h, isActive: false } : h));
-            } catch (err) {
-                alert('Failed to suspend hall: ' + (err.response?.data?.message || err.message));
-            }
-        }
-    };
 
     return (
         <div className="page-wrapper">
@@ -68,7 +57,7 @@ export const SuperAdminHalls = () => {
                                 <tr>
                                     <th>Full Name</th>
                                     <th>Short Name</th>
-                                    <th>Gender Type</th>
+                                    <th>Hall Gender Allow</th>
                                     <th>Bkash</th>
                                     <th>Nagad</th>
                                     <th>Status</th>
@@ -85,20 +74,12 @@ export const SuperAdminHalls = () => {
                                         <td>{hall.nagadNumber || '-'}</td>
                                         <td>
                                             <span className={`badge ${hall.isActive ? 'badge-active' : 'badge-inactive'}`}>
-                                                {hall.isActive ? 'Active' : 'Inactive'}
+                                                {hall.isActive ? 'Active' : 'Suspended'}
                                             </span>
                                         </td>
                                         <td>
                                             <div className="action-buttons">
-                                                <Link to={`/superAdmin/halls/${hall.id}`} className="btn-small btn-view">View</Link>
-                                                {hall.isActive && (
-                                                    <button
-                                                        className="btn-small btn-suspend"
-                                                        onClick={() => handleSuspend(hall.id)}
-                                                    >
-                                                        Suspend
-                                                    </button>
-                                                )}
+                                                <Link to={`/superAdmin/halls/${hall.id}`} className="btn-small btn-view">View Hall</Link>
                                             </div>
                                         </td>
                                     </tr>

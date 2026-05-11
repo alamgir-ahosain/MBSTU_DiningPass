@@ -3,11 +3,9 @@ package com.mbstu.diningpass.auth.controller;
 import com.mbstu.diningpass.auth.dto.request.hallassociate.HallAssociateRegistrationRequest;
 import com.mbstu.diningpass.auth.dto.request.hallassociate.UpdateHallAssociateProfileRequest;
 import com.mbstu.diningpass.auth.dto.request.student.SuspendStudentRequest;
-import com.mbstu.diningpass.auth.dto.request.student.UpdateStudentProfileRequest;
 import com.mbstu.diningpass.auth.dto.response.MessageResponse;
 import com.mbstu.diningpass.auth.dto.response.hallassociate.HallAssociateAdminResponse;
 import com.mbstu.diningpass.auth.dto.response.hallassociate.HallAssociateProfileResponse;
-import com.mbstu.diningpass.auth.dto.response.student.StudentProfileResponse;
 import com.mbstu.diningpass.auth.enums.Role;
 import com.mbstu.diningpass.auth.service.abstraction.HallAssociateService;
 import jakarta.validation.Valid;
@@ -76,7 +74,7 @@ public class HallAssociateController {
     // ==============================
 
     @GetMapping("/me")
-    public ResponseEntity<HallAssociateProfileResponse> getById(
+    public ResponseEntity<HallAssociateProfileResponse> getHallAdminById(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String requesterRoleStr) {
 
@@ -86,6 +84,18 @@ public class HallAssociateController {
         return ResponseEntity.ok(hallAssociateService.getMyProfile(requesterId, role ));
     }
 
+    // only for super admin
+    @GetMapping("/{id}")
+    public ResponseEntity<HallAssociateAdminResponse> getById(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") String requesterRoleStr,
+            @PathVariable UUID id) {
+
+        Role role = Role.valueOf(requesterRoleStr);
+        logger.info("[GET_BY_ID] requester={} role={} target={}", requesterId, role, id);
+
+        return ResponseEntity.ok(hallAssociateService.getById(requesterId, role, id));
+    }
 
     // ==============================
     // UPDATE MY PROFILE
@@ -112,13 +122,12 @@ public class HallAssociateController {
     public ResponseEntity<MessageResponse> suspendAccount(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String requesterRoleStr,
-            @PathVariable UUID id,
-            @Valid @RequestBody SuspendStudentRequest request) {
+            @PathVariable UUID id) {
 
         Role role = Role.valueOf(requesterRoleStr);
         logger.warn("[SUSPEND_REQUEST] requester={} role={} target={}", requesterId, role, id);
 
-        return ResponseEntity.ok(hallAssociateService.suspend(requesterId, role, id, request));
+        return ResponseEntity.ok(hallAssociateService.updateStatus(requesterId, role, id));
     }
 
 

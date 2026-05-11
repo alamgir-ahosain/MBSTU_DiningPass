@@ -146,7 +146,7 @@ public class HallServiceImpl implements HallService {
            throw new ForbiddenException("Only SUPER_ADMIN can view all halls");
        }
 
-       //active hall only
+       // active hall only
        if (activeOnly) {
            return hallRepository.findByIsActiveTrue()
                    .stream()
@@ -154,7 +154,7 @@ public class HallServiceImpl implements HallService {
                    toList();
        }
 
-       //all hall
+       // all hall
        return hallRepository.findAll()
                .stream()
                .map(this::mapToResponse)
@@ -215,6 +215,24 @@ public class HallServiceImpl implements HallService {
         hall.setActive(false);
         hallRepository.save(hall);
         logger.info("[SUCCESS] Hall suspended id={} name={}", hall.getId(), hall.getFullName());
+    }
+
+    @Override
+    public void updateHallStatus(UUID requesterId, Role role, UUID id) {
+
+        ensureSuperAdmin(role);
+        logger.warn("[UPDATE_HALL_STATUS] requester={} hallId={}", requesterId, id);
+        Hall hall = hallRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Hall not found with id: " + id));
+
+        if (hall.isActive()) {
+            hall.setActive(false);
+            logger.info("[SUCCESS] Hall suspended id={} name={}", hall.getId(), hall.getFullName());
+        } else {
+            hall.setActive(true);
+            logger.info("[SUCCESS] Hall activated id={} name={}", hall.getId(), hall.getFullName());
+        }
+
+        hallRepository.save(hall);
     }
 
 

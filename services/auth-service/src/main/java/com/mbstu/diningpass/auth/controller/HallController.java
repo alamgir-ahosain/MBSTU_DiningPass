@@ -103,15 +103,19 @@ public class HallController {
     // SUSPEND HALL (SUPER ADMIN ONLY)
     // ==============================
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Void> suspendHall(
+    public ResponseEntity<Void> updateHallStatus(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String requesterRoleStr,
             @PathVariable UUID id) {
 
         Role role = Role.valueOf(requesterRoleStr);
-        logger.warn("[SUSPEND_HALL] requester={} role={} target={}", requesterId, role, id);
+        logger.info("[SUSPEND_HALL] requester={} role={} hallId={}", requesterId, role, id);
 
-        hallService.suspendHall(requesterId, role, id);
+        hallService.updateHallStatus(requesterId, role, id);
         return ResponseEntity.noContent().build();
+
+
     }
+
+
 }

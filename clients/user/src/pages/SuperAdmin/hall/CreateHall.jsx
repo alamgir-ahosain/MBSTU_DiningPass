@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { hallAPI } from '../../services/api';
-import './SuperAdminPages.css';
+import { hallAPI } from '../../../services/api';
+import '../SuperAdminPages.css';
 
 export const CreateHall = () => {
     const [formData, setFormData] = useState({
@@ -100,62 +100,64 @@ export const CreateHall = () => {
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="shortName">Short Name *</label>
-                        <input
-                            id="shortName"
-                            type="text"
-                            name="shortName"
-                            value={formData.shortName}
-                            onChange={handleChange}
-                            required
-                            placeholder="e.g., JAMH"
-                            disabled={loading}
-                            maxLength="100"
-                        />
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label htmlFor="shortName">Short Name *</label>
+                            <input
+                                id="shortName"
+                                type="text"
+                                name="shortName"
+                                value={formData.shortName}
+                                onChange={handleChange}
+                                required
+                                placeholder="e.g., JAMH"
+                                disabled={loading}
+                                maxLength="100"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="genderType">Gender Type *</label>
+                            <select
+                                id="genderType"
+                                name="genderType"
+                                value={formData.genderType}
+                                onChange={handleChange}
+                                required
+                                disabled={loading}
+                            >
+                                <option value="MALE">Male</option>
+                                <option value="FEMALE">Female</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="genderType">Gender Type *</label>
-                        <select
-                            id="genderType"
-                            name="genderType"
-                            value={formData.genderType}
-                            onChange={handleChange}
-                            required
-                            disabled={loading}
-                        >
-                            <option value="MALE">Male</option>
-                            <option value="FEMALE">Female</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="bkashNumber">Bkash Number</label>
-                        <input
-                            id="bkashNumber"
-                            type="text"
-                            name="bkashNumber"
-                            value={formData.bkashNumber}
-                            onChange={handleChange}
-                            placeholder="e.g., 01700000000"
-                            disabled={loading}
-                            maxLength="15"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="nagadNumber">Nagad Number</label>
-                        <input
-                            id="nagadNumber"
-                            type="text"
-                            name="nagadNumber"
-                            value={formData.nagadNumber}
-                            onChange={handleChange}
-                            placeholder="e.g., 01800000000"
-                            disabled={loading}
-                            maxLength="15"
-                        />
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label htmlFor="bkashNumber">Bkash Number</label>
+                            <input
+                                id="bkashNumber"
+                                type="text"
+                                name="bkashNumber"
+                                value={formData.bkashNumber}
+                                onChange={handleChange}
+                                placeholder="e.g., 01700000000"
+                                disabled={loading}
+                                maxLength="15"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="nagadNumber">Nagad Number</label>
+                            <input
+                                id="nagadNumber"
+                                type="text"
+                                name="nagadNumber"
+                                value={formData.nagadNumber}
+                                onChange={handleChange}
+                                placeholder="e.g., 01800000000"
+                                disabled={loading}
+                                maxLength="15"
+                            />
+                        </div>
                     </div>
 
                     <div className="form-group">

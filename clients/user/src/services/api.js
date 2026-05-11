@@ -67,7 +67,9 @@ export const hallAdminAPI = {
   },
 
   updateHallStaffStatus: (id, status) => {
-    return apiClient.patch(`/api/v1/admins/${id}/status`, { status });
+    return apiClient.patch(`/api/v1/admins/${id}/status`, {
+      reason: status === "SUSPENDED" ? "Hall staff suspended" : "Hall staff activated",
+    });
   },
 
   getById: (id) => {
@@ -104,10 +106,16 @@ export const hallAPI = {
     return apiClient.put(`/api/v1/halls/${id}`, hallData);
   },
 
+  updateHallStatus: (id, status) => {
+    return apiClient.patch(`/api/v1/halls/${id}/status`, { reason: 'Status update' });
+  },
+
   suspendHall: (id) => {
-    return apiClient.patch(`/api/v1/halls/${id}/status`, {
-      status: "SUSPENDED",
-    });
+    return apiClient.patch(`/api/v1/halls/${id}/status`, { reason: 'Hall suspended' });
+  },
+
+  activateHall: (id) => {
+    return apiClient.patch(`/api/v1/halls/${id}/status`, { reason: 'Hall activated' });
   },
 };
 
@@ -123,12 +131,19 @@ export const superAdminAPI = {
   createHall: (hallData) => {
     return apiClient.post("/api/v1/halls", hallData);
   },
+  getHallById: (id) => {
+    return apiClient.get(`/api/v1/halls/${id}`);
+  },
   getProfile: () => {
-    return apiClient.get(`/api/v1/admins/me`);
+    return apiClient.get(`/api/v1/students/me`);
   },
 
   getAllAdmins: (filters = {}) => {
     return apiClient.get("/api/v1/admins", { params: filters });
+  },
+
+  getAdminById: (id) => {
+    return apiClient.get(`/api/v1/admins/${id}`);
   },
 
   getAllStudents: (filters = {}) => {
@@ -142,9 +157,17 @@ export const superAdminAPI = {
   },
 
   suspendAdmin: (id) => {
+    return superAdminAPI.updateAdminStatus(id, "SUSPENDED");
+  },
+
+  updateAdminStatus: (id, status) => {
     return apiClient.patch(`/api/v1/admins/${id}/status`, {
-      status: "SUSPENDED",
+      reason: status === "SUSPENDED" ? "Hall admin suspended" : "Hall admin activated",
     });
+  },
+
+  activateAdmin: (id) => {
+    return superAdminAPI.updateAdminStatus(id, "ACTIVE");
   },
 
   createAdmin: (adminData) => {

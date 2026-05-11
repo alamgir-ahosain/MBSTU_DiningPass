@@ -29,9 +29,16 @@ import { IssueToken } from './pages/HallStaff/IssueToken';
 
 // Super Admin Pages
 import { SuperAdminDashboard } from './pages/SuperAdmin/SuperAdminDashboard';
-import { CreateHall } from './pages/SuperAdmin/CreateHall';
-import { SuperAdminHalls } from './pages/SuperAdmin/SuperAdminHalls';
-import { SuperAdminAdmins } from './pages/SuperAdmin/SuperAdminAdmins';
+import { CreateHall } from './pages/SuperAdmin/hall/CreateHall';
+import { CreateAdmin } from './pages/SuperAdmin/hallAdmin/CreateAdmin';
+import { SuperAdminHalls } from './pages/SuperAdmin/hall/SuperAdminHalls';
+import { SuperAdminAdmins } from './pages/SuperAdmin/hallAdmin/SuperAdminAdmins';
+import { SuperAdminHallDetails } from './pages/SuperAdmin/hall/SuperAdminHallDetails';
+import { SuperAdminEditHall } from './pages/SuperAdmin/hall/SuperAdminEditHall';
+import { SuperAdminAdminDetails } from './pages/SuperAdmin/hallAdmin/SuperAdminAdminDetails';
+import { SuperAdminProfile } from './pages/SuperAdmin/my/SuperAdminProfile';
+import { SuperAdminChangePassword } from './pages/SuperAdmin/my/SuperAdminChangePassword';
+import { SuperAdminForgotPassword } from './pages/SuperAdmin/my/SuperAdminForgotPassword';
 import { SuperAdminStudents } from './pages/SuperAdmin/SuperAdminStudents';
 
 import './App.css';
@@ -193,6 +200,22 @@ function App() {
                 }
               />
               <Route
+                path="/superAdmin/create-admin"
+                element={
+                  <ProtectedRoute requiredRole="SUPER_ADMIN">
+                    <CreateAdmin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/superAdmin/forgot-password"
+                element={
+                  <ProtectedRoute requiredRole="SUPER_ADMIN">
+                    <SuperAdminForgotPassword />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/superAdmin/halls"
                 element={
                   <ProtectedRoute requiredRole="SUPER_ADMIN">
@@ -201,10 +224,50 @@ function App() {
                 }
               />
               <Route
+                path="/superAdmin/halls/:id"
+                element={
+                  <ProtectedRoute requiredRole="SUPER_ADMIN">
+                    <SuperAdminHallDetails />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/superAdmin/halls/:id/edit"
+                element={
+                  <ProtectedRoute requiredRole="SUPER_ADMIN">
+                    <SuperAdminEditHall />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/superAdmin/admins"
                 element={
                   <ProtectedRoute requiredRole="SUPER_ADMIN">
                     <SuperAdminAdmins />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/superAdmin/admins/:id"
+                element={
+                  <ProtectedRoute requiredRole="SUPER_ADMIN">
+                    <SuperAdminAdminDetails />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/superAdmin/profile"
+                element={
+                  <ProtectedRoute requiredRole="SUPER_ADMIN">
+                    <SuperAdminProfile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/superAdmin/change-password"
+                element={
+                  <ProtectedRoute requiredRole="SUPER_ADMIN">
+                    <SuperAdminChangePassword />
                   </ProtectedRoute>
                 }
               />

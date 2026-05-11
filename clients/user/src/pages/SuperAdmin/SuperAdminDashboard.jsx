@@ -18,22 +18,12 @@ export const SuperAdminDashboard = () => {
                     <p className="stat-number">0</p>
                 </div>
                 <div className="stat-card">
-                    <h3>👥 Admins</h3>
-                    <p className="stat-number">0</p>
-                </div>
-                <div className="stat-card">
-                    <h3>🎓 Students</h3>
+                    <h3>👥 Hall Admins</h3>
                     <p className="stat-number">0</p>
                 </div>
             </div>
 
             <div className="dashboard-grid">
-                <Link to="/superAdmin/create-hall" className="dashboard-card primary-card">
-                    <div className="card-icon">➕</div>
-                    <h3>Create Hall</h3>
-                    <p>Add a new hall to the system</p>
-                </Link>
-
                 <Link to="/superAdmin/halls" className="dashboard-card">
                     <div className="card-icon">🏢</div>
                     <h3>Manage Halls</h3>
@@ -42,14 +32,8 @@ export const SuperAdminDashboard = () => {
 
                 <Link to="/superAdmin/admins" className="dashboard-card">
                     <div className="card-icon">👥</div>
-                    <h3>Manage Admins</h3>
-                    <p>Create and manage administrators</p>
-                </Link>
-
-                <Link to="/superAdmin/students" className="dashboard-card">
-                    <div className="card-icon">🎓</div>
-                    <h3>View Students</h3>
-                    <p>View all students in the system</p>
+                    <h3>Manage Hall Admins</h3>
+                    <p>View and manage hall administrators</p>
                 </Link>
             </div>
 
