@@ -9,7 +9,8 @@ export const CreateAdmin = () => {
         email: '',
         phone: '',
         role: 'HALL_ADMIN',
-        hallId: '',
+        hallShortName: '',
+        password: '',
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -32,6 +33,11 @@ export const CreateAdmin = () => {
 
         if (formData.fullName.length < 2 || formData.fullName.length > 100) {
             setError('Full name must be between 2-100 characters');
+            setLoading(false);
+            return;
+        }
+        if (!formData.password || formData.password.length < 6) {
+            setError('Password must be at least 6 characters');
             setLoading(false);
             return;
         }
@@ -124,16 +130,34 @@ export const CreateAdmin = () => {
                             </select>
                         </div>
                         <div className="form-group">
-                            <label htmlFor="hallId">Hall ID *</label>
+                            <label htmlFor="hallShortName">Hall Short Name *</label>
                             <input
-                                id="hallId"
+                                id="hallShortName"
                                 type="text"
-                                name="hallId"
-                                value={formData.hallId}
+                                name="hallShortName"
+                                value={formData.hallShortName}
                                 onChange={handleChange}
                                 required
-                                placeholder="UUID of the hall"
+                                placeholder="e.g., JAMH"
                                 disabled={loading}
+                                maxLength={100}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label htmlFor="password">Password *</label>
+                            <input
+                                id="password"
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                placeholder="Min 6 characters"
+                                disabled={loading}
+                                minLength={6}
                             />
                         </div>
                     </div>

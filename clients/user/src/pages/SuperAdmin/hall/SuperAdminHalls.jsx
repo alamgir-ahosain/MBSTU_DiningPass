@@ -35,7 +35,7 @@ export const SuperAdminHalls = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <h1 className="page-title" style={{ margin: 0 }}>All Halls</h1>
                     <Link to="/superAdmin/create-hall" className="btn btn-primary">
-                        ➕ Create Hall
+                         Create Hall
                     </Link>
                 </div>
 
@@ -57,9 +57,7 @@ export const SuperAdminHalls = () => {
                                 <tr>
                                     <th>Full Name</th>
                                     <th>Short Name</th>
-                                    <th>Hall Gender Allow</th>
-                                    <th>Bkash</th>
-                                    <th>Nagad</th>
+                                    <th>Gender Type</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -70,8 +68,6 @@ export const SuperAdminHalls = () => {
                                         <td>{hall.fullName}</td>
                                         <td><strong>{hall.shortName}</strong></td>
                                         <td>{hall.genderType}</td>
-                                        <td>{hall.bkashNumber || '-'}</td>
-                                        <td>{hall.nagadNumber || '-'}</td>
                                         <td>
                                             <span className={`badge ${hall.isActive ? 'badge-active' : 'badge-inactive'}`}>
                                                 {hall.isActive ? 'Active' : 'Suspended'}

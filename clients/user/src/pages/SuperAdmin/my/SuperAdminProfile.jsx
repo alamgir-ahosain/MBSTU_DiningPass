@@ -1,12 +1,28 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { superAdminAPI } from '../../../services/api';
+import { formatDateTimeParts } from '../../../utils/formatDateTime';
 import '../SuperAdminPages.css';
 
 export const SuperAdminProfile = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const renderDateTime = (value) => {
+        const { date, time } = formatDateTimeParts(value);
+
+        if (date === '-' && time === '-') {
+            return '-';
+        }
+
+        return (
+            <div className="datetime-display">
+                <span>{date}</span>
+                {time && <span>{time}</span>}
+            </div>
+        );
+    };
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -75,11 +91,11 @@ export const SuperAdminProfile = () => {
                             </div>
                             <div className="detail-card">
                                 <span className="detail-label">Created At</span>
-                                <span className="detail-value">{profile.createdAt || '-'}</span>
+                                <div className="detail-value">{renderDateTime(profile.createdAt)}</div>
                             </div>
                             <div className="detail-card">
                                 <span className="detail-label">Updated At</span>
-                                <span className="detail-value">{profile.updatedAt || '-'}</span>
+                                <div className="detail-value">{renderDateTime(profile.updatedAt)}</div>
                             </div>
                         </div>
 

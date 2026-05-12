@@ -98,6 +98,18 @@
   background-color: #2980b9;
 }
 
+.btn-copy {
+  background-color: #6c757d;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  border-radius: 4px;
+}
+
+.btn-copy:hover {
+  background-color: #5a6268;
+}
+
 .btn-suspend {
   background-color: #e74c3c;
   color: white;
@@ -336,6 +348,16 @@
   color: #2c3e50;
   font-weight: 600;
   word-break: break-word;
+}
+
+.datetime-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.datetime-display span {
+  display: block;
 }
 
 .profile-security-section {

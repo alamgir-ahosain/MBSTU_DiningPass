@@ -17,5 +17,6 @@ public record HallResponse(
         String nagadNumber,
         String hallAdminId,
         boolean isActive,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) { }

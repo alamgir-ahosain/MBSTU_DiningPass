@@ -252,35 +252,43 @@ public class HallAssociateServiceImpl implements HallAssociateService {
 
 
 
-
-
-
     @Override
-    @Transactional
-    public MessageResponse suspend(UUID requesterId, Role role, UUID targetId) {
+    @Transactional(readOnly = true)
+    public Map<String, Long> countAccounts(UUID requesterId, Role requesterRole) {
 
-        HallAssociate target = hallAssociateRepository.findById(targetId).orElseThrow(() -> new ResourceNotFoundException("Associate not found"));
+        if (requesterRole == Role.SUPER_ADMIN) {
+            long activeHallAdmins = hallAssociateRepository.countByRoleAndIsActiveTrue(Role.HALL_ADMIN);
+            long activeHallStaff  = hallAssociateRepository.countByRoleAndIsActiveTrue(Role.HALL_STAFF);
 
-        // ================= SUPER ADMIN =================
-        if (role == Role.SUPER_ADMIN) {
-            return doSuspend(target);
+            logger.info("[COUNT_ACCOUNTS] SUPER_ADMIN={} activeHallAdmins={} activeHallStaff={}", requesterId, activeHallAdmins, activeHallStaff);
+            return Map.of(
+                    "active_hall_admins", activeHallAdmins,
+                    "active_hall_staff",  activeHallStaff
+            );
         }
 
-        // ================= HALL ADMIN =================
-        if (role == Role.HALL_ADMIN) {
+        if (requesterRole == Role.HALL_ADMIN) {
+            HallAssociate requester = hallAssociateRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Requester not found"));
+            UUID myHall = requester.getHallId();
 
-            HallAssociate requester = hallAssociateRepository.findById(requesterId).orElseThrow();
+            long total    = hallAssociateRepository.countByHallIdAndRole(myHall, Role.HALL_STAFF);
+            long active   = hallAssociateRepository.countByHallIdAndRoleAndIsActiveTrue(myHall, Role.HALL_STAFF);
+            long inactive = total - active;
 
-            if (!requester.getHallId().equals(target.getHallId())) {throw new AccessDeniedException("Cannot suspend outside your hall");}
-            if (target.getRole() == Role.SUPER_ADMIN) {throw new AccessDeniedException("Cannot suspend SUPER_ADMIN");}
+            logger.info("[COUNT_ACCOUNTS] HALL_ADMIN={} hall={} staffTotal={}", requesterId, myHall, total);
 
-            return doSuspend(target);
+            return Map.of(
+                    "total_hall_staff",    total,
+                    "active_hall_staff",   active,
+                    "inactive_hall_staff", inactive
+            );
         }
 
-
-        // ================= STAFF =================
-        throw new AccessDeniedException("Not allowed to suspend accounts");
+        throw new AccessDeniedException("Not allowed to count accounts");
     }
+
+
+
 
     @Override
     @Transactional

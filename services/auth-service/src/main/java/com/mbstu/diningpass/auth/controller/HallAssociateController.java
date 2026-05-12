@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -112,6 +113,14 @@ public class HallAssociateController {
         return ResponseEntity.ok(hallAssociateService.updateMyProfile(userId, role, req));
     }
 
+    // HallAssociateController
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Long>> countAccounts(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader("X-User-Role") Role role) {
+        logger.info("[COUNT_ACCOUNTS] user={} role={}", userId, role);
+        return ResponseEntity.ok(hallAssociateService.countAccounts(userId, role));
+    }
 
 
     // ==============================

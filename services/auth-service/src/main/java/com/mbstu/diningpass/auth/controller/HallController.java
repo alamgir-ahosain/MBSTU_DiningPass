@@ -84,6 +84,17 @@ public class HallController {
         return ResponseEntity.ok(hallService.getHallById(requesterId, role, id));
     }
 
+    // Count All Hall
+    @GetMapping("/count")
+    public ResponseEntity<Long> countHalls(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader("X-User-Role") Role role) {
+
+        logger.info("[COUNT_HALLS] user={} role={}", userId, role);
+        return ResponseEntity.ok(hallService.countHalls(userId, role));
+    }
+
+
     // ==============================
     // GET BY SHORT NAME
     // ==============================
@@ -113,7 +124,6 @@ public class HallController {
 
         hallService.updateHallStatus(requesterId, role, id);
         return ResponseEntity.noContent().build();
-
 
     }
 

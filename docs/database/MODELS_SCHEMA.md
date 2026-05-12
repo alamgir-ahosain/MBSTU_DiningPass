@@ -23,13 +23,25 @@ Used to create a new residential hall.
 
 Used to register hall staff members and associates.
 
-| Field      | Type   | Constraints                   | Description                                              |
-| ---------- | ------ | ----------------------------- | -------------------------------------------------------- |
-| `fullName` | String | NOT NULL, 2-100 chars         | Full name of the associate                               |
-| `email`    | String | NOT NULL, UNIQUE, Valid Email | University email address                                 |
-| `phone`    | String | Max 15 chars                  | Contact phone number                                     |
-| `role`     | Enum   | NOT NULL                      | Role: SUPER_ADMIN, HALL_ADMIN, COUNTER_STAFF, HALL_STAFF |
-| `hallId`   | UUID   | NOT NULL                      | Reference to the assigned hall                           |
+| Field           | Type   | Constraints                   | Description                                              |
+| --------------- | ------ | ----------------------------- | -------------------------------------------------------- |
+| `fullName`      | String | NOT NULL, 2-100 chars         | Full name of the associate                               |
+| `email`         | String | NOT NULL, UNIQUE, Valid Email | University email address                                 |
+| `password`      | String | NOT NULL, Min 6 chars         | Login password for Firebase/auth account                 |
+| `phone`         | String | Max 15 chars                  | Contact phone number                                     |
+| `role`          | Enum   | NOT NULL                      | Role: SUPER_ADMIN, HALL_ADMIN, HALL_STAFF                |
+| `hallShortName` | String | NOT NULL, 2-100 chars         | Short name of the assigned hall (e.g. "JAMH")           |
+
+---
+
+### **UpdateHallAssociateProfileRequest**
+
+Used by hall associates to update their own profile details.
+
+| Field      | Type   | Constraints           | Description           |
+| ---------- | ------ | --------------------- | --------------------- |
+| `fullName` | String | NOT NULL, 2-100 chars | Updated full name     |
+| `phone`    | String | Max 15 chars          | Updated contact phone |
 
 ---
 
@@ -105,7 +117,7 @@ Returned after successful user authentication with tokens and user info.
 | `refreshToken` | String | JWT token for refreshing access token                      |
 | `tokenType`    | String | Token type (typically "Bearer")                            |
 | `expiresIn`    | Long   | Access token expiration in seconds                         |
-| `role`         | String | User role: STUDENT, HALL_ADMIN, SUPER_ADMIN, COUNTER_STAFF |
+| `role`         | String | User role: STUDENT, HALL_ADMIN, HALL_STAFF, SUPER_ADMIN |
 | `userId`       | String | Unique user identifier                                     |
 | `fullName`     | String | Full name of the user                                      |
 | `hallId`       | String | UUID of the user's hall                                    |
@@ -141,17 +153,18 @@ Simple response containing message and success status.
 
 Returned when retrieving or creating hall information.
 
-| Field         | Type          | Description                |
-| ------------- | ------------- | -------------------------- |
-| `id`          | UUID          | Unique hall identifier     |
-| `fullName`    | String        | Full name of the hall      |
-| `shortName`   | String        | Abbreviated hall name      |
-| `genderType`  | Enum          | Gender type: MALE, FEMALE  |
-| `bkashNumber` | String        | Bkash payment number       |
-| `nagadNumber` | String        | Nagad payment number       |
-| `hallAdminId` | String        | Hall administrator ID      |
-| `isActive`    | boolean       | Whether the hall is active |
-| `createdAt`   | LocalDateTime | Hall creation timestamp    |
+| Field         | Type          | Description                                          |
+|---------------| ------------- |------------------------------------------------------|
+| `id`          | UUID          | Unique hall identifier                               |
+| `fullName`    | String        | Full name of the hall                                |
+| `shortName`   | String        | Abbreviated hall name                                |
+| `genderType`  | Enum          | Gender type: MALE, FEMALE                            |
+| `bkashNumber` | String        | Bkash payment number                                 |
+| `nagadNumber` | String        | Nagad payment number                                 |
+| `hallAdminId` | String        | Hall administrator/provost ID stored in `provost_id` |
+| `isActive`    | boolean       | Whether the hall is active                           |
+| `createdAt`   | LocalDateTime | Hall creation timestamp                              |
+| `updatedAt`   | LocalDateTime | Hall update timestamp                                |
 
 ---
 
@@ -165,14 +178,14 @@ Returned when retrieving or creating hall associate/staff information.
 | `fullName`  | String        | Full name of the associate                               |
 | `email`     | String        | Email address                                            |
 | `phone`     | String        | Phone number                                             |
-| `role`      | Enum          | Role: SUPER_ADMIN, HALL_ADMIN, COUNTER_STAFF, HALL_STAFF |
+| `role`      | Enum          | Role: SUPER_ADMIN, HALL_ADMIN, HALL_STAFF |
 | `hallShortName`| String        | Short name of the student's hall (e.g. "JAMH") |
 | `isActive`  | boolean       | Whether account is active                                |
 | `createdAt` | LocalDateTime | Account creation timestamp                               |
 | `updatedAt` | LocalDateTime | Last update timestamp                                    |
 
 ---
-### **HallAssociateProfileesponse**
+### **HallAssociateProfileResponse**
 
 Returned when retrieving or creating hall associate/staff information.
 
@@ -181,7 +194,7 @@ Returned when retrieving or creating hall associate/staff information.
 | `fullName`  | String        | Full name of the associate                               |
 | `email`     | String        | Email address                                            |
 | `phone`     | String        | Phone number                                             |
-| `role`      | Enum          | Role: SUPER_ADMIN, HALL_ADMIN, COUNTER_STAFF, HALL_STAFF |
+| `role`      | Enum          | Role: SUPER_ADMIN, HALL_ADMIN, HALL_STAFF |
 | `hallShortName`| String        | Short name of the student's hall (e.g. "JAMH") |
 | `isActive`  | boolean       | Whether account is active                                |
 | `createdAt` | LocalDateTime | Account creation timestamp                               |
@@ -198,7 +211,7 @@ Returned when retrieving a student's profile (used for end-user views).
 | `studentId`    | String        | University student ID         |
 | `fullName`     | String        | Full name of student          |
 | `email`        | String        | Student email address         |
-| `role`         | Enum          | User role (STUDENT or higher) |
+| `role`         | Enum          | User role (STUDENT, HALL_STAFF, HALL_ADMIN, SUPER_ADMIN) |
 | `hallShortName`| String        | Short name of the student's hall (e.g. "JAMH") |
 | `roomNumber`   | String        | Room number in hall (nullable)|
 | `department`   | String        | Department name               |
@@ -219,7 +232,7 @@ Returned when retrieving a student's profile for administrative views (includes 
 | `studentId`    | String        | University student ID         |
 | `fullName`     | String        | Full name of student          |
 | `email`        | String        | Student email address         |
-| `role`         | Enum          | User role (STUDENT or higher) |
+| `role`         | Enum          | User role (STUDENT, HALL_STAFF, HALL_ADMIN, SUPER_ADMIN) |
 | `hallShortName`| String        | Short name of the student's hall (e.g. "JAMH") |
 | `roomNumber`   | String        | Room number in hall (nullable)|
 | `department`   | String        | Department name               |
@@ -229,6 +242,8 @@ Returned when retrieving a student's profile for administrative views (includes 
 | `updatedAt`    | LocalDateTime | Last update timestamp         |
 
 ---
+
+> Note: `meal-service` also uses client mirror DTOs under `dto/response/client/*` for hall, hall-associate, and student profile lookups. Their field sets match the auth-service tables above.
 
 ## DATABASE ENTITIES
 
@@ -258,7 +273,7 @@ Returned when retrieving a student's profile for administrative views (includes 
 | `full_name`    | VARCHAR(100) | NOT NULL                | Full name of the associate                               |
 | `email`        | VARCHAR(255) | NOT NULL, UNIQUE        | University email address                                 |
 | `phone`        | VARCHAR(15)  | NULLABLE                | Contact phone number                                     |
-| `role`         | VARCHAR(20)  | NOT NULL                | Role: SUPER_ADMIN, HALL_ADMIN, COUNTER_STAFF, HALL_STAFF |
+| `role`         | VARCHAR(20)  | NOT NULL                | Role: SUPER_ADMIN, HALL_ADMIN, HALL_STAFF |
 | `hall_id`      | UUID         | NOT NULL, FK (halls.id) | Reference to assigned hall                               |
 | `is_active`    | BOOLEAN      | NOT NULL, DEFAULT true  | Account active status                                    |
 | `created_at`   | TIMESTAMP    | NOT NULL, AUTO-SET      | Record creation time                                     |
@@ -275,7 +290,7 @@ Returned when retrieving a student's profile for administrative views (includes 
 | `student_id`   | VARCHAR(20)  | NOT NULL, UNIQUE        | University student ID (e.g., CE21012) |
 | `full_name`    | VARCHAR(100) | NOT NULL                | Full name of the student              |
 | `email`        | VARCHAR(150) | NOT NULL, UNIQUE        | Student's university email            |
-| `role`         | VARCHAR(20)  | NOT NULL                | User role (STUDENT, HALL_ADMIN, etc.) |
+| `role`         | VARCHAR(20)  | NOT NULL                | User role (STUDENT, HALL_ADMIN, HALL_STAFF, SUPER_ADMIN) |
 | `hall_id`      | UUID         | NOT NULL, FK (halls.id) | Reference to residential hall         |
 | `room_number`  | VARCHAR(15)  | NULLABLE                | Room number within the hall           |
 | `department`   | VARCHAR(60)  | NOT NULL                | Department name                       |
@@ -289,7 +304,7 @@ Returned when retrieving a student's profile for administrative views (includes 
 ## ENUMS 
 
 - **GenderType:** `MALE`, `FEMALE`
-- **Role:** `SUPER_ADMIN`, `HALL_ADMIN`, `COUNTER_STAFF`, `HALL_STAFF`, `STUDENT`
+- **Role:** `SUPER_ADMIN`, `HALL_ADMIN`, `HALL_STAFF`, `STUDENT`
 - **MealType:** `LUNCH`, `DINNER`
 - **PaymentMethod:** `BKASH`, `NAGAD`
 - **PaymentStatus:** `SUBMITTED`, `VERIFIED`, `REJECTED`
@@ -329,6 +344,15 @@ Students can view and cut meal tokens until the `cut_token_before` deadline.
 | Constraint Name | Columns |
 |-----------------|---------|
 | `uq_hall_meal_date_type` | (`hall_short_name`, `meal_date`, `meal_type`) |
+
+### Join Table: `payment_meal_types`
+
+Used by `Payment.mealTypes` (`@ElementCollection`).
+
+| Column Name | Type | Constraints | Description |
+|-------------|------|-------------|-------------|
+| `payment_id` | UUID | NOT NULL, FK to `payments.id` | Parent payment reference |
+| `meal_type` | VARCHAR(20) | NOT NULL | Selected meal type |
 
 ---
 
@@ -395,7 +419,7 @@ Used by hall admin/staff to create a new meal configuration.
 
 | Field Name | Type | Validation | Description |
 |------------|------|------------|-------------|
-| `mealDate` | `LocalDate` | `@NotNull`, `@FutureOrPresent` | Meal serving date |
+| `mealDate` | `LocalDate` | `@NotNull`, `@Future` | Meal serving date |
 | `mealType` | `MealType` | `@NotNull` | `LUNCH` or `DINNER` |
 | `mealMenu` | `String` | `@NotBlank`, `@Size(max = 255)` | Meal menu description |
 | `mealPrice` | `Long` | `@NotNull` | Meal price in BDT/TK |
@@ -477,6 +501,7 @@ Returned to hall admin/staff when viewing detailed meal configuration informatio
 | `isActive` | `boolean` | Whether meal booking is active |
 | `feastNote` | `String` | Optional feast/special note |
 | `isBookingOpen` | `boolean` | Computed booking availability |
+| `isTokenValid` | `boolean` | Computed token validity |
 | `createdByName` | `String` | Snapshot of creator name |
 | `updatedByName` | `String` | Snapshot of last updater name |
 | `createdAt` | `LocalDateTime` | Record creation timestamp |
@@ -517,7 +542,7 @@ Returned after successful token cutting/payment submission.
 
 ---
 
-# DTO: `MealTokenDetailResponse`
+# DTO: `MealTokenAdminResponse`
 
 Returned when viewing detailed token information.
 
@@ -540,6 +565,26 @@ Returned when viewing detailed token information.
 
 ---
 
+# DTO: `MealTokenStudentResponse`
+
+Returned to students when viewing their own token information.
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `id` | `UUID` | Meal token identifier |
+| `hallShortName` | `String` | Hall short name snapshot |
+| `mealDate` | `LocalDate` | Meal serving date |
+| `mealType` | `MealType` | `LUNCH` or `DINNER` |
+| `mealPrice` | `Long` | Snapshot meal price |
+| `mealMenu` | `String` | Snapshot meal menu |
+| `tokenStatus` | `TokenStatus` | Current token state |
+| `qrCodeData` | `String` | Signed QR payload |
+| `qrGeneratedAt` | `LocalDateTime` | QR generation timestamp |
+| `scanMode` | `ScanMode` | Token scan mode |
+| `usedAt` | `LocalDateTime` | Meal consumption timestamp |
+
+---
+
 # DTO: `PaymentAdminResponse`
 
 Returned to admin/staff after payment verification actions.
@@ -559,15 +604,56 @@ Returned when viewing payment details.
 | Field Name | Type | Description |
 |------------|------|-------------|
 | `id` | `UUID` | Payment identifier |
+| `studentId` | `UUID` | Student identifier |
 | `hallShortName` | `String` | Hall short name |
 | `mealDate` | `LocalDate` | Meal serving date |
+| `mealTypes` | `List<MealType>` | Selected meal types |
+| `totalAmount` | `Long` | Total submitted amount |
 | `paymentMethod` | `PaymentMethod` | `BKASH` or `NAGAD` |
 | `senderNumber` | `String` | Student wallet number |
-| `receiverNumber` | `String` | Hall/admin payment receiver number |
-| `transactionId` | `String` | Payment transaction identifier |
-| `totalAmount` | `Long` | Total submitted amount |
 | `screenshotUrl` | `String` | Uploaded payment proof |
 | `paymentStatus` | `PaymentStatus` | Current payment state |
 | `rejectionReason` | `String` | Rejection explanation |
+| `verifiedByName` | `String` | Snapshot of verifier name |
 | `verifiedAt` | `LocalDateTime` | Verification timestamp |
 | `submittedAt` | `LocalDateTime` | Submission timestamp |
+
+---
+
+# DTO: `HallMealSummaryResponse`
+
+Returned when viewing hall-level meal summary statistics.
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `id` | `UUID` | Summary identifier |
+| `hallShortName` | `String` | Hall short name |
+| `mealDate` | `LocalDate` | Meal serving date |
+| `mealType` | `MealType` | `LUNCH` or `DINNER` |
+| `mealMenu` | `String` | Meal menu snapshot |
+| `feastNote` | `String` | Optional feast note |
+| `mealPrice` | `Long` | Meal price |
+| `totalTokensSold` | `Long` | Total booked tokens |
+| `totalTokensUsed` | `Long` | Total consumed tokens |
+| `totalTokensUnused` | `Long` | Total unused tokens |
+| `totalRevenue` | `Long` | Total revenue collected |
+| `isFinalized` | `boolean` | Whether summary is finalized |
+| `finalizedAt` | `LocalDateTime` | Finalization timestamp |
+| `createdAt` | `LocalDateTime` | Creation timestamp |
+
+---
+
+# DTO: `StudentMealSummaryResponse`
+
+Returned when viewing student-level meal summary statistics.
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `studentId` | `UUID` | Student identifier |
+| `hallShortName` | `String` | Hall short name |
+| `totalTokensPurchased` | `Long` | Total purchased tokens |
+| `totalTokensUsed` | `Long` | Total consumed tokens |
+| `totalTokensUnused` | `Long` | Total unused tokens |
+| `totalSpent` | `Long` | Total amount paid |
+| `updatedAt` | `LocalDateTime` | Last summary update timestamp |
+

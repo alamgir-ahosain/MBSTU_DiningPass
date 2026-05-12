@@ -79,6 +79,14 @@ public class HallServiceImpl implements HallService {
 
 
 
+    @Override
+    @Transactional(readOnly = true)
+    public Long countHalls(UUID requesterId, Role role) {
+        ensureSuperAdmin(role);
+        long totalActiveHall = hallRepository.countByIsActiveTrue();
+        logger.info("[SUCCESS] Hall count active={}", totalActiveHall);
+        return totalActiveHall;
+    }
 
 
     // Get Hall By ID
@@ -90,7 +98,7 @@ public class HallServiceImpl implements HallService {
 
         // SUPER_ADMIN: retrived any hall by id
         if (role == Role.SUPER_ADMIN) {
-            return mapToResponse(hall);
+            return mapToSuperAdminResponse(hall);
         }
 
         // HALL_ADMIN: retrives only own hall
@@ -199,24 +207,6 @@ public class HallServiceImpl implements HallService {
 
 
 
-    // Soft Delete Hall
-    @Override
-    public void suspendHall(UUID requesterId, Role role, UUID id) {
-
-        ensureSuperAdmin(role);
-        logger.warn("[SUSPEND_HALL] requester={} hallId={}", requesterId, id);
-
-        Hall hall = hallRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Hall not found with id: " + id));
-        if (!hall.isActive()) {
-            logger.warn("Hall {} is already inactive", id);
-            return;
-        }
-
-        hall.setActive(false);
-        hallRepository.save(hall);
-        logger.info("[SUCCESS] Hall suspended id={} name={}", hall.getId(), hall.getFullName());
-    }
-
     @Override
     public void updateHallStatus(UUID requesterId, Role role, UUID id) {
 
@@ -247,7 +237,23 @@ public class HallServiceImpl implements HallService {
                 hall.getNagadNumber(),
                 hall.getHallAdminId(),
                 hall.isActive(),
-                hall.getCreatedAt()
+                hall.getCreatedAt(),
+                null
+        );
+    }
+
+    private HallResponse mapToSuperAdminResponse(Hall hall){
+        return new HallResponse(
+                hall.getId(),
+                hall.getFullName(),
+                hall.getShortName(),
+                hall.getGenderType(),
+                hall.getBkashNumber(),
+                hall.getNagadNumber(),
+                hall.getHallAdminId(),
+                hall.isActive(),
+                hall.getCreatedAt(),
+                hall.getUpdatedAt()
         );
     }
 }

@@ -11,6 +11,8 @@ public interface HallAssociateRepository extends JpaRepository<HallAssociate, UU
 
     boolean existsByEmail(String email);
     boolean existsByHallIdAndRole(UUID hallId, Role role);  // provost uniqueness check
-    List<HallAssociate> findByRole(Role role);
     List<HallAssociate> findByHallId(UUID hallId);
+    long countByRoleAndIsActiveTrue(Role role);
+    long countByHallIdAndRoleAndIsActiveTrue(UUID hallId, Role role);
+    long countByHallIdAndRole(UUID myHall, Role role);
 }

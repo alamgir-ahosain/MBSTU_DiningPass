@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { superAdminAPI } from '../../../services/api';
+import { formatDateTimeParts } from '../../../utils/formatDateTime';
 import '../SuperAdminPages.css';
 
 export const SuperAdminAdminDetails = () => {
@@ -10,6 +11,21 @@ export const SuperAdminAdminDetails = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+
+    const renderDateTime = (value) => {
+        const { date, time } = formatDateTimeParts(value);
+
+        if (date === '-' && time === '-') {
+            return '-';
+        }
+
+        return (
+            <div className="datetime-display">
+                <span>{date}</span>
+                {time && <span>{time}</span>}
+            </div>
+        );
+    };
 
     useEffect(() => {
         const fetchAdmin = async () => {
@@ -82,6 +98,22 @@ export const SuperAdminAdminDetails = () => {
                     </div>
                 ) : admin ? (
                     <div className="detail-grid">
+
+                        <div className="detail-card">
+                            <span className="detail-label">Hall Admin ID</span>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <span className="detail-value">{admin.id}</span>
+                                <button
+                                    type="button"
+                                    className="btn-small btn-copy"
+                                    onClick={async () => {
+                                        try { await navigator.clipboard.writeText(admin.id); alert('Hall Admin ID copied'); }
+                                        catch (e) { alert('Copy failed'); }
+                                    }}
+                                >Copy</button>
+                            </div>
+                        </div>
+
                         <div className="detail-card">
                             <span className="detail-label">Full Name</span>
                             <span className="detail-value">{admin.fullName}</span>
@@ -110,11 +142,11 @@ export const SuperAdminAdminDetails = () => {
                         </div>
                         <div className="detail-card">
                             <span className="detail-label">Created At</span>
-                            <span className="detail-value">{admin.createdAt || '-'}</span>
+                            <div className="detail-value">{renderDateTime(admin.createdAt)}</div>
                         </div>
                         <div className="detail-card">
                             <span className="detail-label">Updated At</span>
-                            <span className="detail-value">{admin.updatedAt || '-'}</span>
+                            <div className="detail-value">{renderDateTime(admin.updatedAt)}</div>
                         </div>
                     </div>
                 ) : (

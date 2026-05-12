@@ -117,6 +117,9 @@ export const hallAPI = {
   activateHall: (id) => {
     return apiClient.patch(`/api/v1/halls/${id}/status`, { reason: 'Hall activated' });
   },
+  getCount: () => {
+    return apiClient.get('/api/v1/halls/count');
+  },
 };
 
 
@@ -140,6 +143,10 @@ export const superAdminAPI = {
 
   getAllAdmins: (filters = {}) => {
     return apiClient.get("/api/v1/admins", { params: filters });
+  },
+
+  getAdminsCount: () => {
+    return apiClient.get('/api/v1/admins/count');
   },
 
   getAdminById: (id) => {

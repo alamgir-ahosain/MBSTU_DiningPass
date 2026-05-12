@@ -16,4 +16,5 @@ public interface HallRepository extends JpaRepository<Hall, UUID> {
     Optional<Hall> findByShortNameAndIsActiveTrue(String shortName);
     List<Hall> findByIsActiveTrue();
     Optional<Hall> findByShortName(String shortName);
+    long countByIsActiveTrue();
 }

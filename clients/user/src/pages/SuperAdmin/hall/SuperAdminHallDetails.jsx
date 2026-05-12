@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { superAdminAPI } from '../../../services/api';
+import { formatDateTimeParts } from '../../../utils/formatDateTime';
 import '../SuperAdminPages.css';
 
 export const SuperAdminHallDetails = () => {
@@ -10,6 +11,21 @@ export const SuperAdminHallDetails = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+
+    const renderDateTime = (value) => {
+        const { date, time } = formatDateTimeParts(value);
+
+        if (date === '-' && time === '-') {
+            return '-';
+        }
+
+        return (
+            <div className="datetime-display">
+                <span>{date}</span>
+                {time && <span>{time}</span>}
+            </div>
+        );
+    };
 
     useEffect(() => {
         const fetchHall = async () => {
@@ -85,40 +101,105 @@ export const SuperAdminHallDetails = () => {
                     </div>
                 ) : hall ? (
                     <div className="detail-grid">
-                        <div className="detail-card">
-                            <span className="detail-label">Full Name</span>
-                            <span className="detail-value">{hall.fullName}</span>
-                        </div>
-                        <div className="detail-card">
-                            <span className="detail-label">Short Name</span>
-                            <span className="detail-value">{hall.shortName}</span>
-                        </div>
-                        <div className="detail-card">
-                            <span className="detail-label">Gender Type</span>
-                            <span className="detail-value">{hall.genderType}</span>
-                        </div>
-                        <div className="detail-card">
-                            <span className="detail-label">Bkash Number</span>
-                            <span className="detail-value">{hall.bkashNumber || '-'}</span>
-                        </div>
-                        <div className="detail-card">
-                            <span className="detail-label">Nagad Number</span>
-                            <span className="detail-value">{hall.nagadNumber || '-'}</span>
-                        </div>
-                        <div className="detail-card">
-                            <span className="detail-label">Hall Admin ID</span>
-                            <span className="detail-value">{hall.hallAdminId || '-'}</span>
-                        </div>
+                        {hall.fullName && (
+                            <div className="detail-card">
+                                <span className="detail-label">Full Name</span>
+                                <span className="detail-value">{hall.fullName}</span>
+                            </div>
+                        )}
+
+                        {hall.shortName && (
+                            <div className="detail-card">
+                                <span className="detail-label">Short Name</span>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <span className="detail-value">{hall.shortName}</span>
+                                    <button
+                                        type="button"
+                                        className="btn-small btn-copy"
+                                        onClick={async () => {
+                                            try { await navigator.clipboard.writeText(hall.shortName); alert('Short name copied'); }
+                                            catch (e) { alert('Copy failed'); }
+                                        }}
+                                    >Copy</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {hall.genderType && (
+                            <div className="detail-card">
+                                <span className="detail-label">Gender Type</span>
+                                <span className="detail-value">{hall.genderType}</span>
+                            </div>
+                        )}
+
+                        {hall.bkashNumber && (
+                            <div className="detail-card">
+                                <span className="detail-label">Bkash Number</span>
+                                <span className="detail-value">{hall.bkashNumber}</span>
+                            </div>
+                        )}
+
+                        {hall.nagadNumber && (
+                            <div className="detail-card">
+                                <span className="detail-label">Nagad Number</span>
+                                <span className="detail-value">{hall.nagadNumber}</span>
+                            </div>
+                        )}
+
+                        {hall.id && (
+                            <div className="detail-card">
+                                <span className="detail-label">Hall ID</span>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <span className="detail-value">{hall.id}</span>
+                                    <button
+                                        type="button"
+                                        className="btn-small btn-copy"
+                                        onClick={async () => {
+                                            try { await navigator.clipboard.writeText(hall.id); alert('Hall ID copied'); }
+                                            catch (e) { alert('Copy failed'); }
+                                        }}
+                                    >Copy</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {hall.hallAdminId && (
+                            <div className="detail-card">
+                                <span className="detail-label">Hall Admin ID</span>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <span className="detail-value">{hall.hallAdminId}</span>
+                                    <button
+                                        type="button"
+                                        className="btn-small btn-copy"
+                                        onClick={async () => {
+                                            try { await navigator.clipboard.writeText(hall.hallAdminId); alert('Hall Admin ID copied'); }
+                                            catch (e) { alert('Copy failed'); }
+                                        }}
+                                    >Copy</button>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="detail-card">
                             <span className="detail-label">Status</span>
                             <span className={`badge ${hall.isActive ? 'badge-active' : 'badge-inactive'}`}>
                                 {hall.isActive ? 'Active' : 'Suspended'}
                             </span>
                         </div>
-                        <div className="detail-card">
-                            <span className="detail-label">Created At</span>
-                            <span className="detail-value">{hall.createdAt || '-'}</span>
-                        </div>
+
+                        {hall.createdAt && (
+                            <div className="detail-card">
+                                <span className="detail-label">Created At</span>
+                                <div className="detail-value">{renderDateTime(hall.createdAt)}</div>
+                            </div>
+                        )}
+
+                        {hall.updatedAt && (
+                            <div className="detail-card">
+                                <span className="detail-label">Updated At</span>
+                                <div className="detail-value">{renderDateTime(hall.updatedAt)}</div>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="empty-state">
