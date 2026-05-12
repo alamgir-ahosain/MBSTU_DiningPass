@@ -74,11 +74,11 @@ Used to update Firebase Cloud Messaging token for push notifications.
 
 ### **SuspendStudentRequest**
 
-Used to suspend a student account with documented reason.
+Used for documenting status-change reasons in legacy/compatibility flows. Current student and hall-associate status endpoints toggle directly and do not require a request body.
 
-| Field    | Type   | Constraints             | Description           |
-| -------- | ------ | ----------------------- | --------------------- |
-| `reason` | String | NOT NULL, Max 255 chars | Reason for suspension |
+| Field    | Type   | Constraints             | Description                  |
+| -------- | ------ | ----------------------- | ---------------------------- |
+| `reason` | String | NOT NULL, Max 255 chars | Reason for status change     |
 
 ---
 

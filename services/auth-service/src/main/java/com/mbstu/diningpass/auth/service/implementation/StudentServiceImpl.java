@@ -21,10 +21,16 @@ import com.mbstu.diningpass.auth.repository.HallAssociateRepository;
 import com.mbstu.diningpass.auth.repository.HallRepository;
 import com.mbstu.diningpass.auth.repository.StudentRepository;
 import com.mbstu.diningpass.auth.service.abstraction.StudentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -193,109 +199,112 @@ public class StudentServiceImpl implements StudentService {
 
 
 
-
-
-
-
     @Override
-    public MessageResponse suspendStudent(UUID requesterId, Role role, UUID targetId, SuspendStudentRequest request) {
+    public MessageResponse suspendStudent(UUID requesterId, Role role, UUID targetId) {
 
-        Student student = studentRepository.findById(targetId).orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + targetId));
+        Student target = studentRepository.findById(targetId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
-        // ================= SUPER ADMIN =================
+        // SUPER_ADMIN — toggle any student account
         if (role == Role.SUPER_ADMIN) {
-            return doSuspendWithFirebase(student, request);
+            return doUpdateStatus(target, !target.isActive());
         }
 
-        // ================= HALL ADMIN =================
+        // HALL_ADMIN — toggle only within own hall
         if (role == Role.HALL_ADMIN) {
-
             HallAssociate requester = hallAssociateRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Requester not found"));
 
-            //  restrict to same hall
-            if (!requester.getHallId().equals(student.getHallId())) {
-                throw new ForbiddenException("Cannot suspend student from another hall");
+            if (!requester.getHallId().equals(target.getHallId())) {
+                throw new AccessDeniedException("Cannot change status outside your hall");
             }
 
-            return doSuspendWithFirebase(student, request);
+            if (target.getRole() == Role.SUPER_ADMIN) {
+                throw new AccessDeniedException("Cannot change status of SUPER_ADMIN");
+            }
+
+            return doUpdateStatus(target, !target.isActive());
         }
 
-        // ================= OTHERS =================
-        throw new ForbiddenException("Not allowed to suspend student");
+        throw new AccessDeniedException("Not allowed to change account status");
     }
 
+    private MessageResponse doUpdateStatus(Student student, boolean activate) {
 
-
-    private MessageResponse doSuspendWithFirebase(Student student, SuspendStudentRequest request) {
-
-        if (!student.isActive()) {
-            logger.warn("Student {} is already inactive", student.getId());
-            return new MessageResponse("Student is already inactive", false);
+        if (student.isActive() == activate) {
+            return new MessageResponse("Already " + (activate ? "active" : "inactive"), false);
         }
 
-        student.setActive(false);
+        student.setActive(activate);
         student.setUpdatedAt(LocalDateTime.now());
 
-        //  Firebase disable (your original logic)
+        logger.info("[{}] target={}", activate ? "ACTIVATE" : "SUSPEND", student.getId());
+
         try {
-            FirebaseAuth.getInstance().updateUser(new UserRecord.UpdateRequest(student.getFirebaseUid()).setDisabled(true));
+            FirebaseAuth.getInstance().updateUser(new UserRecord.UpdateRequest(student.getFirebaseUid()).setDisabled(!activate));
         } catch (FirebaseAuthException e) {
-            logger.warn("Could not disable Firebase account for student {}: {}", student.getId(), e.getMessage());
+            logger.warn("Firebase {} failed: {}", activate ? "enable" : "disable", e.getMessage());
         }
 
         studentRepository.save(student);
-        logger.info("Student suspended: {}, reason: {}", student.getFullName(), request.reason());
-        return new MessageResponse("Student suspended successfully", true);
+        return new MessageResponse(student.getRole() + (activate ? " activated" : " suspended") + " successfully", true);
     }
 
 
-
     @Override
-    public List<StudentProfileAdminResponse> getAllStudents(UUID requesterId, Role role, UUID hallId, boolean activeOnly) {
+    public Page<StudentProfileAdminResponse> getAllStudents(UUID requesterId, Role role, UUID hallId, int page, int size) {
 
-        // ================= SUPER ADMIN =================
-        if (role == Role.SUPER_ADMIN) {
-
-            List<Student> students;
-
-            if (hallId != null) {students = studentRepository.findByHallId(hallId);}
-            else {students = studentRepository.findAll();}
-            if (activeOnly) {students = students.stream().filter(Student::isActive).toList();}
-
-            return students.stream()
-                    .map(this::mapToResponseAdmin)
-                    .toList();
-        }
+        Pageable pageable = PageRequest.of(page, size);
 
         // ================= HALL ADMIN =================
         if (role == Role.HALL_ADMIN) {
 
             HallAssociate requester = hallAssociateRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Requester not found"));
-
             UUID myHallId = requester.getHallId();
 
-            //  prevent accessing other hall
             if (hallId != null && !hallId.equals(myHallId)) {
                 throw new ForbiddenException("Cannot access students from another hall");
             }
+            Hall hall = hallRepository.findById(myHallId).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
 
-            List<Student> students = studentRepository.findByHallId(myHallId);
+            Page<Student> students = studentRepository.findByHallId(myHallId, pageable);
 
-            if (activeOnly) {
-                students = students.stream()
-                        .filter(Student::isActive)
-                        .toList();
+            return students.map(student -> new StudentProfileAdminResponse(
+                    student.getId(),
+                    student.getStudentId(),
+                    student.getFullName(),
+                    student.getEmail(),
+                    hall.getShortName(),
+                    student.getRoomNumber(),
+                    student.getDepartment(),
+                    student.isActive()
+            ));
+        }
+
+        // ================= SUPER ADMIN =================
+        if (role == Role.SUPER_ADMIN) {
+            Page<Student> students;
+            if (hallId != null) {
+                students = studentRepository.findByHallId(hallId, pageable);
+            } else {
+                students = studentRepository.findAll(pageable);
             }
-
-            return students.stream()
-                    .map(this::mapToResponseAdmin)
-                    .toList();
+            return students.map(student -> {
+                Hall hall = hallRepository.findById(student.getHallId()).orElse(null);
+                return new StudentProfileAdminResponse(
+                        student.getId(),
+                        student.getStudentId(),
+                        student.getFullName(),
+                        student.getEmail(),
+                        hall != null ? hall.getShortName() : "N/A",
+                        student.getRoomNumber(),
+                        student.getDepartment(),
+                        student.isActive()
+                );
+            });
         }
 
         // ================= OTHERS =================
         throw new ForbiddenException("Not allowed to view students");
     }
-
 
 
 
@@ -321,25 +330,25 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
-    private StudentProfileAdminResponse mapToResponseAdmin(Student student){
-
-        Hall hall = hallRepository.findById(student.getHallId()).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
-        return new StudentProfileAdminResponse(
-
-                student.getId(),
-                student.getStudentId(),
-                student.getFullName(),
-                student.getEmail(),
-                student.getRole(),
-                hall.getShortName(),
-                student.getRoomNumber(),
-                student.getDepartment(),
-                student.getGender(),
-                student.isActive(),
-                student.getCreatedAt(),
-                student.getUpdatedAt()
-        );
-    }
+//    private StudentProfileAdminResponse mapToResponseAdmin(Student student){
+//
+//        Hall hall = hallRepository.findById(student.getHallId()).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+//        return new StudentProfileAdminResponse(
+//
+//                student.getId(),
+//                student.getStudentId(),
+//                student.getFullName(),
+//                student.getEmail(),
+//                student.getRole(),
+//                hall.getShortName(),
+//                student.getRoomNumber(),
+//                student.getDepartment(),
+//                student.getGender(),
+//                student.isActive(),
+//                student.getCreatedAt(),
+//                student.getUpdatedAt()
+//        );
+//    }
 
 
 

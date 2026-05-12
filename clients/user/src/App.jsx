@@ -17,10 +17,14 @@ import { ViewProfile } from './pages/Student/ViewProfile';
 import { ChangePassword } from './pages/Student/ChangePassword';
 
 // Hall Admin Pages
-import { HallAdminDashboard } from './pages/HallAdmin/HallAdminDashboard';
-import { CreateHallStaff } from './pages/HallAdmin/CreateHallStaff';
-import { HallAdminStaffList } from './pages/HallAdmin/HallAdminStaffList';
-import { HallAdminStudents } from './pages/HallAdmin/HallAdminStudents';
+import { HallAdminDashboard } from './pages/HallAdmin/dashboard/HallAdminDashboard';
+import { HallAdminStaff } from './pages/HallAdmin/staff/HallAdminStaff';
+import { HallAdminStudents } from './pages/HallAdmin/student/HallAdminStudents';
+import { HallAdminMealConfigs } from './pages/HallAdmin/meal/HallAdminMealConfigs';
+import { HallAdminPayments } from './pages/HallAdmin/payment/HallAdminPayments';
+import { HallAdminProfile } from './pages/HallAdmin/my/HallAdminProfile';
+import { HallAdminChangePassword } from './pages/HallAdmin/my/HallAdminChangePassword';
+import { HallAdminForgotPassword } from './pages/HallAdmin/my/HallAdminForgotPassword';
 
 // Hall Staff Pages
 import { HallStaffDashboard } from './pages/HallStaff/HallStaffDashboard';
@@ -132,18 +136,10 @@ function App() {
                 }
               />
               <Route
-                path="/hallAdmin/create-staff"
+                path="/hallAdmin/staff"
                 element={
                   <ProtectedRoute requiredRole="HALL_ADMIN">
-                    <CreateHallStaff />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/hallAdmin/staff-list"
-                element={
-                  <ProtectedRoute requiredRole="HALL_ADMIN">
-                    <HallAdminStaffList />
+                    <HallAdminStaff />
                   </ProtectedRoute>
                 }
               />
@@ -152,6 +148,46 @@ function App() {
                 element={
                   <ProtectedRoute requiredRole="HALL_ADMIN">
                     <HallAdminStudents />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hallAdmin/meals"
+                element={
+                  <ProtectedRoute requiredRole="HALL_ADMIN">
+                    <HallAdminMealConfigs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hallAdmin/payments"
+                element={
+                  <ProtectedRoute requiredRole="HALL_ADMIN">
+                    <HallAdminPayments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hallAdmin/profile"
+                element={
+                  <ProtectedRoute requiredRole="HALL_ADMIN">
+                    <HallAdminProfile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hallAdmin/change-password"
+                element={
+                  <ProtectedRoute requiredRole="HALL_ADMIN">
+                    <HallAdminChangePassword />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hallAdmin/forgot-password"
+                element={
+                  <ProtectedRoute requiredRole="HALL_ADMIN">
+                    <HallAdminForgotPassword />
                   </ProtectedRoute>
                 }
               />

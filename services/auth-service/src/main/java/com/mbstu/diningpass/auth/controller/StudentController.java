@@ -12,6 +12,7 @@ import com.mbstu.diningpass.auth.service.abstraction.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -80,16 +81,20 @@ public class StudentController {
     // GET ALL  STUDENT
     // ==============================
     @GetMapping
-    public ResponseEntity<List<StudentProfileAdminResponse>> getAllStudents(
+    public ResponseEntity<Page<StudentProfileAdminResponse>> getAllStudents(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String roleStr,
             @RequestParam(required = false) UUID hallId,
-            @RequestParam(defaultValue = "false") boolean activeOnly) {
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "20") int size) {
 
         Role role = Role.valueOf(roleStr);
-        logger.info("[GET_ALL_STUDENTS] requester={} role={} hallId={} activeOnly={}", requesterId, role, hallId, activeOnly);
-        return ResponseEntity.ok(studentService.getAllStudents(requesterId, role, hallId, activeOnly));
+        logger.info("[GET_ALL_STUDENTS] requester={} role={} hallId={}", requesterId, role, hallId);
+
+        return ResponseEntity.ok(studentService.getAllStudents(requesterId, role, hallId,page,size));
     }
+
+
 
     // ==============================
     // SUSPEND STUDENT
@@ -99,13 +104,12 @@ public class StudentController {
     public ResponseEntity<MessageResponse> suspendStudent(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String roleStr,
-            @PathVariable UUID id,
-            @Valid @RequestBody SuspendStudentRequest request) {
+            @PathVariable UUID id) {
 
         Role role = Role.valueOf(roleStr);
         logger.warn("[SUSPEND_STUDENT] requester={} role={} target={}", requesterId, role, id);
 
-        return ResponseEntity.ok(studentService.suspendStudent(requesterId, role, id, request));
+        return ResponseEntity.ok(studentService.suspendStudent(requesterId, role, id));
     }
 
 

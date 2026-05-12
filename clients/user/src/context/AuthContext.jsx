@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../firebase';
 import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import axios from 'axios';
-import { setAuthState, updateDatabaseRole, updateUserId, clearAuthState } from '../services/authState';
+import { updateDatabaseRole, updateUserId, clearAuthState } from '../services/authState';
 
 const AuthContext = createContext();
 
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const API = import.meta.env.VITE_API_BASE_URL;
+    const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
     // Helper to get ID token
     const getIdToken = async () => {
@@ -111,7 +111,7 @@ export const AuthProvider = ({ children }) => {
 
     // Listen to auth state changes
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        return onAuthStateChanged(auth, async (firebaseUser) => {
             try {
                 if (firebaseUser) {
                     setUser(firebaseUser);
@@ -129,8 +129,6 @@ export const AuthProvider = ({ children }) => {
                 setLoading(false);
             }
         });
-
-        return unsubscribe;
     }, []);
 
     // Refresh user data
