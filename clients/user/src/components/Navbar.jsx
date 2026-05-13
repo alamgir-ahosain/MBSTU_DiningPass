@@ -1,15 +1,24 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 export const Navbar = () => {
     const { isAuthenticated, role, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    useEffect(() => {
+        setMenuOpen(false);
+    }, [location.pathname]);
 
     const handleLogout = async () => {
         await logout();
         navigate('/login');
     };
+
+    const closeMenu = () => setMenuOpen(false);
 
     return (
         <nav className="navbar">
@@ -19,6 +28,20 @@ export const Navbar = () => {
                 </Link>
 
                 <div className="navbar-menu">
+                    {isAuthenticated && (
+                        <button
+                            type="button"
+                            className="menu-toggle"
+                            onClick={() => setMenuOpen((open) => !open)}
+                            aria-label="Toggle navigation menu"
+                            aria-expanded={menuOpen}
+                        >
+                            <span />
+                            <span />
+                            <span />
+                        </button>
+                    )}
+
                     {!isAuthenticated ? (
                         <div className="navbar-links">
                             <Link to="/" className="nav-link">
@@ -32,13 +55,19 @@ export const Navbar = () => {
                             </Link>
                         </div>
                     ) : (
-                        <div className="navbar-links">
-                            <span className="nav-role">
-                                Role: <strong>{role}</strong>
-                            </span>
-                            <Link to="/dashboard" className="nav-link">
-                                Dashboard
-                            </Link>
+                        <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
+                            {role === 'SUPER_ADMIN' ? (
+                                <>
+                                    <Link to="/superAdmin/dashboard" className="nav-link" onClick={closeMenu}>Dashboard</Link>
+                                    <Link to="/superAdmin/halls" className="nav-link" onClick={closeMenu}>Manage Halls</Link>
+                                    <Link to="/superAdmin/admins" className="nav-link" onClick={closeMenu}>Manage Hall Admins</Link>
+                                    <Link to="/superAdmin/profile" className="nav-link" onClick={closeMenu}>My Profile</Link>
+                                </>
+                            ) : (
+                                <Link to="/dashboard" className="nav-link" onClick={closeMenu}>
+                                    Dashboard
+                                </Link>
+                            )}
                             <button onClick={handleLogout} className="nav-link logout-btn">
                                 Logout
                             </button>

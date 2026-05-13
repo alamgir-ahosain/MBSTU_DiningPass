@@ -176,9 +176,14 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentProfileResponse getMyProfile(UUID requesterId, Role role) {
 
-        if (role != Role.STUDENT) {
-            throw new ForbiddenException("Only students can access their profile");
-        }
+//        if (role != Role.STUDENT) {
+//            if (role==Role.HALL_STAFF){
+//                Student student = studentRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+//                Hall hall = hallRepository.findById(student.getHallId()).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
+//                return mapToResponse(student,hall);
+//            }
+//            throw new ForbiddenException("Only students can access their profile");
+//        }
 
         Student student = studentRepository.findById(requesterId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         Hall hall = hallRepository.findById(student.getHallId()).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));

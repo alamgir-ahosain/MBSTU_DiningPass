@@ -84,6 +84,17 @@ public class HallController {
         return ResponseEntity.ok(hallService.getHallById(requesterId, role, id));
     }
 
+    // Count All Hall
+    @GetMapping("/count")
+    public ResponseEntity<Long> countHalls(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader("X-User-Role") Role role) {
+
+        logger.info("[COUNT_HALLS] user={} role={}", userId, role);
+        return ResponseEntity.ok(hallService.countHalls(userId, role));
+    }
+
+
     // ==============================
     // GET BY SHORT NAME
     // ==============================
@@ -103,15 +114,18 @@ public class HallController {
     // SUSPEND HALL (SUPER ADMIN ONLY)
     // ==============================
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Void> suspendHall(
+    public ResponseEntity<Void> updateHallStatus(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String requesterRoleStr,
             @PathVariable UUID id) {
 
         Role role = Role.valueOf(requesterRoleStr);
-        logger.warn("[SUSPEND_HALL] requester={} role={} target={}", requesterId, role, id);
+        logger.info("[SUSPEND_HALL] requester={} role={} hallId={}", requesterId, role, id);
 
-        hallService.suspendHall(requesterId, role, id);
+        hallService.updateHallStatus(requesterId, role, id);
         return ResponseEntity.noContent().build();
+
     }
+
+
 }

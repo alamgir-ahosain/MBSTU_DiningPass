@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { hallAPI } from '../../services/api';
-import './SuperAdminPages.css';
+import { hallAPI } from '../../../services/api';
+import '../SuperAdminPages.css';
 
 export const SuperAdminHalls = () => {
     const [halls, setHalls] = useState([]);
@@ -27,17 +27,6 @@ export const SuperAdminHalls = () => {
         fetchHalls();
     }, []);
 
-    const handleSuspend = async (hallId) => {
-        if (window.confirm('Are you sure you want to suspend this hall?')) {
-            try {
-                await hallAPI.suspendHall(hallId);
-                setHalls(halls.map(h => h.id === hallId ? { ...h, isActive: false } : h));
-            } catch (err) {
-                alert('Failed to suspend hall: ' + (err.response?.data?.message || err.message));
-            }
-        }
-    };
-
     return (
         <div className="page-wrapper">
             <Link to="/superAdmin/dashboard" className="back-link">← Back to Dashboard</Link>
@@ -46,7 +35,7 @@ export const SuperAdminHalls = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <h1 className="page-title" style={{ margin: 0 }}>All Halls</h1>
                     <Link to="/superAdmin/create-hall" className="btn btn-primary">
-                        ➕ Create Hall
+                         Create Hall
                     </Link>
                 </div>
 
@@ -69,8 +58,6 @@ export const SuperAdminHalls = () => {
                                     <th>Full Name</th>
                                     <th>Short Name</th>
                                     <th>Gender Type</th>
-                                    <th>Bkash</th>
-                                    <th>Nagad</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -81,24 +68,14 @@ export const SuperAdminHalls = () => {
                                         <td>{hall.fullName}</td>
                                         <td><strong>{hall.shortName}</strong></td>
                                         <td>{hall.genderType}</td>
-                                        <td>{hall.bkashNumber || '-'}</td>
-                                        <td>{hall.nagadNumber || '-'}</td>
                                         <td>
                                             <span className={`badge ${hall.isActive ? 'badge-active' : 'badge-inactive'}`}>
-                                                {hall.isActive ? 'Active' : 'Inactive'}
+                                                {hall.isActive ? 'Active' : 'Suspended'}
                                             </span>
                                         </td>
                                         <td>
                                             <div className="action-buttons">
-                                                <Link to={`/superAdmin/halls/${hall.id}`} className="btn-small btn-view">View</Link>
-                                                {hall.isActive && (
-                                                    <button
-                                                        className="btn-small btn-suspend"
-                                                        onClick={() => handleSuspend(hall.id)}
-                                                    >
-                                                        Suspend
-                                                    </button>
-                                                )}
+                                                <Link to={`/superAdmin/halls/${hall.id}`} className="btn-small btn-view">View Hall</Link>
                                             </div>
                                         </td>
                                     </tr>

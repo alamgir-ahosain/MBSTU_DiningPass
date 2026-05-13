@@ -3,11 +3,9 @@ package com.mbstu.diningpass.auth.controller;
 import com.mbstu.diningpass.auth.dto.request.hallassociate.HallAssociateRegistrationRequest;
 import com.mbstu.diningpass.auth.dto.request.hallassociate.UpdateHallAssociateProfileRequest;
 import com.mbstu.diningpass.auth.dto.request.student.SuspendStudentRequest;
-import com.mbstu.diningpass.auth.dto.request.student.UpdateStudentProfileRequest;
 import com.mbstu.diningpass.auth.dto.response.MessageResponse;
 import com.mbstu.diningpass.auth.dto.response.hallassociate.HallAssociateAdminResponse;
 import com.mbstu.diningpass.auth.dto.response.hallassociate.HallAssociateProfileResponse;
-import com.mbstu.diningpass.auth.dto.response.student.StudentProfileResponse;
 import com.mbstu.diningpass.auth.enums.Role;
 import com.mbstu.diningpass.auth.service.abstraction.HallAssociateService;
 import jakarta.validation.Valid;
@@ -19,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -76,7 +75,7 @@ public class HallAssociateController {
     // ==============================
 
     @GetMapping("/me")
-    public ResponseEntity<HallAssociateProfileResponse> getById(
+    public ResponseEntity<HallAssociateProfileResponse> getHallAdminById(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String requesterRoleStr) {
 
@@ -86,6 +85,18 @@ public class HallAssociateController {
         return ResponseEntity.ok(hallAssociateService.getMyProfile(requesterId, role ));
     }
 
+    // only for super admin
+    @GetMapping("/{id}")
+    public ResponseEntity<HallAssociateAdminResponse> getById(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") String requesterRoleStr,
+            @PathVariable UUID id) {
+
+        Role role = Role.valueOf(requesterRoleStr);
+        logger.info("[GET_BY_ID] requester={} role={} target={}", requesterId, role, id);
+
+        return ResponseEntity.ok(hallAssociateService.getById(requesterId, role, id));
+    }
 
     // ==============================
     // UPDATE MY PROFILE
@@ -102,6 +113,14 @@ public class HallAssociateController {
         return ResponseEntity.ok(hallAssociateService.updateMyProfile(userId, role, req));
     }
 
+    // HallAssociateController
+    @GetMapping("/count")
+    public ResponseEntity<Map<String, Long>> countAccounts(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestHeader("X-User-Role") Role role) {
+        logger.info("[COUNT_ACCOUNTS] user={} role={}", userId, role);
+        return ResponseEntity.ok(hallAssociateService.countAccounts(userId, role));
+    }
 
 
     // ==============================
@@ -112,13 +131,12 @@ public class HallAssociateController {
     public ResponseEntity<MessageResponse> suspendAccount(
             @RequestHeader("X-User-Id") UUID requesterId,
             @RequestHeader("X-User-Role") String requesterRoleStr,
-            @PathVariable UUID id,
-            @Valid @RequestBody SuspendStudentRequest request) {
+            @PathVariable UUID id) {
 
         Role role = Role.valueOf(requesterRoleStr);
         logger.warn("[SUSPEND_REQUEST] requester={} role={} target={}", requesterId, role, id);
 
-        return ResponseEntity.ok(hallAssociateService.suspend(requesterId, role, id, request));
+        return ResponseEntity.ok(hallAssociateService.updateStatus(requesterId, role, id));
     }
 
 

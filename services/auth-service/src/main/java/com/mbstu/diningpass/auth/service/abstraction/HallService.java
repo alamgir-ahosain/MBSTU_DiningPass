@@ -14,6 +14,6 @@ public interface HallService {
     List<HallResponse> getAllHalls(UUID requesterId, Role role, boolean activeOnly);
     HallResponse getHallById(UUID requesterId, Role role, UUID id);
     HallResponse getHallByShortName(UUID requesterId, Role role, String shortName);
-    void suspendHall(UUID requesterId, Role role, UUID id);
-
+    void updateHallStatus(UUID requesterId, Role role, UUID id) ;
+    Long countHalls(UUID requesterId, Role role);
 }
