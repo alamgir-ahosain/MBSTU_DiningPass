@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
-import { auth } from '../../firebase';
-import './StudentPages.css';
+import { Link, useNavigate } from 'react-router-dom';
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
+import { auth } from '../../../firebase';
+import '../HallStaffPages.css';
 
-export const ChangePassword = () => {
+export const HallStaffChangePassword = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         currentPassword: '',
         newPassword: '',
@@ -13,66 +14,46 @@ export const ChangePassword = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
         setError('');
         setSuccess('');
 
-        // Validation
         if (formData.newPassword !== formData.confirmPassword) {
-            setError('New passwords do not match');
+            setError('New password and confirm password do not match.');
             return;
         }
-
         if (formData.newPassword.length < 6) {
-            setError('New password must be at least 6 characters');
-            return;
-        }
-
-        if (formData.currentPassword === formData.newPassword) {
-            setError('New password must be different from current password');
+            setError('New password must be at least 6 characters.');
             return;
         }
 
         setLoading(true);
-
         try {
             const user = auth.currentUser;
-            if (!user) {
-                setError('You must be logged in to change your password');
+            if (!user?.email) {
+                setError('No authenticated user found. Please login again.');
                 return;
             }
 
-            // Reauthenticate with current password
             const credential = EmailAuthProvider.credential(user.email, formData.currentPassword);
             await reauthenticateWithCredential(user, credential);
-
-            // Update password
             await updatePassword(user, formData.newPassword);
 
-            setSuccess('Password changed successfully! Redirecting...');
-            setTimeout(() => {
-                navigate('/dashboard');
-            }, 2000);
+            setSuccess('Password changed successfully. Redirecting to profile...');
+            setTimeout(() => navigate('/hallStaff/profile'), 1500);
         } catch (err) {
-            console.error('Change password error:', err);
-
+            console.error('Failed to change password', err);
             if (err.code === 'auth/wrong-password') {
-                setError('Current password is incorrect');
-            } else if (err.code === 'auth/weak-password') {
-                setError('New password is too weak');
+                setError('Current password is incorrect.');
             } else {
-                setError(err.message || 'Failed to change password');
+                setError(err.message || 'Failed to change password.');
             }
         } finally {
             setLoading(false);
@@ -81,7 +62,7 @@ export const ChangePassword = () => {
 
     return (
         <div className="page-wrapper">
-            <Link to="/dashboard" className="back-link">← Back to Dashboard</Link>
+            <Link to="/hallStaff/profile" className="back-link">← Back to My Profile</Link>
 
             <div className="card">
                 <h1 className="page-title">Change Password</h1>
@@ -99,11 +80,8 @@ export const ChangePassword = () => {
                             value={formData.currentPassword}
                             onChange={handleChange}
                             required
-                            placeholder="Enter your current password"
-                            disabled={loading}
                         />
                     </div>
-
                     <div className="form-group">
                         <label htmlFor="newPassword">New Password</label>
                         <input
@@ -113,11 +91,9 @@ export const ChangePassword = () => {
                             value={formData.newPassword}
                             onChange={handleChange}
                             required
-                            placeholder="Enter your new password (min 6 characters)"
-                            disabled={loading}
+                            minLength={6}
                         />
                     </div>
-
                     <div className="form-group">
                         <label htmlFor="confirmPassword">Confirm New Password</label>
                         <input
@@ -127,21 +103,14 @@ export const ChangePassword = () => {
                             value={formData.confirmPassword}
                             onChange={handleChange}
                             required
-                            placeholder="Confirm your new password"
-                            disabled={loading}
+                            minLength={6}
                         />
                     </div>
-
                     <div className="button-group">
                         <button type="submit" className="btn btn-primary" disabled={loading}>
                             {loading ? 'Updating...' : 'Update Password'}
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => navigate('/dashboard')}
-                            className="btn btn-cancel"
-                            disabled={loading}
-                        >
+                        <button type="button" className="btn btn-cancel" onClick={() => navigate('/hallStaff/profile')}>
                             Cancel
                         </button>
                     </div>
@@ -150,3 +119,4 @@ export const ChangePassword = () => {
         </div>
     );
 };
+

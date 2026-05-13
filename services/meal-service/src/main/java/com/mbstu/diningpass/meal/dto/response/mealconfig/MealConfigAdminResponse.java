@@ -17,6 +17,9 @@ public record MealConfigAdminResponse(
         LocalTime tokenExpires,
         boolean   isActive,
         String    feastNote,
+        Long      totalTokensSold,
+        Long      totalTokensUsed,
+        Long      totalTokenPending,
         boolean   isBookingOpen,    // computed: now < cutTokenBefore && mealDate >= today
         boolean   isTokenValid,      // computed: now < tokenExpires && mealDate >= today
         String    createdByName,    // snapshot — who created this config

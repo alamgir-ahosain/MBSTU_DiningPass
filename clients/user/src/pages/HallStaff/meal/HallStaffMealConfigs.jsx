@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { hallAdminAPI } from '../../../services/api';
-import '../HallAdminPages.css';
+import { hallStaffAPI } from '../../../services/api';
+import '../HallStaffPages.css';
 
 const getItems = (payload) => {
     if (Array.isArray(payload)) return payload;
@@ -19,7 +19,7 @@ const createDefaultForm = () => ({
     feastNote: '',
 });
 
-export const HallAdminMealConfigs = () => {
+export const HallStaffMealConfigs = () => {
     const [configs, setConfigs] = useState([]);
     const [createForm, setCreateForm] = useState(createDefaultForm());
     const [editingId, setEditingId] = useState('');
@@ -45,7 +45,7 @@ export const HallAdminMealConfigs = () => {
         setLoading(true);
         setError('');
         try {
-            const response = await hallAdminAPI.getMealConfigs();
+            const response = await hallStaffAPI.getMealConfigs();
             setConfigs(getItems(response.data));
         } catch (err) {
             console.error('Failed to load meal configs', err);
@@ -75,7 +75,7 @@ export const HallAdminMealConfigs = () => {
         setError('');
         setSuccess('');
         try {
-            await hallAdminAPI.createMealConfig({
+            await hallStaffAPI.createMealConfig({
                 ...createForm,
                 mealPrice: Number(createForm.mealPrice),
             });
@@ -111,7 +111,7 @@ export const HallAdminMealConfigs = () => {
         setSuccess('');
 
         try {
-            await hallAdminAPI.updateMealConfig(editingId, {
+            await hallStaffAPI.updateMealConfig(editingId, {
                 ...updateForm,
                 mealPrice: Number(updateForm.mealPrice),
             });
@@ -128,7 +128,7 @@ export const HallAdminMealConfigs = () => {
 
     return (
         <div className="page-wrapper">
-            <Link to="/hallAdmin/dashboard" className="back-link">← Back to Dashboard</Link>
+            <Link to="/hallStaff/dashboard" className="back-link">← Back to Dashboard</Link>
 
             <div className="card" style={{ marginBottom: '1rem' }}>
                 <h2 style={{ marginTop: 0, marginBottom: '1rem' }}>All Meal Configs</h2>
@@ -278,4 +278,5 @@ export const HallAdminMealConfigs = () => {
         </div>
     );
 };
+
 

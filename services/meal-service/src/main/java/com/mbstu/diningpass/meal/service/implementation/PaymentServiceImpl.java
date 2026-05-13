@@ -91,6 +91,9 @@ public class PaymentServiceImpl implements PaymentService {
                     )
                     .orElseThrow(() -> new ResourceNotFoundException("Meal config not found"));
 
+            mealConfig.setTotalSold(mealConfig.getTotalSold() + 1);
+            mealConfigRepository.save(mealConfig);
+
             MealToken token = MealToken.builder()
                     .paymentId(payment.getId())
                     .studentId(payment.getStudentId())

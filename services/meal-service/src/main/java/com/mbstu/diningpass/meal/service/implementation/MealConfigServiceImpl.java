@@ -279,6 +279,7 @@ public class MealConfigServiceImpl implements MealConfigService {
     }
 
     private MealConfigAdminResponse mapToResponse(MealConfig config) {
+        Long totalTokenPending= config.getTotalSold() - config.getTotalUsed();
         return new MealConfigAdminResponse(
                 config.getId(),
                 config.getHallShortName(),
@@ -290,6 +291,9 @@ public class MealConfigServiceImpl implements MealConfigService {
                 config.getTokenExpires(),
                 config.isActive(),
                 config.getFeastNote(),
+                config.getTotalSold(),
+                config.getTotalUsed(),
+                totalTokenPending,
                 computeIsBookingOpen(config),
                 computeIsTokenValid(config),     // bonus field for admin UI to show if tokens are still valid
                 config.getCreatedByName(),

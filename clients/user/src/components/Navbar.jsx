@@ -72,6 +72,13 @@ export const Navbar = () => {
                                     <Link to="/hallAdmin/payments" className="nav-link" onClick={closeMenu}>Payments</Link>
                                     <Link to="/hallAdmin/profile" className="nav-link" onClick={closeMenu}>My Profile</Link>
                                 </>
+                            ) : role === 'HALL_STAFF' ? (
+                                <>
+                                    <Link to="/hallStaff/dashboard" className="nav-link" onClick={closeMenu}>Dashboard</Link>
+                                    <Link to="/hallStaff/payments" className="nav-link" onClick={closeMenu}>Payments</Link>
+                                    <Link to="/hallStaff/meals" className="nav-link" onClick={closeMenu}>Meals</Link>
+                                    <Link to="/hallStaff/profile" className="nav-link" onClick={closeMenu}>My Profile</Link>
+                                </>
                             ) : (
                                 <Link to="/dashboard" className="nav-link" onClick={closeMenu}>
                                     Dashboard
