@@ -56,6 +56,14 @@ public class MealConfig {
     @Column(name = "feast_note", length = 100)
     private String feastNote; // e.g. "Eid Special"
 
+    @Builder.Default
+    @Column(name = "total_sold", nullable = false)
+    private Long totalSold = 0L; // increments when payment is APPROVED
+
+    @Builder.Default
+    @Column(name = "total_used", nullable = false)
+    private Long totalUsed = 0L; // increments when QR is scanned (USED)
+
 
 
     // Stored as plain UUIDs — Admin entity lives in auth-service

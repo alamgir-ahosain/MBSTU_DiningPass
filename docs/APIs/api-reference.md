@@ -7,12 +7,12 @@
 **Base path:** `/api/v1/admins`
 
 | REST Method | URL Path       | Headers (Auth)             | Role Access                         | Description                                                                    |
-|-------------|----------------| -------------------------- |-------------------------------------|--------------------------------------------------------------------------------|
+|-------------|----------------|----------------------------|-------------------------------------|--------------------------------------------------------------------------------|
 | POST        | `/`            | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN             | Create account. SUPER_ADMIN can create any role, HALL_ADMIN → only HALL_STAFF. |
 | GET         | `/`            | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN, HALL_STAFF | Get accounts (filter: `role`, `hallId`). Access scope depends on role.         |
 | GET         | `/me`          | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN, HALL_STAFF | Get own profile only.                                                          |
 | PUT         | `/me`          | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF              | Update own profile only.                                                       |
-| PATCH       | `/{id}/status` | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN             | Suspend account. HALL_ADMIN limited to own hall.                               |
+| PATCH       | `/{id}/status` | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN             | Toggle account status (suspend/activate). HALL_ADMIN limited to own hall.     |
 | GET         | `/count`       | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF              | Get all active hall staff and hall_admin(SUPER_ADMIN) ,HALL_ADMIN find all.    |
 
 ---
@@ -21,13 +21,13 @@
 
 **Base path:** `/api/v1/students`
 
-| REST Method | URL Path       | Headers (Auth)             | Role Access             | Description                                                  |
-| ----------- | -------------- | -------------------------- | ----------------------- | ------------------------------------------------------------ |
-| POST        | `/`            | None                       | PUBLIC                  | Register new student.                                        |
-| GET         | `/me`          | `X-User-Id`, `X-User-Role` | STUDENT                 | Get own profile only.                                        |
-| PUT         | `/me`          | `X-User-Id`, `X-User-Role` | STUDENT                 | Update own profile only.                                     |
-| GET         | `/`            | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN | Get students. SUPER_ADMIN = all, HALL_ADMIN = only own hall. |
-| PATCH       | `/{id}/status` | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN | Suspend student. HALL_ADMIN restricted to **own hall only**. |
+| REST Method | URL Path       | Headers (Auth)             | Role Access             | Description                                                                 |
+| ----------- | -------------- | -------------------------- | ----------------------- | --------------------------------------------------------------------------- |
+| POST        | `/`            | None                       | PUBLIC                  | Register new student.                                                       |
+| GET         | `/me`          | `X-User-Id`, `X-User-Role` | STUDENT                 | Get own profile only.                                                       |
+| PUT         | `/me`          | `X-User-Id`, `X-User-Role` | STUDENT                 | Update own profile only.                                                    |
+| GET         | `/`            | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN | Get students as a paged response (`page`, `size`). SUPER_ADMIN = all, HALL_ADMIN = only own hall. |
+| PATCH       | `/{id}/status` | `X-User-Id`, `X-User-Role` | SUPER_ADMIN, HALL_ADMIN | Toggle student status (suspend/activate). HALL_ADMIN restricted to **own hall only**. |
 
 ---
 **Errors**

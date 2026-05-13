@@ -2,7 +2,7 @@ import axios from "axios";
 import { auth } from "../firebase";
 import { getAuthState } from "./authState";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_BASE_URL ;
 
 // Helper to decode JWT and extract custom claims
 const getCustomClaimsFromToken = (token) => {

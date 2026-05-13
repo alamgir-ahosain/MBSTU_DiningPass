@@ -49,32 +49,62 @@ export const studentAPI = {
 
 // Hall Admin API calls
 export const hallAdminAPI = {
-
-  getProfile: () => {
-    return apiClient.get(`/api/v1/admins/me`);
+  getMyProfile: () => {
+    return apiClient.get("/api/v1/admins/me");
   },
 
-  updateProfile: (adminData) => {
-    return apiClient().put(`/api/v1/admins/me`, adminData);
+  updateMyProfile: (adminData) => {
+    return apiClient.put("/api/v1/admins/me", adminData);
   },
 
   createHallStaff: (staffData) => {
-    return apiClient.post("/api/v1/staff", staffData);
+    return apiClient.post("/api/v1/admins", staffData);
   },
 
   getHallStaff: (filters = {}) => {
     return apiClient.get("/api/v1/admins", { params: filters });
   },
 
-  updateHallStaffStatus: (id, status) => {
-    return apiClient.patch(`/api/v1/admins/${id}/status`, {
-      reason: status === "SUSPENDED" ? "Hall staff suspended" : "Hall staff activated",
-    });
+  toggleHallStaffStatus: (id) => {
+    return apiClient.patch(`/api/v1/admins/${id}/status`);
   },
 
-  getById: (id) => {
-    return apiClient.get(`/api/v1/admins/${id}`);
+  getStudents: (filters = {}) => {
+    return apiClient.get("/api/v1/students", { params: filters });
   },
+
+  suspendStudent: (id) => {
+    return apiClient.patch(`/api/v1/students/${id}/status`);
+  },
+
+  createMealConfig: (payload) => {
+    return apiClient.post("/api/v1/meal-configs", payload);
+  },
+
+  getMealConfigs: (filters = {}) => {
+    return apiClient.get("/api/v1/meal-configs", { params: filters });
+  },
+
+  updateMealConfig: (configId, payload) => {
+    return apiClient.put(`/api/v1/meal-configs/${configId}`, payload);
+  },
+
+  getPayments: (filters = {}) => {
+    return apiClient.get("/api/v1/payments", { params: filters });
+  },
+
+  approvePayment: (id) => {
+    return apiClient.patch(`/api/v1/payments/${id}/approve`);
+  },
+
+  // Backward-compatible aliases
+  getProfile: () => apiClient.get("/api/v1/admins/me"),
+  updateProfile: (adminData) => apiClient.put("/api/v1/admins/me", adminData),
+  updateHallStaffStatus: (id, status) =>
+    apiClient.patch(`/api/v1/admins/${id}/status`, {
+      reason: status === "SUSPENDED" ? "Hall staff account suspended" : "Hall staff account activated",
+    }),
+  getById: (id) => apiClient.get(`/api/v1/admins/${id}`),
 
 };
 
@@ -189,15 +219,39 @@ export const superAdminAPI = {
 
 // Hall Staff API calls
 export const hallStaffAPI = {
-  getProfile: (staffId) => {
-    return apiClient.get(`/api/v1/staff/me`);
+  getMyProfile: () => {
+    return apiClient.get("/api/v1/admins/me");
   },
 
-  updateProfile: (staffData) => {
-    return apiClient().put(`/api/v1/staff/me`, staffData);
+  updateMyProfile: (staffData) => {
+    return apiClient.put("/api/v1/admins/me", staffData);
   },
 
   getStudents: (filters = {}) => {
     return apiClient.get("/api/v1/students", { params: filters });
   },
+
+  getMealConfigs: (filters = {}) => {
+    return apiClient.get("/api/v1/meal-configs", { params: filters });
+  },
+
+  createMealConfig: (payload) => {
+    return apiClient.post("/api/v1/meal-configs", payload);
+  },
+
+  updateMealConfig: (configId, payload) => {
+    return apiClient.put(`/api/v1/meal-configs/${configId}`, payload);
+  },
+
+  getPayments: (filters = {}) => {
+    return apiClient.get("/api/v1/payments", { params: filters });
+  },
+
+  approvePayment: (id) => {
+    return apiClient.patch(`/api/v1/payments/${id}/approve`);
+  },
+
+  // Backward-compatible aliases
+  getProfile: () => apiClient.get("/api/v1/admins/me"),
+  updateProfile: (staffData) => apiClient.put("/api/v1/admins/me", staffData),
 };

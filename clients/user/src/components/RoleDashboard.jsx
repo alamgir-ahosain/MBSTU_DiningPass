@@ -1,8 +1,8 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { StudentDashboard } from '../pages/Student/StudentDashboard';
-import { HallAdminDashboard } from '../pages/HallAdmin/HallAdminDashboard';
-import { HallStaffDashboard } from '../pages/HallStaff/HallStaffDashboard';
+import { HallAdminDashboard } from '../pages/HallAdmin/dashboard/HallAdminDashboard';
+import { HallStaffDashboard } from '../pages/HallStaff/dashboard/HallStaffDashboard';
 import { SuperAdminDashboard } from '../pages/SuperAdmin/SuperAdminDashboard';
 
 export const RoleDashboard = () => {

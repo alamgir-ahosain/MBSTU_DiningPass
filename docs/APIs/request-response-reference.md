@@ -100,12 +100,7 @@ This document follows the same service order as `api-reference.md` and uses requ
 - **403 Forbidden** - Wrong role.
 ### 1.1.5 Suspend Account
 **PATCH** `/api/v1/admins/{id}/status`
-**Request**
-```json
-{
-  "reason": "string"
-}
-```
+**Request body:** none.
 **Response - 200 OK**
 ```json
 {
@@ -232,12 +227,7 @@ This document follows the same service order as `api-reference.md` and uses requ
 - **403 Forbidden** - Not allowed for this role.
 ### 1.2.5 Suspend Student
 **PATCH** `/api/v1/students/{id}/status`
-**Request**
-```json
-{
-  "reason": "string"
-}
-```
+**Request body:** none.
 **Response - 200 OK**
 ```json
 {
