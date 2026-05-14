@@ -14,6 +14,9 @@ import com.mbstu.diningpass.auth.service.abstraction.HallService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +43,13 @@ public class HallServiceImpl implements HallService {
 
 
     //Create Hall
+    // Create Hall — evict all hall caches since list/count are now stale
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "halls", key = "'all'"),        // getAllHalls
+            @CacheEvict(value = "halls", key = "'all-active'"), //getAllHalls
+            @CacheEvict(value = "halls", key = "'count'")       // countHalls
+    })
     public HallResponse createHall(UUID requesterId, Role role, CreateHallRequest request) {
 
         ensureSuperAdmin(role);
@@ -81,7 +90,9 @@ public class HallServiceImpl implements HallService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "halls", key = "'count'")
     public Long countHalls(UUID requesterId, Role role) {
+        logger.warn("auth-service/hall: DIRECT DB CALL for countHalls");
         ensureSuperAdmin(role);
         long totalActiveHall = hallRepository.countByIsActiveTrue();
         logger.info("[SUCCESS] Hall count active={}", totalActiveHall);
@@ -90,9 +101,16 @@ public class HallServiceImpl implements HallService {
 
 
     // Get Hall By ID
+    // Get by ID — cache per hallId
+    // SUPER_ADMIN gets updatedAt too, so key includes role to avoid serving
+    // a HALL_ADMIN the richer SUPER_ADMIN response (or vice versa)
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "halls", key = "'id:' + #hallId + ':' + #role")
     public HallResponse getHallById(UUID requesterId, Role role, UUID hallId) {
+
+        logger.warn("auth-service/hall: DIRECT DB CALL for getHallById");
+
 
         Hall hall = hallRepository.findById(hallId).orElseThrow(() -> new ResourceNotFoundException("Hall not found"));
 
@@ -119,9 +137,13 @@ public class HallServiceImpl implements HallService {
 
 
     // Get Hall By Short Name
+    // Get by Short Name — cache per shortName + role
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "halls", key = "'shortName:' + #shortName.toUpperCase() + ':' + #role")
     public HallResponse getHallByShortName(UUID requesterId, Role role, String shortName) {
+
+        logger.warn("auth-service/hall: DIRECT DB CALL for getHallByShortName");
 
         if (role == Role.SUPER_ADMIN) {
             // Can see all halls, active or not
@@ -148,7 +170,10 @@ public class HallServiceImpl implements HallService {
    // Get All Hall
    @Override
    @Transactional(readOnly = true)
+   @Cacheable(value = "halls", key = "#activeOnly ? 'all-active' : 'all'")
    public List<HallResponse> getAllHalls(UUID requesterId, Role role, boolean activeOnly) {
+
+       logger.warn("auth-service/hall: DIRECT DB CALL for getAllHalls");
 
        if (role != Role.SUPER_ADMIN) {
            throw new ForbiddenException("Only SUPER_ADMIN can view all halls");
@@ -170,10 +195,20 @@ public class HallServiceImpl implements HallService {
    }
 
 
-
-    // Update Hall
+    // Update Hall — evict everything hall-related
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "halls", key = "'all'"),
+            @CacheEvict(value = "halls", key = "'all-active'"),
+            @CacheEvict(value = "halls", key = "'count'"),
+            @CacheEvict(value = "halls", key = "'id:' + #id + ':' + T(com.mbstu.diningpass.auth.enums.Role).SUPER_ADMIN"),
+            @CacheEvict(value = "halls", key = "'id:' + #id + ':' + T(com.mbstu.diningpass.auth.enums.Role).HALL_ADMIN"),
+            @CacheEvict(value = "halls", key = "'shortName:' + #request.shortName().toUpperCase() + ':' + T(com.mbstu.diningpass.auth.enums.Role).SUPER_ADMIN"),
+            @CacheEvict(value = "halls", key = "'shortName:' + #request.shortName().toUpperCase() + ':' + T(com.mbstu.diningpass.auth.enums.Role).HALL_ADMIN")
+    })
     public HallResponse updateHall(UUID requesterId, Role role, UUID id, CreateHallRequest request) {
+
+        logger.warn("auth-service/hall: DIRECT DB CALL for updateHall");
 
         ensureSuperAdmin(role);
         logger.info("[UPDATE_HALL] requester={} hallId={}", requesterId, id);
@@ -207,7 +242,15 @@ public class HallServiceImpl implements HallService {
 
 
 
+    // Toggle status — evict all since active/inactive state affects list queries
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "halls", key = "'all'"),
+            @CacheEvict(value = "halls", key = "'all-active'"),
+            @CacheEvict(value = "halls", key = "'count'"),
+            @CacheEvict(value = "halls", key = "'id:' + #id + ':' + T(com.mbstu.diningpass.auth.enums.Role).SUPER_ADMIN"),
+            @CacheEvict(value = "halls", key = "'id:' + #id + ':' + T(com.mbstu.diningpass.auth.enums.Role).HALL_ADMIN")
+    })
     public void updateHallStatus(UUID requesterId, Role role, UUID id) {
 
         ensureSuperAdmin(role);

@@ -21,6 +21,9 @@ import com.mbstu.diningpass.auth.service.abstraction.HallAssociateService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,10 +45,15 @@ public class HallAssociateServiceImpl implements HallAssociateService {
 
 
 
+    // Create — evict lists since a new associate changes all list results
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "hallAssociateList", allEntries = true)
+    })
     public HallAssociateAdminResponse create(UUID requesterId, Role requesterRole, HallAssociateRegistrationRequest request) {
 
+        logger.warn("auth-service/hallAssociate: DIRECT DB CALL for create");
         logger.info("[SERVICE_CREATE] requester={} role={} targetRole={}", requesterId, requesterRole, request.role());
 
         // STEP 1: ROLE VALIDATION
@@ -147,8 +155,15 @@ public class HallAssociateServiceImpl implements HallAssociateService {
 
 
 
+
+    // Get accounts list — cache key encodes all three filter dimensions
+    // null hallId   → 'all',  null filterRole → 'all'
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = "hallAssociateList",
+            key = "'list:' + #requesterRole + ':hall:' + (#hallId ?: 'all') + ':role:' + (#filterRole ?: 'all')"
+    )
     public List<HallAssociateAdminResponse> getAccounts(UUID requesterId, Role requesterRole, Role filterRole, UUID hallId) {
 
         // ================= SUPER ADMIN =================
@@ -202,9 +217,13 @@ public class HallAssociateServiceImpl implements HallAssociateService {
 
 
 
+    // Own profile — cache per requesterId
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "hallAssociateProfile", key = "'profile:' + #requesterId")
     public HallAssociateProfileResponse getMyProfile(UUID requesterId, Role role) {
+
+        logger.warn("auth-service/hallAssociate: DIRECT DB CALL for getMyProfile");
 
         if(role==Role.STUDENT){
             throw new AccessDeniedException("Students cannot access this endpoint");
@@ -215,10 +234,13 @@ public class HallAssociateServiceImpl implements HallAssociateService {
     }
 
 
+    // Get by ID — cache per hallAssociateId (SUPER_ADMIN only endpoint)
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "hallAssociateProfile", key = "'id:' + #hallAssociateId")
     public HallAssociateAdminResponse getById(UUID requesterId, Role role, UUID hallAssociateId) {
 
+        logger.warn("auth-service/hallAssociate: DIRECT DB CALL for getById");
         if (role!= Role.SUPER_ADMIN) {
             throw new AccessDeniedException("Only SUPER_ADMIN can access other profiles");
         }
@@ -230,7 +252,12 @@ public class HallAssociateServiceImpl implements HallAssociateService {
 
 
 
+    // Update own profile — evict own profile cache entry
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "hallAssociateProfile", key = "'profile:' + #requesterId"),
+            @CacheEvict(value = "hallAssociateList", allEntries = true)
+    })
     public HallAssociateProfileResponse updateMyProfile(UUID requesterId, Role role, UpdateHallAssociateProfileRequest request) {
 
 
@@ -290,8 +317,14 @@ public class HallAssociateServiceImpl implements HallAssociateService {
 
 
 
+    // Toggle status — evict profile + id caches + all lists
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "hallAssociateProfile", key = "'profile:' + #targetId"),
+            @CacheEvict(value = "hallAssociateProfile", key = "'id:' + #targetId"),
+            @CacheEvict(value = "hallAssociateList",    allEntries = true)
+    })
     public MessageResponse updateStatus(UUID requesterId, Role role, UUID targetId) {
 
         HallAssociate target = hallAssociateRepository.findById(targetId).orElseThrow(() -> new ResourceNotFoundException("Associate not found"));
