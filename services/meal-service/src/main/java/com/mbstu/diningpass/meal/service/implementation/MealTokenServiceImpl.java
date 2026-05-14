@@ -25,6 +25,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -48,9 +50,14 @@ public class MealTokenServiceImpl implements MealTokenService {
 
 
 
+
+    // Cut token — evict student's token list since a new payment is submitted
     @Override
     @Transactional
+    @CacheEvict(value = "mealTokens", key = "'student:' + #studentId")
     public CutTokenResponse cutToken(UUID studentId, Role role, CutTokenRequest request) {
+
+        logger.warn("meal-service/mealToken: DIRECT DB CALL for cutToken");
 
         StudentProfileResponse profileResponse= studentFeignClient.getProfile();
 
@@ -125,8 +132,12 @@ public class MealTokenServiceImpl implements MealTokenService {
 
 
 
+    // Get own tokens — cache per studentId, only APPROVED tokens
     @Override
+    @Cacheable(value = "mealTokens", key = "'student:' + #studentId")
     public List<MealTokenStudentResponse> getMyMealToken(UUID studentId, Role role) {
+
+        logger.warn("meal-service/mealToken: DIRECT DB CALL for getMyMealToken");
 
         if (role != Role.STUDENT) {
             throw new ForbiddenException("Only students can access their meal tokens");

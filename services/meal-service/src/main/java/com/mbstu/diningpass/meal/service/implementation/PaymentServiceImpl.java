@@ -23,6 +23,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,9 +47,17 @@ public class PaymentServiceImpl implements PaymentService {
 
 
 
+    // Approve payment — evict the student's token list (new tokens created)
+    // and all mealConfigs lists (totalSold updated on MealConfig)
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "mealTokens",  allEntries = true),  // student tokens changed
+            @CacheEvict(value = "mealConfigs", allEntries = true)   // totalSold changed
+    })
     public PaymentAdminResponse approvePayment(UUID requesterId, Role requesterRole, UUID paymentId) {
+
+        logger.warn("meal-service/payment: DIRECT DB CALL for approvePayment");
 
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
@@ -134,6 +144,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 
 
+    //  NOT cached (Page<> + changes every cutToken submission)
     @Override
     public Page<PaymentResponse> getAllPayment(UUID requesterId, Role requesterRole, int page, int size) {
 
