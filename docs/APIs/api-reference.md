@@ -85,9 +85,21 @@
 
 **Base path:** `/api/v1/payments`
 
-| REST Method | URL Path         | Headers (Auth)             | Role Access                  | Description |
-|-------------|------------------|----------------------------|------------------------------|-------------|
-| GET         | `/`              | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Get payments with pagination (`page`, `size`). |
-| PATCH       | `/{id}/approve`  | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF       | Approve payment and generate QR meal tokens. |
-| GET         | `/test`          | None                       | PUBLIC                       | Health/test endpoint for the payment controller. |
+| REST Method | URL Path        | Headers (Auth)             | Role Access            | Description                                      |
+|-------------|-----------------|----------------------------|------------------------|--------------------------------------------------|
+| GET         | `/`             | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF | Get payments with pagination (`page`, `size`).   |
+| GET         | `/my`           | `X-User-Id`, `X-User-Role` | STUDENT                | Get my payment.                                  |
+| PATCH       | `/{id}/approve` | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF | Approve payment and generate QR meal tokens.     |
+| PATCH       | `/{id}/reject`  | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF | Reject payment with a message.                   |
+| GET         | `/test`         | None                       | PUBLIC                 | Health/test endpoint for the payment controller. |
+ 
+---
+
+## Summary Service API (v1)
+
+**Base path:** `/api/v1/summary`
+
+| REST Method | URL Path        | Headers (Auth)             | Role Access            | Description                                      |
+|-------------|-----------------|----------------------------|------------------------|--------------------------------------------------|
+| GET         | `/` or `/hall`  | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF | Get paginated hall meal summaries for the requester's hall (`page`, `size`). Returns `Page<HallMealSummaryResponse>`. |
 

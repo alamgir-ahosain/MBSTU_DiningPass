@@ -6,21 +6,17 @@ import com.mbstu.diningpass.meal.enums.TokenStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public record MealTokenStudentResponse(
 
         UUID        id,
-        String      hallShortName,
         LocalDate   mealDate,
         MealType    mealType,
-        Long        mealPrice,
         String      mealMenu,
+        String      tokenExpiry,            // Formatted time (AM/PM) - changed from LocalTime to avoid Redis serialization issues
         TokenStatus tokenStatus,
-        String      qrCodeData,             // null until APPROVED
-        LocalDateTime qrGeneratedAt,
-        ScanMode    scanMode,               // null until scanned
-        LocalDateTime usedAt               // null until USED
-
+        String      qrCodeData             // null until APPROVED
 ) {}
 

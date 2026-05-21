@@ -1,9 +1,7 @@
 package com.mbstu.diningpass.meal.service.implementation;
 
-import com.mbstu.diningpass.meal.client.HallAssociateFeignClient;
 import com.mbstu.diningpass.meal.client.StudentFeignClient;
 import com.mbstu.diningpass.meal.dto.request.mealtoken.CutTokenRequest;
-import com.mbstu.diningpass.meal.dto.response.client.HallAssociateProfileResponse;
 import com.mbstu.diningpass.meal.dto.response.client.StudentProfileResponse;
 import com.mbstu.diningpass.meal.dto.response.mealtoken.CutTokenResponse;
 import com.mbstu.diningpass.meal.dto.response.mealtoken.MealTokenStudentResponse;
@@ -20,6 +18,7 @@ import com.mbstu.diningpass.meal.exception.ResourceNotFoundException;
 import com.mbstu.diningpass.meal.repository.MealConfigRepository;
 import com.mbstu.diningpass.meal.repository.MealTokenRepository;
 import com.mbstu.diningpass.meal.repository.PaymentRepository;
+import com.mbstu.diningpass.meal.service.abstraction.HallMealSummaryService;
 import com.mbstu.diningpass.meal.service.abstraction.MealTokenService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -32,6 +31,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -46,6 +47,7 @@ public class MealTokenServiceImpl implements MealTokenService {
     private final MealTokenRepository mealTokenRepository;
     private  final MealConfigRepository mealConfigRepository;
     private final StudentFeignClient studentFeignClient;
+    private  final HallMealSummaryService hallMealSummaryService;
 
 
 
@@ -62,6 +64,8 @@ public class MealTokenServiceImpl implements MealTokenService {
         StudentProfileResponse profileResponse= studentFeignClient.getProfile();
 
         Long totalAmount = 0L;
+        List<UUID> rejectedPaymentIdsToDelete = new ArrayList<>();
+
 
         // check duplicate requests
         for (MealType mealType : request.mealTypes()) {
@@ -102,11 +106,28 @@ public class MealTokenServiceImpl implements MealTokenService {
                             );
 
             if (pendingExists ) {
-                throw new BadRequestException("You have already submitted a request for this meal");
+                throw new BadRequestException("You have already submitted a request for " +mealType);
             }
             if (approvedTokenExists) {
                 throw new BadRequestException("You have already completed payment for this meal");
             }
+            // Collect rejected payments for this meal type to delete before resubmission
+            paymentRepository.findRejectedPayment(studentId, mealConfig.getMealDate(), mealType, PaymentStatus.REJECTED)
+                    .ifPresent(rejected -> {
+                        rejectedPaymentIdsToDelete.add(rejected.getId());
+                        logger.info("Rejected payment found and queued for deletion, paymentId={}, studentId={}", rejected.getId(), studentId);
+                    });
+        }
+
+
+
+
+
+        // Delete all rejected payments before saving the new one
+        if (!rejectedPaymentIdsToDelete.isEmpty()) {
+            paymentRepository.deleteAllById(rejectedPaymentIdsToDelete);
+            logger.info("Deleted {} rejected payment(s) for studentId={}",
+                    rejectedPaymentIdsToDelete.size(), studentId);
         }
 
         Payment payment = Payment.builder()
@@ -143,8 +164,7 @@ public class MealTokenServiceImpl implements MealTokenService {
             throw new ForbiddenException("Only students can access their meal tokens");
         }
 
-        List<MealToken> tokens = mealTokenRepository
-                .findByStudentIdAndTokenStatus(studentId, TokenStatus.APPROVED);
+        List<MealToken> tokens = mealTokenRepository.findByStudentIdAndTokenStatus(studentId, TokenStatus.APPROVED);
 
         if (tokens.isEmpty()) {
             return List.of();   // empty list, not an exception
@@ -171,19 +191,22 @@ public class MealTokenServiceImpl implements MealTokenService {
             String key = token.getMealDate() + "_" + token.getMealType();
             MealConfig config = configMap.get(key);
             String menu = config != null ? config.getMealMenu() : null;
+            assert config != null;
+            LocalTime tokenExpiry= config.getTokenExpires();
+
+            // Format LocalTime to readable string with AM/PM format
+            String formattedTokenExpiry = tokenExpiry != null
+                ? tokenExpiry.format(DateTimeFormatter.ofPattern("hh:mm a"))
+                : null;
 
             return new MealTokenStudentResponse(
                     token.getId(),              // ← id included now
-                    token.getHallShortName(),
                     token.getMealDate(),
                     token.getMealType(),
-                    token.getMealPrice(),
                     menu,
+                    formattedTokenExpiry,       // Now using formatted String instead of LocalTime
                     token.getTokenStatus(),
-                    token.getQrCodeData(),
-                    token.getQrGeneratedAt(),
-                    token.getScanMode(),
-                    token.getUsedAt()
+                    token.getQrCodeData()
             );
         }).toList();
     }

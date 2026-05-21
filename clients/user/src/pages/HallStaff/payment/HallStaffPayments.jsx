@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { hallStaffAPI } from '../../../services/api';
 import '../HallStaffPages.css';
@@ -10,6 +10,7 @@ const getItems = (payload) => {
 };
 
 const getScreenshotUrl = (payment) => payment?.screenshotUrl || payment?.screenshot_url || '';
+const isRenderableScreenshotUrl = (url) => Boolean(url) && !String(url).startsWith('blob:');
 
 export const HallStaffPayments = () => {
     const [payments, setPayments] = useState([]);
@@ -20,10 +21,13 @@ export const HallStaffPayments = () => {
     const [error, setError] = useState('');
     const [previewPayment, setPreviewPayment] = useState(null);
     const [approvingId, setApprovingId] = useState('');
+    const [rejectingId, setRejectingId] = useState('');
+    const [rejectionReason, setRejectionReason] = useState('');
 
     const selectedScreenshot = useMemo(() => getScreenshotUrl(previewPayment), [previewPayment]);
+    const selectedScreenshotIsRenderable = useMemo(() => isRenderableScreenshotUrl(selectedScreenshot), [selectedScreenshot]);
 
-    const loadPayments = async (targetPage = page) => {
+    const loadPayments = useCallback(async (targetPage = page) => {
         setLoading(true);
         setError('');
         try {
@@ -38,18 +42,24 @@ export const HallStaffPayments = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, size]);
 
     useEffect(() => {
-        loadPayments(0);
-    }, []);
+        const timeoutId = window.setTimeout(() => {
+            void loadPayments(0);
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [loadPayments]);
 
     const openApprovalPreview = (payment) => {
         setPreviewPayment(payment);
+        setRejectionReason('');
     };
 
     const closePreview = () => {
         setPreviewPayment(null);
+        setRejectionReason('');
     };
 
     const handleApprove = async () => {
@@ -67,6 +77,30 @@ export const HallStaffPayments = () => {
             setError('Failed to approve payment. ' + (err.response?.data?.message || err.message));
         } finally {
             setApprovingId('');
+        }
+    };
+
+    const handleReject = async () => {
+        if (!previewPayment?.id) return;
+
+        const reason = rejectionReason.trim();
+        if (!reason) {
+            setError('Please enter a rejection reason');
+            return;
+        }
+
+        setRejectingId(previewPayment.id);
+        setError('');
+
+        try {
+            await hallStaffAPI.rejectPayment(previewPayment.id, reason);
+            closePreview();
+            await loadPayments(page);
+        } catch (err) {
+            console.error('Failed to reject payment', err);
+            setError('Failed to reject payment. ' + (err.response?.data?.message || err.message));
+        } finally {
+            setRejectingId('');
         }
     };
 
@@ -119,13 +153,9 @@ export const HallStaffPayments = () => {
                                                 <td>{payment.paymentStatus || '-'}</td>
                                                 <td>
                                                     {screenshotUrl ? (
-                                                        <button
-                                                            type="button"
-                                                            className="btn-small btn-view"
-                                                            onClick={() => openApprovalPreview(payment)}
-                                                        >
-                                                            View Image
-                                                        </button>
+                                                        <span className="text-muted">
+                                                            {isRenderableScreenshotUrl(screenshotUrl) ? 'Available in approval card' : 'Temporary preview only'}
+                                                        </span>
                                                     ) : (
                                                         <span className="text-muted">No image</span>
                                                     )}
@@ -139,7 +169,7 @@ export const HallStaffPayments = () => {
                                                             onClick={() => openApprovalPreview(payment)}
                                                             disabled={payment.paymentStatus && payment.paymentStatus !== 'SUBMITTED'}
                                                         >
-                                                            Approve Payment
+                                                            Verify
                                                         </button>
                                                     </div>
                                                 </td>
@@ -179,11 +209,8 @@ export const HallStaffPayments = () => {
                         <div className="payment-preview-header">
                             <div>
                                 <h2 id="payment-preview-title">Approve Payment</h2>
-                                <p className="detail-subtitle">Review the screenshot before approving this payment.</p>
+                                <p className="detail-subtitle">Review the screenshot before approving or rejecting this payment.</p>
                             </div>
-                            <button type="button" className="btn-small btn-cancel" onClick={closePreview}>
-                                Close
-                            </button>
                         </div>
 
                         <div className="payment-preview-details">
@@ -195,17 +222,38 @@ export const HallStaffPayments = () => {
                         </div>
 
                         <div className="payment-preview-image-wrap">
-                            {selectedScreenshot ? (
-                                <img
-                                    className="payment-preview-image"
-                                    src={selectedScreenshot}
-                                    alt={`Payment screenshot for ${previewPayment.studentId || 'student'}`}
-                                />
+                            {selectedScreenshotIsRenderable ? (
+                                <div className="payment-preview-image-card">
+                                    <p className="payment-preview-image-title">Payment Proof</p>
+                                    <img
+                                        className="payment-preview-image"
+                                        src={selectedScreenshot}
+                                        alt={`Payment screenshot for ${previewPayment.studentId || 'student'}`}
+                                    />
+                                </div>
+                            ) : selectedScreenshot ? (
+                                <div className="payment-preview-empty payment-preview-warning">
+                                    <p>
+                                        This payment proof is stored as a temporary `blob:` URL and cannot be displayed safely.
+                                        Please ask the student to resubmit the payment proof using a real uploaded image URL.
+                                    </p>
+                                </div>
                             ) : (
                                 <div className="payment-preview-empty">
                                     <p>No screenshot available for this payment.</p>
                                 </div>
                             )}
+                        </div>
+
+                        <div className="payment-preview-form-group">
+                            <label htmlFor="rejectionReason">Rejection Reason *</label>
+                            <textarea
+                                id="rejectionReason"
+                                value={rejectionReason}
+                                onChange={(event) => setRejectionReason(event.target.value)}
+                                placeholder="Explain why this payment is being rejected"
+                                rows="4"
+                            />
                         </div>
 
                         <div className="button-group payment-preview-actions">
@@ -215,7 +263,15 @@ export const HallStaffPayments = () => {
                                 onClick={handleApprove}
                                 disabled={approvingId === previewPayment.id}
                             >
-                                {approvingId === previewPayment.id ? 'Approving...' : 'Confirm Approve'}
+                                {approvingId === previewPayment.id ? 'Approving...' : 'Approve Payment'}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-danger"
+                                onClick={handleReject}
+                                disabled={rejectingId === previewPayment.id}
+                            >
+                                {rejectingId === previewPayment.id ? 'Rejecting...' : 'Reject Payment'}
                             </button>
                             <button type="button" className="btn btn-cancel" onClick={closePreview}>
                                 Cancel

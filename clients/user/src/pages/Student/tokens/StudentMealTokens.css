@@ -1,0 +1,230 @@
+.student-tokens-page .card {
+  margin-top: 0.5rem;
+}
+
+.student-section {
+  margin-top: 1.5rem;
+}
+
+.section-header-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.section-title {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.15rem;
+}
+
+.section-count {
+  min-width: 2rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #edf2f7;
+  color: #34495e;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.compact-empty-state {
+  margin-top: 0;
+}
+
+.student-tokens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.student-token-card {
+  border: 1px solid #ecf0f1;
+  border-radius: 10px;
+  padding: 1.25rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.student-token-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.student-token-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.student-token-header p {
+  margin: 0.35rem 0 0;
+  color: #6c757d;
+}
+
+.student-token-badge {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: #d5f4e6;
+  color: #1e8449;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.student-token-badge.rejected {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.payment-badge-submitted {
+  background: #fff5d6;
+  color: #b7791f;
+}
+
+.payment-badge-verified {
+  background: #d5f4e6;
+  color: #1e8449;
+}
+
+.payment-badge-rejected {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.payment-record-card {
+  border-left: 4px solid #5dade2;
+}
+
+.payment-submitted {
+  border-left-color: #f1c40f;
+}
+
+.payment-verified {
+  border-left-color: #27ae60;
+}
+
+.payment-rejected {
+  border-left-color: #e74c3c;
+}
+
+.payment-rejection-card {
+  border-color: #f5b7b1;
+  background: linear-gradient(180deg, #fff8f7 0%, #fff3f1 100%);
+}
+
+.student-token-meta {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.student-token-meta p {
+  margin: 0;
+  color: #495057;
+}
+
+.student-token-code {
+  margin-top: 1rem;
+}
+
+.student-token-code label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.qr-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.qr-container canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.btn-download-qr {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #27ae60;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-download-qr:hover {
+  background-color: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-download-qr:active {
+  transform: translateY(0);
+}
+
+.payment-rejection-proof {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0d6d3;
+}
+
+.payment-rejection-proof-title {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+  color: #7f1d1d;
+}
+
+.payment-rejection-proof-image {
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid #f5b7b1;
+  background: #ffffff;
+}
+
+.payment-rejection-proof-note {
+  margin: 0;
+  color: #7f1d1d;
+  font-size: 0.92rem;
+}
+
+.student-token-code code {
+  display: block;
+  padding: 0.85rem;
+  border-radius: 8px;
+  background: #f8f9fa;
+  border: 1px dashed #ced4da;
+  color: #34495e;
+  word-break: break-word;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .student-token-header {
+    flex-direction: column;
+  }
+
+  .student-token-badge {
+    align-self: flex-start;
+  }
+}
+

@@ -6,11 +6,13 @@ import com.mbstu.diningpass.meal.enums.PaymentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface PaymentRepository extends JpaRepository<Payment, UUID> {
@@ -24,6 +26,8 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
         AND mt = :mealType
         AND p.paymentStatus IN :statuses
     """)
+
+
     boolean existsMealRequest(
             UUID studentId,
             LocalDate mealDate,
@@ -38,4 +42,28 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
             @Param("status") PaymentStatus status,
             Pageable pageable
     );
+
+    List<Payment> findByStudentId(UUID studentId);
+
+
+    // Find a single rejected payment for a specific student + date + mealType
+    @Query("""
+    SELECT p FROM Payment p
+    JOIN p.mealTypes mt
+    WHERE p.studentId = :studentId
+    AND p.mealDate = :mealDate
+    AND mt = :mealType
+    AND p.paymentStatus = :status
+    """)
+    Optional<Payment> findRejectedPayment(
+            @Param("studentId") UUID studentId,
+            @Param("mealDate") LocalDate mealDate,
+            @Param("mealType") MealType mealType,
+            @Param("status") PaymentStatus status
+    );
+
+
+    @Modifying
+    @Query("DELETE FROM Payment p WHERE p.mealDate = :date")
+    int deleteByMealDate(@Param("date") LocalDate date);
 }

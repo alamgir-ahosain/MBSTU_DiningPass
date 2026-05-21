@@ -582,6 +582,84 @@ The endpoint toggles the hall's active state: if the hall is currently active it
 - **400 Bad Request** - Invalid payment state.
 - **403 Forbidden** - Not allowed for this role.
 - **404 Not Found** - Payment not found.
+
+
+### 2.3.3 Reject Payment
+**PATCH** `/api/v1/payments/{id}/reject`
+**Path Variable:** `id` — UUID of the payment to reject
+**Request Body:**
+```json
+{
+  "rejectionReason": "string (required, max 255 chars)"
+}
+```
+
+**Response - 200 OK:**
+```json
+{
+  "id": "uuid",
+  "studentId": "uuid",
+  "mealDate": "2026-05-20",
+  "mealTypes": ["LUNCH", "DINNER"],
+  "totalAmount": 30,
+  "paymentMethod": "BKASH",
+  "senderNumber": "01XXXXXXXXX",
+  "screenshotUrl": "string",
+  "paymentStatus": "REJECTED",
+  "rejectionReason": "string",
+  "submittedAt": "2026-05-20T10:00:00"
+}
+```
+
+**Errors**
+- **400 Bad Request** - Invalid payment state.
+- **403 Forbidden** - Not allowed for this role.
+- **404 Not Found** - Payment not found.
+
+
+
+
+## 2.4 Summary Service API
+### 2.4.1 Get Hall Meal Summaries
+**GET** `/api/v1/summary` or `/api/v1/summary/hall`
+**Request body:** none.
+**Query params:** `page`, `size`
+**Response - 200 OK**
+```json
+{
+  "content": [
+    {
+      "id": "uuid",
+      "hallShortName": "JAMH",
+      "mealDate": "2026-05-20",
+      "mealType": "LUNCH",
+      "mealMenu": "Rice, Fish, Dal",
+      "feastNote": "Eid Special",
+      "mealPrice": 30,
+      "totalTokensSold": 120,
+      "totalTokensUsed": 98,
+      "totalTokensUnused": 22,
+      "totalRevenue": 3600,
+      "isFinalized": false,
+      "finalizedAt": null,
+      "createdAt": "2026-05-20T10:00:00",
+      "updatedAt": "2026-05-20T11:00:00"
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 20
+  },
+  "totalElements": 1,
+  "totalPages": 1
+}
+```
+**Errors**
+- **401 Unauthorized** - Missing or invalid token.
+- **403 Forbidden** - Only HALL_ADMIN and HALL_STAFF can access.
+
+
+
 ---
 ## 3. Shared Error Response
 When the backend returns an error, it uses the following JSON shape:

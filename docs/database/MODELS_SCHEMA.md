@@ -339,11 +339,31 @@ Students can view and cut meal tokens until the `cut_token_before` deadline.
 | `created_at`        | TIMESTAMP     | NOT NULL, AUTO-SET                                      | Record creation timestamp |
 | `updated_at`        | TIMESTAMP     | NOT NULL, AUTO-SET                                      | Last update timestamp |
 
-### Unique Constraints
+---
 
-| Constraint Name | Columns |
-|-----------------|---------|
-| `uq_hall_meal_date_type` | (`hall_short_name`, `meal_date`, `meal_type`) |
+## Table: `hall_meal_summaries`
+
+Holds per-hall, per-meal aggregated statistics (sold/used/unused/revenue) and a snapshot of meal metadata.
+
+| Column Name           | Type        | Constraints                        | Description |
+|-----------------------|-------------|------------------------------------|-------------|
+| `id`                  | UUID        | PRIMARY KEY, AUTO-GENERATED        | Unique summary identifier |
+| `hall_short_name`     | VARCHAR(100)| NOT NULL                           | Hall short name snapshot |
+| `meal_date`           | DATE        | NOT NULL                           | Meal serving date |
+| `meal_type`           | VARCHAR(20) | NOT NULL                           | `LUNCH` or `DINNER` |
+| `meal_menu`           | VARCHAR(255)| NULLABLE                           | Menu snapshot from `meal_configs` |
+| `meal_price`          | BIGINT      | NULLABLE                           | Price snapshot from `meal_configs` |
+| `feast_note`          | VARCHAR(100)| NULLABLE                           | Optional feast note snapshot |
+| `total_tokens_sold`   | BIGINT      | NOT NULL, DEFAULT 0                | Total tokens sold (approved payments) |
+| `total_tokens_used`   | BIGINT      | NOT NULL, DEFAULT 0                | Total tokens consumed (QR scanned) |
+| `total_tokens_unused` | BIGINT      | NOT NULL, DEFAULT 0                | Total tokens expired/unused |
+| `total_revenue`       | BIGINT      | NOT NULL, DEFAULT 0                | Total revenue collected for the meal |
+| `is_finalized`        | BOOLEAN     | NOT NULL, DEFAULT false            | True when final cleanup has been applied |
+| `finalized_at`        | TIMESTAMP   | NULLABLE                           | Finalization timestamp |
+| `created_at`          | TIMESTAMP   | NOT NULL, AUTO-SET                 | Record creation timestamp |
+| `updated_at`          | TIMESTAMP   | NULLABLE, AUTO-SET                 | Last update timestamp |
+
+
 
 ### Join Table: `payment_meal_types`
 
@@ -475,7 +495,6 @@ Used by hall admin/staff to reject a submitted payment.
 
 | Field Name | Type | Validation | Description |
 |------------|------|------------|-------------|
-| `paymentId` | `UUID` | `@NotNull` | Payment identifier to reject |
 | `rejectionReason` | `String` | `@NotBlank`, `@Size(max = 255)` | Reason for rejection |
 
 ---
@@ -596,6 +615,23 @@ Returned to admin/staff after payment verification actions.
 
 ---
 
+# DTO: `PaymentRejectionResponse`
+Returned after a payment is successfully rejected.
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `id` | `UUID` | Payment identifier |
+| `studentId` | `UUID` | Student identifier |
+| `mealDate` | `LocalDate` | Meal serving date |
+| `mealTypes` | `List<MealType>` | Selected meal types |
+| `totalAmount` | `Long` | Total submitted amount |
+| `paymentMethod` | `PaymentMethod` | `BKASH` or `NAGAD` |
+| `senderNumber` | `String` | Student wallet number |
+| `screenshotUrl` | `String` | Uploaded payment proof |
+| `paymentStatus` | `PaymentStatus` | Always `REJECTED` |
+| `rejectionReason` | `String` | Reason provided by admin/staff |
+| `submittedAt` | `LocalDateTime` | Original payment submission timestamp |
+
 # DTO: `PaymentResponse`
 
 Returned when viewing payment details.
@@ -640,20 +676,4 @@ Returned when viewing hall-level meal summary statistics.
 | `isFinalized` | `boolean` | Whether summary is finalized |
 | `finalizedAt` | `LocalDateTime` | Finalization timestamp |
 | `createdAt` | `LocalDateTime` | Creation timestamp |
-
----
-
-# DTO: `StudentMealSummaryResponse`
-
-Returned when viewing student-level meal summary statistics.
-
-| Field Name | Type | Description |
-|------------|------|-------------|
-| `studentId` | `UUID` | Student identifier |
-| `hallShortName` | `String` | Hall short name |
-| `totalTokensPurchased` | `Long` | Total purchased tokens |
-| `totalTokensUsed` | `Long` | Total consumed tokens |
-| `totalTokensUnused` | `Long` | Total unused tokens |
-| `totalSpent` | `Long` | Total amount paid |
-| `updatedAt` | `LocalDateTime` | Last summary update timestamp |
 

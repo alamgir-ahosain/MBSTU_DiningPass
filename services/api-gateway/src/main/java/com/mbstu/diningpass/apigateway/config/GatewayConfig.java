@@ -71,6 +71,10 @@ public class GatewayConfig {
                         .path("/api/v1/payments", "/api/v1/payments/**")
                         .uri("http://localhost:8082"))
 
+                .route("meal-service-summary", r -> r
+                        .path("/api/v1/summary", "/api/v1/summary/**")
+                        .uri("http://localhost:8082"))
+
                 .build();
     }
 }
