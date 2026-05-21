@@ -12,9 +12,12 @@ import { ForgotPasswordPage } from './pages/public/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/public/ResetPasswordPage';
 
 // Student Pages
-import { StudentDashboard } from './pages/Student/StudentDashboard';
-import { ViewProfile } from './pages/Student/ViewProfile';
+import { StudentDashboard } from './pages/Student/dashboard/StudentDashboard';
+import { StudentProfile } from './pages/Student/profile/StudentProfile';
 import { ChangePassword } from './pages/Student/ChangePassword';
+import { CutToken } from './pages/Student/cut_token/CutToken';
+import { StudentMealTokens } from './pages/Student/tokens/StudentMealTokens';
+import { StudentForgotPassword } from './pages/Student/StudentForgotPassword';
 
 // Hall Admin Pages
 import { HallAdminDashboard } from './pages/HallAdmin/dashboard/HallAdminDashboard';
@@ -33,6 +36,8 @@ import { HallStaffMealConfigs } from './pages/HallStaff/meal/HallStaffMealConfig
 import { HallStaffProfile } from './pages/HallStaff/my/HallStaffProfile';
 import { HallStaffChangePassword } from './pages/HallStaff/my/HallStaffChangePassword';
 import { HallStaffForgotPassword } from './pages/HallStaff/my/HallStaffForgotPassword';
+import { ValidateToken } from './pages/HallStaff/token/ValidateToken';
+import { HallMealSummary } from './pages/HallStaff/summary/HallMealSummary';
 
 // Super Admin Pages
 import { SuperAdminDashboard } from './pages/SuperAdmin/SuperAdminDashboard';
@@ -103,31 +108,55 @@ function App() {
                 }
               />
 
-              {/* Student Routes */}
-              <Route
-                path="/student/dashboard"
-                element={
-                  <ProtectedRoute requiredRole="STUDENT">
-                    <StudentDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/student/profile"
-                element={
-                  <ProtectedRoute requiredRole="STUDENT">
-                    <ViewProfile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/student/change-password"
-                element={
-                  <ProtectedRoute requiredRole="STUDENT">
-                    <ChangePassword />
-                  </ProtectedRoute>
-                }
-              />
+               {/* Student Routes */}
+               <Route
+                 path="/student/dashboard"
+                 element={
+                   <ProtectedRoute requiredRole="STUDENT">
+                     <StudentDashboard />
+                   </ProtectedRoute>
+                 }
+               />
+               <Route
+                 path="/student/profile"
+                 element={
+                   <ProtectedRoute requiredRole="STUDENT">
+                     <StudentProfile />
+                   </ProtectedRoute>
+                 }
+               />
+               <Route
+                 path="/student/change-password"
+                 element={
+                   <ProtectedRoute requiredRole="STUDENT">
+                     <ChangePassword />
+                   </ProtectedRoute>
+                 }
+               />
+               <Route
+                 path="/student/cut-token"
+                 element={
+                   <ProtectedRoute requiredRole="STUDENT">
+                     <CutToken />
+                   </ProtectedRoute>
+                 }
+               />
+                <Route
+                  path="/student/my-tokens"
+                  element={
+                    <ProtectedRoute requiredRole="STUDENT">
+                      <StudentMealTokens />
+                    </ProtectedRoute>
+                  }
+                />
+               <Route
+                 path="/student/forgot-password"
+                 element={
+                   <ProtectedRoute requiredRole="STUDENT">
+                     <StudentForgotPassword />
+                   </ProtectedRoute>
+                 }
+               />
 
               {/* Hall Admin Routes */}
               <Route
@@ -220,6 +249,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+                <Route
+                  path="/hallStaff/summary"
+                  element={
+                    <ProtectedRoute requiredRole="HALL_STAFF">
+                      <HallMealSummary />
+                    </ProtectedRoute>
+                  }
+                />
               <Route
                 path="/hallStaff/profile"
                 element={
@@ -236,15 +273,23 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/hallStaff/forgot-password"
-                element={
-                  <ProtectedRoute requiredRole="HALL_STAFF">
-                    <HallStaffForgotPassword />
-                  </ProtectedRoute>
-                }
-              />
-              
+               <Route
+                 path="/hallStaff/forgot-password"
+                 element={
+                   <ProtectedRoute requiredRole="HALL_STAFF">
+                     <HallStaffForgotPassword />
+                   </ProtectedRoute>
+                 }
+               />
+               <Route
+                 path="/hallStaff/validate-token"
+                 element={
+                   <ProtectedRoute requiredRole="HALL_STAFF">
+                     <ValidateToken />
+                   </ProtectedRoute>
+                 }
+               />
+
 
               {/* Super Admin Routes */}
               <Route

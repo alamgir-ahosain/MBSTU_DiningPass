@@ -21,6 +21,9 @@ import com.mbstu.diningpass.auth.repository.HallAssociateRepository;
 import com.mbstu.diningpass.auth.repository.HallRepository;
 import com.mbstu.diningpass.auth.repository.StudentRepository;
 import com.mbstu.diningpass.auth.service.abstraction.StudentService;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -51,9 +54,13 @@ public class StudentServiceImpl implements StudentService {
 
 
 
-    @Transactional
+    // Register — evict studentList since a new student changes all list results
     @Override
+    @Transactional
+    @CacheEvict(value = "studentList", allEntries = true)
     public StudentProfileResponse register(StudentRegistrationRequest request) {
+
+        logger.warn("auth-service/student: DIRECT DB CALL for register");
 
         //  Step 0: Validation
         if (studentRepository.existsByStudentId(request.studentId())) {
@@ -151,8 +158,15 @@ public class StudentServiceImpl implements StudentService {
 
 
 
+    // Update own profile — evict own profile + student list (fullName/room changed)
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "studentProfile", key = "'profile:' + #requesterId"),
+            @CacheEvict(value = "studentList",    allEntries = true)
+    })
     public StudentProfileResponse updateMyProfile(UUID requesterId, Role role, UpdateStudentProfileRequest request) {
+
+        logger.warn("auth-service/student: DIRECT DB CALL for updateMyProfile");
 
         if (role != Role.STUDENT) {
             throw new ForbiddenException("Only students can update their profile");
@@ -179,8 +193,12 @@ public class StudentServiceImpl implements StudentService {
 
 
 
+    // Get own profile — cache per student UUID
     @Override
+    @Cacheable(value = "studentProfile", key = "'profile:' + #requesterId")
     public StudentProfileResponse getMyProfile(UUID requesterId, Role role) {
+
+        logger.warn("auth-service/student: DIRECT DB CALL for getMyProfile");
 
 //        if (role != Role.STUDENT) {
 //            if (role==Role.HALL_STAFF){
@@ -199,8 +217,15 @@ public class StudentServiceImpl implements StudentService {
 
 
 
+    // Suspend / activate — evict target's profile + all list pages
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "studentProfile", key = "'profile:' + #targetId"),
+            @CacheEvict(value = "studentList",    allEntries = true)
+    })
     public MessageResponse suspendStudent(UUID requesterId, Role role, UUID targetId) {
+
+        logger.warn("auth-service/student: DIRECT DB CALL for suspendStudent");
 
         Student target = studentRepository.findById(targetId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
@@ -249,6 +274,10 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
+    // getAllStudents — NOT cached intentionally
+    // Reasons: Page<> serialization is fragile with Redis; result varies by
+    // page/size/hallId/role (too many key combinations); data changes on
+    // every register/suspend. A DB paginated query is fast enough.
     @Override
     public Page<StudentProfileAdminResponse> getAllStudents(UUID requesterId, Role role, UUID hallId, int page, int size) {
 

@@ -1,10 +1,13 @@
 package com.mbstu.diningpass.meal.controller;
 
 
+import com.mbstu.diningpass.meal.dto.request.payment.PaymentRejectRequest;
 import com.mbstu.diningpass.meal.dto.response.payment.PaymentAdminResponse;
+import com.mbstu.diningpass.meal.dto.response.payment.PaymentRejectionResponse;
 import com.mbstu.diningpass.meal.dto.response.payment.PaymentResponse;
 import com.mbstu.diningpass.meal.enums.Role;
 import com.mbstu.diningpass.meal.service.abstraction.PaymentService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -56,7 +60,25 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.OK).body(paymentService.getAllPayment(requesterId,requesterRole, page, size));
     }
 
+    @PatchMapping("/{id}/reject")
+    public ResponseEntity<PaymentRejectionResponse> rejectPayment(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") Role requesterRole,
+            @PathVariable UUID id,
+            @Valid @RequestBody PaymentRejectRequest request) {
+        PaymentRejectionResponse response = paymentService.rejectPayment(requesterId, requesterRole, id, request);
+        return ResponseEntity.ok(response);
+    }
 
+    @GetMapping("/my")
+    public ResponseEntity<List<PaymentResponse>> getMyPayments(
+            @RequestHeader("X-User-Id") UUID requesterId,
+            @RequestHeader("X-User-Role") Role requesterRole) {
+
+        List<PaymentResponse> payments = paymentService.getMyPayments(requesterId, requesterRole);
+        logger.info("[GET_MY_PAYMENTS] requester={} role={}", requesterId, requesterRole);
+        return ResponseEntity.status(HttpStatus.OK).body(payments);
+    }
 
 
 

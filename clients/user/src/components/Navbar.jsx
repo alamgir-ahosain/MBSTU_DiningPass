@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
@@ -9,10 +9,6 @@ export const Navbar = () => {
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
 
-    useEffect(() => {
-        setMenuOpen(false);
-    }, [location.pathname]);
-
     const handleLogout = async () => {
         await logout();
         navigate('/login');
@@ -21,7 +17,7 @@ export const Navbar = () => {
     const closeMenu = () => setMenuOpen(false);
 
     return (
-        <nav className="navbar">
+        <nav className="navbar" key={location.pathname}>
             <div className="navbar-container">
                 <Link to="/" className="navbar-brand">
                     MBSTU Dining Pass
@@ -77,7 +73,15 @@ export const Navbar = () => {
                                     <Link to="/hallStaff/dashboard" className="nav-link" onClick={closeMenu}>Dashboard</Link>
                                     <Link to="/hallStaff/payments" className="nav-link" onClick={closeMenu}>Payments</Link>
                                     <Link to="/hallStaff/meals" className="nav-link" onClick={closeMenu}>Meals</Link>
+                                    <Link to="/hallStaff/validate-token" className="nav-link">Validate Token</Link>
                                     <Link to="/hallStaff/profile" className="nav-link" onClick={closeMenu}>My Profile</Link>
+                                </>
+                            ) : role === 'STUDENT' ? (
+                                <>
+                                    <Link to="/student/dashboard" className="nav-link" onClick={closeMenu}>Dashboard</Link>
+                                    <Link to="/student/cut-token" className="nav-link" onClick={closeMenu}>Cut Token</Link>
+                                    <Link to="/student/my-tokens" className="nav-link" onClick={closeMenu}>My Tokens</Link>
+                                    <Link to="/student/profile" className="nav-link" onClick={closeMenu}>My Profile</Link>
                                 </>
                             ) : (
                                 <Link to="/dashboard" className="nav-link" onClick={closeMenu}>

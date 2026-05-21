@@ -1,9 +1,11 @@
 package com.mbstu.diningpass.meal.service.implementation;
 
 import com.mbstu.diningpass.meal.client.HallAssociateFeignClient;
+import com.mbstu.diningpass.meal.client.StudentFeignClient;
 import com.mbstu.diningpass.meal.dto.request.mealconfig.CreateMealConfigRequest;
 import com.mbstu.diningpass.meal.dto.request.mealconfig.UpdateMealConfigRequest;
 import com.mbstu.diningpass.meal.dto.response.client.HallAssociateProfileResponse;
+import com.mbstu.diningpass.meal.dto.response.client.StudentProfileResponse;
 import com.mbstu.diningpass.meal.dto.response.mealconfig.MealConfigAdminResponse;
 import com.mbstu.diningpass.meal.entity.MealConfig;
 import com.mbstu.diningpass.meal.enums.Role;
@@ -16,14 +18,19 @@ import com.mbstu.diningpass.meal.service.abstraction.MealConfigService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -34,12 +41,24 @@ public class MealConfigServiceImpl implements MealConfigService {
     private final MealConfigRepository mealConfigRepository;
     private final HallAssociateFeignClient hallAssociateFeignClient;
 
+    private final CacheManager cacheManager; // Injected for manual cache eviction when needed
+    private static final String CACHE_NAME = "mealConfigs";
+    private final StudentFeignClient studentFeignClient;
 
+
+
+    @Cacheable(value = "hallProfiles", key = "#requesterId")
+    public HallAssociateProfileResponse getCachedProfile(UUID requesterId) {
+        return hallAssociateFeignClient.getMyProfile();
+    }
 
 
 
     @Override
+    @Transactional
     public MealConfigAdminResponse createMealConfig(UUID requesterId, Role role, CreateMealConfigRequest request) {
+
+     //        logger.warn("meal-service/mealConfig: DIRECT DB CALL for createMealConfig");
 
         HallAssociateProfileResponse creatorProfile =
                 getAuthorizedHallProfile(
@@ -48,17 +67,19 @@ public class MealConfigServiceImpl implements MealConfigService {
                         "create meal configurations"
                 );
 
+        String hallShortName = creatorProfile.hallShortName();
+
         // Business rule: booking deadline must come before token expiry
         validateTimeWindow(request.mealDate(), request.cutTokenBefore(), request.tokenExpires());
 
 
         // Programmatic duplicate check (fast path — avoids hitting the DB constraint on every request)
-        if (mealConfigRepository.existsByHallShortNameAndMealDateAndMealType(creatorProfile.hallShortName(), request.mealDate(), request.mealType())) {
+        if (mealConfigRepository.existsByHallShortNameAndMealDateAndMealType(hallShortName, request.mealDate(), request.mealType())) {
             throw new DuplicateResourceException("A meal config already exists for " + creatorProfile.hallShortName() + " on " + request.mealDate() + " for " + request.mealType());
         }
 
         MealConfig newMealConfig = MealConfig.builder()
-                .hallShortName(creatorProfile.hallShortName())
+                .hallShortName(hallShortName)
                 .mealDate(request.mealDate())
                 .mealType(request.mealType())
                 .mealMenu(request.mealMenu())
@@ -72,40 +93,96 @@ public class MealConfigServiceImpl implements MealConfigService {
                 .updatedByName(creatorProfile.fullName())   // same as creator on first save
                 .build();
 
+        MealConfig saved;
         try {
-            MealConfig saved = mealConfigRepository.save(newMealConfig);
+            saved = mealConfigRepository.save(newMealConfig);
             logger.info("[CREATE_MEAL_CONFIG] saved id={}", saved.getId());
-            return mapToResponse(saved);
         } catch (DataIntegrityViolationException e) {
             // Safety net for race condition — two concurrent requests passing the check above
-            throw new DuplicateResourceException("A meal config already exists for this hall, date, and meal type");
+            throw new DuplicateResourceException("A meal config already exists for " + hallShortName + " on " + request.mealDate() + " for " + request.mealType());
+        }
+
+        // Evict AFTER the transaction commits so no other thread reads stale data
+        // from cache while this transaction is still in-flight.
+        evictHallCache(hallShortName);
+
+        return mapToResponse(saved);
+
+    }
+
+
+
+
+
+
+@Override
+@Transactional(readOnly = true)
+public List<MealConfigAdminResponse> getAllMealConfigs(UUID requesterId, Role role) {
+
+    String hallShortName;
+    if (role == Role.STUDENT) {
+
+        // Fetch student's hall from auth-service
+        StudentProfileResponse studentProfile = studentFeignClient.getProfile();
+        hallShortName = studentProfile.hallShortName();
+
+        // Students always hit DB directly — no cache (they see only active configs,
+        // which is a different dataset from the admin cache keyed by hallShortName)
+        logger.info("[MEAL_CONFIG][GET_ALL] STUDENT requester={} hall={}", requesterId, hallShortName);
+
+        return mealConfigRepository
+                .findByHallShortNameAndIsActiveTrueOrderByMealDateDesc(hallShortName)
+                .stream()
+                .map(this::mapToStudentResponse)
+                .collect(Collectors.toList());
+    }
+
+    //  Admin / Staff path (unchanged from before)
+    HallAssociateProfileResponse creatorProfile =
+            getAuthorizedHallProfile(requesterId, role, "view meal configurations");
+
+    hallShortName = creatorProfile.hallShortName();
+
+    //  Cache read
+    Cache cache = resolveCache();
+    if (cache != null) {
+        Cache.ValueWrapper wrapper = cache.get(hallShortName);
+        if (wrapper != null) {
+            try {
+                @SuppressWarnings("unchecked")
+                List<MealConfigAdminResponse> cached = (List<MealConfigAdminResponse>) wrapper.get();
+                if (cached != null) {
+                    logger.info("[MEAL_CONFIG][GET_ALL] CACHE HIT hall={} entries={}", hallShortName, cached.size());
+                    return cached;
+                }
+            } catch (Exception e) {
+                logger.warn("[MEAL_CONFIG][CACHE] GET cast failed hall={}: {} — falling back to DB", hallShortName, e.getMessage());
+            }
         }
     }
 
+    //  Cache miss -> DB
+    logger.info("[MEAL_CONFIG][GET_ALL] CACHE MISS — querying DB hall={}", hallShortName);
 
+    List<MealConfigAdminResponse> result =
+            mealConfigRepository
+                    .findByHallShortNameOrderByMealDateDesc(hallShortName)
+                    .stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
 
-
-
-
-
-    @Override
-    public List<MealConfigAdminResponse> getAllMealConfigs(UUID requesterId, Role role) {
-
-
-        HallAssociateProfileResponse creatorProfile =
-                getAuthorizedHallProfile(
-                        requesterId,
-                        role,
-                        "view meal configurations"
-                );
-
-        return mealConfigRepository
-                .findByHallShortNameOrderByMealDateDesc(creatorProfile.hallShortName())
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-
+    //  Populate cache
+    if (cache != null && !result.isEmpty()) {
+        try {
+            cache.put(hallShortName, result);
+            logger.info("[MEAL_CONFIG][GET_ALL] CACHE PUT hall={} entries={}", hallShortName, result.size());
+        } catch (Exception e) {
+            logger.warn("[MEAL_CONFIG][CACHE] PUT failed hall={}: {}", hallShortName, e.getMessage());
+        }
     }
+
+    return result;
+}
 
 
 
@@ -121,10 +198,11 @@ public class MealConfigServiceImpl implements MealConfigService {
                         "update meal configurations"
                 );
 
+        String hallShortName = updaterProfile.hallShortName();
         // Fetch config scoped to this admin's hall — prevents editing another hall's config
-        MealConfig config = mealConfigRepository.findByIdAndHallShortName(configId, updaterProfile.hallShortName()).orElseThrow(() -> new ResourceNotFoundException("Meal config not found or does not belong to your hall"));
+        MealConfig config = mealConfigRepository.findByIdAndHallShortName(configId, hallShortName).orElseThrow(() -> new ResourceNotFoundException("Meal config not found or does not belong to your hall"));
 
-        logger.info("[UPDATE_MEAL_CONFIG] requester={} configId={} hall={}", requesterId, configId, updaterProfile.hallShortName());
+        logger.info("[UPDATE_MEAL_CONFIG] requester={} configId={} hall={}", requesterId, configId, hallShortName);
 
         //  Resolve final values (merge: use request value if provided, else keep existing)
 
@@ -153,90 +231,52 @@ public class MealConfigServiceImpl implements MealConfigService {
         MealConfig saved = mealConfigRepository.save(config);
         logger.info("[UPDATE_MEAL_CONFIG] updated id={}", saved.getId());
 
+        evictHallCache(hallShortName);
         return mapToResponse(saved);
     }
 
 
 
-//
-//    public MessageResponse deleteMealConfig(UUID configId, UUID requesterId, Role role) {
-//
-//        if (role != Role.HALL_STAFF && role != Role.HALL_ADMIN) {
-//            throw new ForbiddenException("Only Hall Staff and Hall Admins can delete meal configurations");
-//        }
-//
-//        HallAssociateProfileResponse requesterProfile =
-//                hallAssociateFeignClient.getMyProfile(requesterId, role);
-//
-//        if (requesterProfile.hallShortName() == null) {
-//            throw new ForbiddenException("Your account has no hall assigned. Contact a Super Admin.");
-//        }
-//
-//        MealConfig config = mealConfigRepository
-//                .findByIdAndHallShortName(configId, requesterProfile.hallShortName())
-//                .orElseThrow(() -> new ResourceNotFoundException(
-//                        "Meal config not found or does not belong to your hall"));
-//
-//        logger.info("[DELETE_MEAL_CONFIG] requester={} configId={} hall={}",
-//                requesterId, configId, requesterProfile.hallShortName());
-//
-//        long totalCut = mealTokenRepository.countByHallShortNameAndMealDateAndMealType(
-//                config.getHallShortName(), config.getMealDate(), config.getMealType());
-//
-//        // Case 1 — no tokens booked at all, safe to delete directly
-//        if (totalCut == 0) {
-//            mealConfigRepository.delete(config);
-//            logger.info("[DELETE_MEAL_CONFIG] deleted with no tokens id={}", configId);
-//            return new MessageResponse("Meal configuration deleted successfully", true);
-//        }
-//
-//        // Case 2 — tokens exist, check if meal is fully settled
-//        long totalUsed    = mealTokenRepository.countUsedByHallShortNameAndMealDateAndMealType(
-//                config.getHallShortName(), config.getMealDate(), config.getMealType());
-//
-//        long totalExpired = mealTokenRepository.countExpiredByHallShortNameAndMealDateAndMealType(
-//                config.getHallShortName(), config.getMealDate(), config.getMealType());
-//
-//        long totalPending = totalCut - totalUsed - totalExpired;
-//
-//        // Still active tokens (PENDING_PAYMENT, APPROVED) — cannot delete yet
-//        if (totalPending > 0) {
-//            throw new BadRequestException(
-//                    totalPending + " token(s) are still active for this meal. " +
-//                            "Wait until all tokens are used or expired before deleting.");
-//        }
-//
-//        // All tokens settled — archive summary then delete
-//        long totalRevenue = totalUsed * config.getMealPrice();
-//
-//        MealConfigHistory history = MealConfigHistory.builder()
-//                .mealConfigId(config.getId())
-//                .hallShortName(config.getHallShortName())
-//                .mealDate(config.getMealDate())
-//                .mealType(config.getMealType())
-//                .mealMenu(config.getMealMenu())
-//                .mealPrice(config.getMealPrice())
-//                .cutTokenBefore(config.getCutTokenBefore())
-//                .tokenExpires(config.getTokenExpires())
-//                .feastNote(config.getFeastNote())
-//                .totalTokensCut(totalCut)
-//                .totalTokensUsed(totalUsed)
-//                .totalTokensExpired(totalExpired)
-//                .totalRevenue(totalRevenue)
-//                .createdByName(config.getCreatedByName())
-//                .build();
-//
-//        mealConfigHistoryRepository.save(history);
-//        mealConfigRepository.delete(config);
-//
-//        logger.info("[DELETE_MEAL_CONFIG] archived and deleted id={} revenue={}",
-//                configId, totalRevenue);
-//
-//        return new MessageResponse("Meal configuration archived and deleted successfully", true);
-//    }
+
+    // Cache helpers
+
+    /**
+     * Returns the "mealConfigs" Cache, or null if Redis is unavailable.
+     * Returning null makes all three CRUD methods degrade gracefully to
+     * DB-only mode rather than throwing during a Redis outage.
+     */
+    private Cache resolveCache() {
+        try {
+            return cacheManager.getCache(CACHE_NAME);
+        } catch (Exception e) {
+            logger.warn("[MEAL_CONFIG][CACHE] could not resolve '{}': {}", CACHE_NAME, e.getMessage());
+            return null;
+        }
+    }
 
 
-    //  ________________________ Helpers __________________
+    /**
+     * Evicts the cache entry for a specific hall.
+     *
+     * Called after every write (create / update) so that the next read by ANY
+     * staff member in that hall fetches fresh data from the DB.
+     *
+     * No-ops gracefully if the Cache or the key doesn't exist.
+     */
+    // Called after every write so all staff in the same hall see fresh data
+    // on their next getAllMealConfigs request.
+    private void evictHallCache(String hallShortName) {
+        try {
+            Cache cache = resolveCache();
+            if (cache != null) {
+                cache.evict(hallShortName);
+                logger.info("[MEAL_CONFIG][CACHE] EVICT hall={}", hallShortName);
+            }
+        } catch (Exception e) {
+            // Non-fatal — the 2-min TTL will expire the entry naturally.
+            logger.warn("[MEAL_CONFIG][CACHE] EVICT failed hall={}: {}", hallShortName, e.getMessage());
+        }
+    }
 
 
     private HallAssociateProfileResponse getAuthorizedHallProfile(UUID requesterId, Role role, String action) {
@@ -302,4 +342,28 @@ public class MealConfigServiceImpl implements MealConfigService {
                 config.getUpdatedAt()
         );
     }
+
+    private MealConfigAdminResponse mapToStudentResponse(MealConfig config) {
+    return new MealConfigAdminResponse(
+            config.getId(),
+            config.getHallShortName(),
+            config.getMealDate(),
+            config.getMealType(),
+            config.getMealMenu(),
+            config.getMealPrice(),
+            config.getCutTokenBefore(),
+            config.getTokenExpires(),
+            config.isActive(),
+            config.getFeastNote(),
+            null,    // totalSold    — admin only
+            null,    // totalUsed    — admin only
+            null,    // totalPending — admin only
+            computeIsBookingOpen(config),
+            computeIsTokenValid(config),
+            null,    // createdByName — admin only
+            null,    // updatedByName — admin only
+            config.getCreatedAt(),
+            null     // updatedAt    — admin only
+    );
+}
 }

@@ -97,6 +97,10 @@ export const hallAdminAPI = {
     return apiClient.patch(`/api/v1/payments/${id}/approve`);
   },
 
+  rejectPayment: (id, rejectionReason) => {
+    return apiClient.patch(`/api/v1/payments/${id}/reject`, { rejectionReason });
+  },
+
   // Backward-compatible aliases
   getProfile: () => apiClient.get("/api/v1/admins/me"),
   updateProfile: (adminData) => apiClient.put("/api/v1/admins/me", adminData),
@@ -136,7 +140,7 @@ export const hallAPI = {
     return apiClient.put(`/api/v1/halls/${id}`, hallData);
   },
 
-  updateHallStatus: (id, status) => {
+  updateHallStatus: (id) => {
     return apiClient.patch(`/api/v1/halls/${id}/status`, { reason: 'Status update' });
   },
 
@@ -219,39 +223,121 @@ export const superAdminAPI = {
 
 // Hall Staff API calls
 export const hallStaffAPI = {
-  getMyProfile: () => {
-    return apiClient.get("/api/v1/admins/me");
+   getMyProfile: () => {
+     return apiClient.get("/api/v1/admins/me");
+   },
+
+   updateMyProfile: (staffData) => {
+     return apiClient.put("/api/v1/admins/me", staffData);
+   },
+
+   getStudents: (filters = {}) => {
+     return apiClient.get("/api/v1/students", { params: filters });
+   },
+
+   getMealConfigs: (filters = {}) => {
+     return apiClient.get("/api/v1/meal-configs", { params: filters });
+   },
+
+   createMealConfig: (payload) => {
+     return apiClient.post("/api/v1/meal-configs", payload);
+   },
+
+   updateMealConfig: (configId, payload) => {
+     return apiClient.put(`/api/v1/meal-configs/${configId}`, payload);
+   },
+
+   getPayments: (filters = {}) => {
+     return apiClient.get("/api/v1/payments", { params: filters });
+   },
+
+   approvePayment: (id) => {
+     return apiClient.patch(`/api/v1/payments/${id}/approve`);
+   },
+
+   rejectPayment: (id, rejectionReason) => {
+     return apiClient.patch(`/api/v1/payments/${id}/reject`, { rejectionReason });
+   },
+
+   // QR Token Scanning
+   scanQrToken: (qrCodeData) => {
+     return apiClient.post("/api/v1/meal-tokens/staff-scan", { qrCodeData });
+   },
+
+    // Hall meal summaries
+    // Resolve and cache the working endpoint to avoid repeated fallback calls
+    __hallSummaryEndpoint: null,
+    getHallSummaries: function (params = {}) {
+      const self = this;
+      const tryEndpoint = (ep) => apiClient.get(ep, { params });
+
+      if (self.__hallSummaryEndpoint) {
+        return tryEndpoint(self.__hallSummaryEndpoint);
+      }
+
+      // Try documented primary endpoint first
+      return tryEndpoint('/api/v1/summary/hall')
+        .then((res) => {
+          self.__hallSummaryEndpoint = '/api/v1/summary/hall';
+          return res;
+        })
+        .catch((err) => {
+          if (err.response && err.response.status === 404) {
+            // try fallback without /hall once
+            return tryEndpoint('/api/v1/summary')
+              .then((res) => {
+                self.__hallSummaryEndpoint = '/api/v1/summary';
+                return res;
+              });
+          }
+          throw err;
+        });
+    },
+
+   // Backward-compatible aliases
+   getProfile: () => apiClient.get("/api/v1/admins/me"),
+   updateProfile: (staffData) => apiClient.put("/api/v1/admins/me", staffData),
+};
+
+
+// Meal Token API calls (for students)
+export const mealTokenAPI = {
+  cutToken: (payload) => {
+    return apiClient.post("/api/v1/meal-tokens", payload);
   },
 
-  updateMyProfile: (staffData) => {
-    return apiClient.put("/api/v1/admins/me", staffData);
+  getMyTokens: () => {
+    return apiClient.get("/api/v1/meal-tokens/my");
   },
 
-  getStudents: (filters = {}) => {
-    return apiClient.get("/api/v1/students", { params: filters });
+  getTokenById: (id) => {
+    return apiClient.get(`/api/v1/meal-tokens/${id}`);
   },
+};
 
-  getMealConfigs: (filters = {}) => {
-    return apiClient.get("/api/v1/meal-configs", { params: filters });
-  },
-
-  createMealConfig: (payload) => {
-    return apiClient.post("/api/v1/meal-configs", payload);
-  },
-
-  updateMealConfig: (configId, payload) => {
-    return apiClient.put(`/api/v1/meal-configs/${configId}`, payload);
+// Payment API calls (for students)
+export const paymentAPI = {
+  getMyPayments: () => {
+    return apiClient.get("/api/v1/payments/my");
   },
 
   getPayments: (filters = {}) => {
     return apiClient.get("/api/v1/payments", { params: filters });
   },
 
+  getPaymentById: (id) => {
+    return apiClient.get(`/api/v1/payments/${id}`);
+  },
+
+  submitPayment: (payload) => {
+    return apiClient.post("/api/v1/payments", payload);
+  },
+
   approvePayment: (id) => {
     return apiClient.patch(`/api/v1/payments/${id}/approve`);
   },
 
-  // Backward-compatible aliases
-  getProfile: () => apiClient.get("/api/v1/admins/me"),
-  updateProfile: (staffData) => apiClient.put("/api/v1/admins/me", staffData),
+  rejectPayment: (id, rejectionReason) => {
+    return apiClient.patch(`/api/v1/payments/${id}/reject`, { rejectionReason });
+  },
 };

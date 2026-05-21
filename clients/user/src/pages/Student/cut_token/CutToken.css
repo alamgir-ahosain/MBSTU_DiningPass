@@ -1,0 +1,434 @@
+/* Cut Token Page Styles */
+
+.meal-configs-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.meal-config-card {
+    background-color: white;
+    border: 1px solid #ecf0f1;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    position: relative;
+}
+
+.meal-config-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #3498db;
+}
+
+.meal-config-card.selected {
+    border: 2px solid #27ae60;
+    background-color: #f0fdf4;
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+}
+
+.meal-selected-indicator {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: #27ae60;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.meal-config-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.meal-config-header h3 {
+    font-size: 1.3rem;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.meal-date-badge {
+    background-color: #3498db;
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.meal-date-badge.past {
+    background-color: #95a5a6;
+}
+
+.meal-config-details {
+    flex: 1;
+    margin-bottom: 1.5rem;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #555;
+    min-width: 150px;
+}
+
+.detail-value {
+    color: #2c3e50;
+    text-align: right;
+    flex: 1;
+}
+
+.detail-price {
+    color: #27ae60;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.detail-note {
+    background-color: #fff3cd;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-style: italic;
+    color: #856404;
+}
+
+.btn-cut-token {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    margin-top: auto;
+}
+
+.meal-card-actions {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #666;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.empty-state p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #ecf0f1;
+    background-color: #f8f9fa;
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background-color: #e0e0e0;
+    color: #2c3e50;
+}
+
+.modal-close:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.payment-summary {
+    background-color: #ecf0f1;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+}
+
+.selected-meal-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.selected-meal-card {
+    background: #fff;
+    border: 1px solid #dfe6e9;
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+}
+
+.payment-summary h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #bdc3c7;
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+}
+
+.summary-row span:first-child {
+    color: #555;
+    font-weight: 500;
+}
+
+.summary-row strong {
+    color: #2c3e50;
+}
+
+.summary-row .price {
+    color: #27ae60;
+    font-size: 1.1rem;
+}
+
+.total-row {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 2px solid #bdc3c7;
+}
+
+/* Payment Form */
+.payment-form {
+    margin-top: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.form-group select,
+.form-group input[type="tel"],
+.form-group input[type="file"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.form-group select:focus,
+.form-group input[type="tel"]:focus,
+.form-group input[type="file"]:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.form-group select:disabled,
+.form-group input:disabled {
+    background-color: #ecf0f1;
+    cursor: not-allowed;
+}
+
+.form-hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+.meal-types-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #555;
+    font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 0.75rem;
+    cursor: pointer;
+    width: auto;
+}
+
+.file-info {
+    color: #27ae60;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: flex-end;
+}
+
+.btn-submit {
+    flex: 1;
+}
+
+/* Loading State */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1.05rem;
+}
+
+/* Page Subtitle */
+.page-subtitle {
+    color: #666;
+    font-size: 1rem;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .meal-configs-container {
+        grid-template-columns: 1fr;
+    }
+
+    .meal-config-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .meal-date-badge {
+        align-self: flex-start;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .detail-value {
+        text-align: left;
+        margin-top: 0.25rem;
+    }
+
+    .modal-overlay {
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        border-radius: 8px 8px 0 0;
+        max-height: 80vh;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-submit {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .meal-config-card {
+        padding: 1rem;
+    }
+
+    .meal-config-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .detail-label {
+        min-width: 100px;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 import { hallStaffAPI } from '../../../services/api';
 import '../HallStaffPages.css';
 
@@ -10,10 +11,12 @@ const getItems = (payload) => {
 };
 
 export const HallStaffDashboard = () => {
+    const { logout } = useAuth();
     const [counts, setCounts] = useState({
         meals: 0,
         payments: 0,
     });
+    const [summaries, setSummaries] = useState([]);
 
     useEffect(() => {
         const fetchCounts = async () => {
@@ -22,6 +25,14 @@ export const HallStaffDashboard = () => {
                     hallStaffAPI.getMealConfigs(),
                     hallStaffAPI.getPayments({ page: 0, size: 1 }),
                 ]);
+
+                // fetch a small page of summaries for dashboard card
+                let summariesRes = null;
+                try {
+                    summariesRes = await hallStaffAPI.getHallSummaries({ page: 0, size: 5 });
+                } catch (err) {
+                    console.warn('Failed to load hall summaries for dashboard', err);
+                }
 
                 const paymentPayload = paymentsRes.data;
                 const paymentCount = typeof paymentPayload?.totalElements === 'number'
@@ -32,6 +43,10 @@ export const HallStaffDashboard = () => {
                     meals: getItems(mealsRes.data).length,
                     payments: paymentCount,
                 });
+
+                if (summariesRes) {
+                    setSummaries(getItems(summariesRes.data));
+                }
             } catch (error) {
                 console.warn('Failed to load Hall Staff dashboard counts', error);
             }
@@ -47,35 +62,42 @@ export const HallStaffDashboard = () => {
                 <p>Review payments, manage meal configs, and support student dining operations.</p>
             </div>
 
+
+
             <div className="admin-stats">
                 <div className="stat-card">
                     <h3>Meal Configs</h3>
                     <p className="stat-number">{counts.meals}</p>
                 </div>
                 <div className="stat-card">
-                    <h3>Payments</h3>
+                    <h3>Pending Payments</h3>
                     <p className="stat-number">{counts.payments}</p>
                 </div>
+
             </div>
 
             <div className="dashboard-grid">
-                <Link to="/hallStaff/payments" className="dashboard-card">
-                    <div className="card-icon">💳</div>
-                    <h3>Payments</h3>
-                    <p>View submitted payments and approve them with screenshot preview.</p>
-                </Link>
-
-                <Link to="/hallStaff/meals" className="dashboard-card">
-                    <div className="card-icon">🍴</div>
-                    <h3>Meals</h3>
-                    <p>Manage meal configs just like hall admin.</p>
-                </Link>
-
-                <Link to="/hallStaff/profile" className="dashboard-card info-card">
-                    <div className="card-icon">👤</div>
-                    <h3>My Profile</h3>
-                    <p>View and update your hall staff profile.</p>
-                </Link>
+                <div className="dashboard-card" style={{ gridColumn: '2 / 3' }}>
+                    <div className="card-icon">📊</div>
+                    <h3>Hall Meal Summary</h3>
+                    {summaries.length === 0 ? (
+                        <p style={{ marginTop: '0.5rem' }}>No summaries available</p>
+                    ) : (
+                        <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            {summaries.map((s) => (
+                                <div key={s.id} className="summary-mini-card" style={{ border: '1px solid #eee', padding: '0.5rem', borderRadius: '6px', minWidth: '150px' }}>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{s.mealDate} · {s.mealType}</div>
+                                    <div style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                                        <div>Sold: <strong>{s.totalTokensSold ?? 0}</strong></div>
+                                        <div>Used: <strong>{s.totalTokensUsed ?? 0}</strong></div>
+                                        <div>Unused: <strong>{s.totalTokensUnused ?? 0}</strong></div>
+                                        <div>Revenue: <strong>{s.totalRevenue ?? 0}</strong></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

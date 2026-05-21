@@ -9,13 +9,22 @@ const getItems = (payload) => {
     return [];
 };
 
+const getTokenExpireTime = (mealType) => {
+    if (mealType === 'LUNCH') {
+        return '15:00'; // 3 PM
+    } else if (mealType === 'DINNER') {
+        return '22:00'; // 10 PM
+    }
+    return '15:00'; // default to 3 PM
+};
+
 const createDefaultForm = () => ({
     mealDate: '',
     mealType: 'LUNCH',
     mealMenu: '',
-    mealPrice: '',
-    cutTokenBefore: '23:59',
-    tokenExpires: '14:30',
+    mealPrice: 30,
+    cutTokenBefore: '00:00',
+    tokenExpires: getTokenExpireTime('LUNCH'),
     feastNote: '',
 });
 
@@ -61,7 +70,14 @@ export const HallStaffMealConfigs = () => {
 
     const handleCreateChange = (event) => {
         const { name, value } = event.target;
-        setCreateForm((prev) => ({ ...prev, [name]: value }));
+        const updatedForm = { ...createForm, [name]: value };
+
+        // Auto-set tokenExpires based on meal type
+        if (name === 'mealType') {
+            updatedForm.tokenExpires = getTokenExpireTime(value);
+        }
+
+        setCreateForm(updatedForm);
     };
 
     const handleUpdateChange = (event) => {
@@ -160,7 +176,7 @@ export const HallStaffMealConfigs = () => {
                                     <p><strong>Feast Note:</strong> {config.feastNote || '-'}</p>
                                     <p><strong>Sold </strong> {config.totalTokensSold || '-'}</p>
                                     <p><strong>Used:</strong> {config.totalTokensUsed || '-'}</p>
-                                    <p><strong>Pending:</strong> {config.totalTokenPending || '-'}</p>
+                                    <p><strong>UnUsed:</strong> {config.totalTokenPending || '-'}</p>
                                 </div>
 
                                 <div className="meal-config-card-actions">

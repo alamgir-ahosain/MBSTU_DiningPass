@@ -21,6 +21,7 @@ public record HallMealSummaryResponse(
         Long      totalRevenue,
         boolean   isFinalized,
         LocalDateTime finalizedAt,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 
 ) {}
