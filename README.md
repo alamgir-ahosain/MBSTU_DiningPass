@@ -1,6 +1,10 @@
-# MBSTU DiningPass - Project Overview
+>**On Going**
 
-MBSTU DiningPass is a mobile and web-enabled dining management platform for Mawlana Bhashani Science and Technology University (MBSTU). It digitizes the full hall meal lifecycle: student registration, meal booking, payment verification, QR-based meal collection, and hall-level reporting.
+<br>
+
+# MBSTU DiningPass 
+
+MBSTU DiningPass is a  web-enabled dining management platform for Mawlana Bhashani Science and Technology University (MBSTU). It digitizes the full hall meal lifecycle: student registration, meal booking, payment verification, QR-based meal collection, and hall-level reporting.
 
 The system is designed for four operational roles:
 - `STUDENT`
@@ -10,20 +14,11 @@ The system is designed for four operational roles:
 
 ---
 
-## Deployment Links
-
-- Web client (update with your production URL): `TBD`
-- API gateway base URL (update with your production URL): `TBD`
-- API references: `/docs/APIs/api-reference.md`
-- Request/response examples: `/docs/APIs/request-response-reference.md`
-- Database schema: `/docs/database/MODELS_SCHEMA.md`
-
----
 
 ## Core User Features
 
 ### 1) Secure Authentication and Role-Based Access
-- Firebase-backed authentication with custom claims (`dbId`, `role`)
+- Firebase-backed authentication with custom claims 
 - Gateway-level token verification and trusted header forwarding
 - Role-specific access across student, hall staff/admin, and super admin workflows
 
@@ -51,7 +46,7 @@ The system is designed for four operational roles:
 ## Admin Features
 
 - Hall and hall-associate account management
-- Meal configuration management (`LUNCH`, `DINNER`)
+- Meal configuration management 
 - Payment queue management (approve/reject)
 - Real-time counter scan operations
 - Hall meal summary analytics (sold/used/unused/revenue)
@@ -76,7 +71,7 @@ The system is designed for four operational roles:
 | Part             | Technology |
 |------------------|------------|
 | Backend          | Spring Boot (microservices) |
-| Frontend         | React (web), planned/optional mobile client integration |
+| Frontend         | React (web), planned mobile client integration |
 | Database         | PostgreSQL |
 | Cache/Lock       | Redis |
 | API Security     | Firebase ID Token + API Gateway verification |
@@ -94,13 +89,12 @@ The system is designed for four operational roles:
 | `auth-service` | Hall, student, and hall-associate account lifecycle and authorization data |
 | `meal-service` | Meal config, token/payment lifecycle, QR scan, summaries, scheduler |
 | `eureka-server` | Service discovery scaffold |
-| `user-service` | Reserved scaffold for future domain expansion |
 
 ---
 
 ## Frontend Services
 
-- **User Web Client** (`clients/user`): role-based dashboard and user operations
+- **User Web Client** : role-based dashboard and user operations
 - **Admin Operations UI**: managed within role-based frontend routes
 
 ---
