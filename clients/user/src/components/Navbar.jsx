@@ -80,6 +80,7 @@ export const Navbar = () => {
                                 <>
                                     <Link to="/student/dashboard" className="nav-link" onClick={closeMenu}>Dashboard</Link>
                                     <Link to="/student/cut-token" className="nav-link" onClick={closeMenu}>Cut Token</Link>
+                                    <Link to="/student/payment-history" className="nav-link" onClick={closeMenu}>Payment History</Link>
                                     <Link to="/student/my-tokens" className="nav-link" onClick={closeMenu}>My Tokens</Link>
                                     <Link to="/student/profile" className="nav-link" onClick={closeMenu}>My Profile</Link>
                                 </>

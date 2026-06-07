@@ -21,11 +21,13 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+
     @Column(name = "student_id", nullable = false)
     private UUID studentId;                     // plain UUID — students live in auth-service
 
     @Column(name = "hall_short_name", nullable = false)
     private String hallShortName;
+
     @Column(name = "meal_date", nullable = false)
     private LocalDate mealDate;                 // which meal date this payment covers
 
@@ -41,38 +43,42 @@ public class Payment {
     @Column(name = "total_amount", nullable = false)
     private Long totalAmount;// sum of all linked token prices
 
-
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false, length = 20)
     private PaymentMethod paymentMethod;        // BKASH | NAGAD | ROCKET | CASH
 
-    @Column(name = "sender_number", nullable = false, length = 20)
-    private String senderNumber;                // student's bKash/Nagad number
 
 
-    @Column(name = "screenshot_url", columnDefinition = "TEXT")
-    private String screenshotUrl;               // main proof image URL
+
+
+
+    @Column(name = "bkash_payment_id", length = 100, unique = true)
+    private String bkashPaymentId; // paymentID from bKash Create response
+
+    @Column(name = "bkash_trx_id", length = 100)
+    private String bkashTrxId; // trxID from bKash Execute response
+
+    @Column(name = "customer_number", length = 20)
+    private String customerMsisdn; // student's bKash number (from Execute response)
+
+    @Column(name = "merchant_invoice_no", length = 100)
+    private String merchantInvoiceNo;  // your generated invoice (DINING-XXXXXXXX)
+
+
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false, length = 20)
-    private PaymentStatus paymentStatus = PaymentStatus.SUBMITTED; //  SUBMITTED,VERIFIED,REJECTED
+    private PaymentStatus paymentStatus = PaymentStatus.INITIATED;
 
-    @Column(name = "rejection_reason", columnDefinition = "TEXT")
-    private String rejectionReason;             // nullable — set on rejection
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "verified_by_name", length = 100)
-    private String verifiedByName;              // snapshot at verification time
 
-    @Column(name = "verified_at")
-    private LocalDateTime verifiedAt;
-
-    @Column(name = "submitted_at", nullable = false, updatable = false)
-    private LocalDateTime submittedAt;
 
     @PrePersist
     public void onCreate() {
-        this.submittedAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
 }

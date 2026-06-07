@@ -1,112 +1,112 @@
-package com.mbstu.diningpass.meal.controller;
-
-
-import com.mbstu.diningpass.meal.dto.request.payment.PaymentRejectRequest;
-import com.mbstu.diningpass.meal.dto.response.payment.PaymentAdminResponse;
-import com.mbstu.diningpass.meal.dto.response.payment.PaymentRejectionResponse;
-import com.mbstu.diningpass.meal.dto.response.payment.PaymentResponse;
-import com.mbstu.diningpass.meal.enums.Role;
-import com.mbstu.diningpass.meal.service.abstraction.PaymentService;
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
-
-@RestController
-@RequestMapping("/api/v1/payments")
-@AllArgsConstructor
-public class PaymentController {
-
-    private final PaymentService paymentService;
-    private final Logger logger= LoggerFactory.getLogger(PaymentController.class);
-
-
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("Meal-Service: Payment Controller is working!");
-    }
-
-
-    // HALL_ADMIN / HALL_STAFF approves a payment → generates QR tokens
-    @PatchMapping("/{id}/approve")
-    public ResponseEntity<PaymentAdminResponse> approvePayment(
-            @RequestHeader("X-User-Id")   UUID requesterId,
-            @RequestHeader("X-User-Role") Role role,
-            @PathVariable UUID id) {
-
-        logger.info("[APPROVE_PAYMENT] requester={} role={} paymentId={}", requesterId, role, id);
-        PaymentAdminResponse response = paymentService.approvePayment(requesterId, role, id);
-        logger.info("[APPROVE_PAYMENT] requester={} role={} paymentId={}", requesterId, role, id);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-
-    @GetMapping
-    public ResponseEntity<Page<PaymentResponse>> getAllPayments(
-            @RequestHeader("X-User-Id")   UUID requesterId,
-            @RequestHeader("X-User-Role") Role requesterRole,
-            @RequestParam(defaultValue = "0")  int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.status(HttpStatus.OK).body(paymentService.getAllPayment(requesterId,requesterRole, page, size));
-    }
-
-    @PatchMapping("/{id}/reject")
-    public ResponseEntity<PaymentRejectionResponse> rejectPayment(
-            @RequestHeader("X-User-Id") UUID requesterId,
-            @RequestHeader("X-User-Role") Role requesterRole,
-            @PathVariable UUID id,
-            @Valid @RequestBody PaymentRejectRequest request) {
-        PaymentRejectionResponse response = paymentService.rejectPayment(requesterId, requesterRole, id, request);
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/my")
-    public ResponseEntity<List<PaymentResponse>> getMyPayments(
-            @RequestHeader("X-User-Id") UUID requesterId,
-            @RequestHeader("X-User-Role") Role requesterRole) {
-
-        List<PaymentResponse> payments = paymentService.getMyPayments(requesterId, requesterRole);
-        logger.info("[GET_MY_PAYMENTS] requester={} role={}", requesterId, requesterRole);
-        return ResponseEntity.status(HttpStatus.OK).body(payments);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // HALL_ADMIN / HALL_STAFF rejects a payment with a reason
-//    @PatchMapping("/{id}/reject")
-//    public ResponseEntity<PaymentAdminResponse> rejectPayment(
+//package com.mbstu.diningpass.meal.controller;
+//
+//
+//import com.mbstu.diningpass.meal.dto.request.payment.PaymentRejectRequest;
+//import com.mbstu.diningpass.meal.dto.response.payment.PaymentAdminResponse;
+//import com.mbstu.diningpass.meal.dto.response.payment.PaymentRejectionResponse;
+//import com.mbstu.diningpass.meal.dto.response.payment.PaymentResponse;
+//import com.mbstu.diningpass.meal.enums.Role;
+//import com.mbstu.diningpass.meal.service.abstraction.PaymentService;
+//import jakarta.validation.Valid;
+//import lombok.AllArgsConstructor;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+//import org.springframework.data.domain.Page;
+//import org.springframework.data.domain.PageRequest;
+//import org.springframework.data.domain.Pageable;
+//import org.springframework.data.domain.Sort;
+//import org.springframework.http.HttpStatus;
+//import org.springframework.http.ResponseEntity;
+//import org.springframework.web.bind.annotation.*;
+//
+//import java.util.List;
+//import java.util.UUID;
+//
+//@RestController
+//@RequestMapping("/api/v1/payments")
+//@AllArgsConstructor
+//public class PaymentController {
+//
+//    private final PaymentService paymentService;
+//    private final Logger logger= LoggerFactory.getLogger(PaymentController.class);
+//
+//
+//    @GetMapping("/test")
+//    public ResponseEntity<String> test() {
+//        return ResponseEntity.ok("Meal-Service: Payment Controller is working!");
+//    }
+//
+//
+//    // HALL_ADMIN / HALL_STAFF approves a payment → generates QR tokens
+//    @PatchMapping("/{id}/approve")
+//    public ResponseEntity<PaymentAdminResponse> approvePayment(
 //            @RequestHeader("X-User-Id")   UUID requesterId,
 //            @RequestHeader("X-User-Role") Role role,
+//            @PathVariable UUID id) {
+//
+//        logger.info("[APPROVE_PAYMENT] requester={} role={} paymentId={}", requesterId, role, id);
+//        PaymentAdminResponse response = paymentService.approvePayment(requesterId, role, id);
+//        logger.info("[APPROVE_PAYMENT] requester={} role={} paymentId={}", requesterId, role, id);
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//    }
+//
+//
+//    @GetMapping
+//    public ResponseEntity<Page<PaymentResponse>> getAllPayments(
+//            @RequestHeader("X-User-Id")   UUID requesterId,
+//            @RequestHeader("X-User-Role") Role requesterRole,
+//            @RequestParam(defaultValue = "0")  int page,
+//            @RequestParam(defaultValue = "20") int size) {
+//        return ResponseEntity.status(HttpStatus.OK).body(paymentService.getAllPayment(requesterId,requesterRole, page, size));
+//    }
+//
+//    @PatchMapping("/{id}/reject")
+//    public ResponseEntity<PaymentRejectionResponse> rejectPayment(
+//            @RequestHeader("X-User-Id") UUID requesterId,
+//            @RequestHeader("X-User-Role") Role requesterRole,
 //            @PathVariable UUID id,
-//            @Valid @RequestBody RejectPaymentRequest request
-//    ) {
-//        PaymentAdminResponse response = paymentService.rejectPayment(requesterId, role, id, request);
+//            @Valid @RequestBody PaymentRejectRequest request) {
+//        PaymentRejectionResponse response = paymentService.rejectPayment(requesterId, requesterRole, id, request);
 //        return ResponseEntity.ok(response);
 //    }
-}
+//
+//    @GetMapping("/my")
+//    public ResponseEntity<List<PaymentResponse>> getMyPayments(
+//            @RequestHeader("X-User-Id") UUID requesterId,
+//            @RequestHeader("X-User-Role") Role requesterRole) {
+//
+//        List<PaymentResponse> payments = paymentService.getMyPayments(requesterId, requesterRole);
+//        logger.info("[GET_MY_PAYMENTS] requester={} role={}", requesterId, requesterRole);
+//        return ResponseEntity.status(HttpStatus.OK).body(payments);
+//    }
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//    // HALL_ADMIN / HALL_STAFF rejects a payment with a reason
+////    @PatchMapping("/{id}/reject")
+////    public ResponseEntity<PaymentAdminResponse> rejectPayment(
+////            @RequestHeader("X-User-Id")   UUID requesterId,
+////            @RequestHeader("X-User-Role") Role role,
+////            @PathVariable UUID id,
+////            @Valid @RequestBody RejectPaymentRequest request
+////    ) {
+////        PaymentAdminResponse response = paymentService.rejectPayment(requesterId, role, id, request);
+////        return ResponseEntity.ok(response);
+////    }
+//}

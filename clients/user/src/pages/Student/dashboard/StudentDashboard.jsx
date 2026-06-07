@@ -21,8 +21,14 @@ export const StudentDashboard = () => {
 
                 <Link to="/student/cut-token" className="dashboard-card">
                     <div className="card-icon">🎫</div>
-                    <h3>Cut Meal Token</h3>
-                    <p>Book meals and pay for your dining pass</p>
+                    <h3>Pay with bKash</h3>
+                    <p>Open the gateway checkout and cut your meal token</p>
+                </Link>
+
+                <Link to="/student/payment-history" className="dashboard-card">
+                    <div className="card-icon">🧾</div>
+                    <h3>Payment History</h3>
+                    <p>Review your bKash payment requests and statuses</p>
                 </Link>
 
                 <Link to="/student/my-tokens" className="dashboard-card">

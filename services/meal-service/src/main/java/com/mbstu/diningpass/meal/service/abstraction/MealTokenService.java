@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MealTokenService {
-     CutTokenResponse cutToken(UUID studentId, Role role, CutTokenRequest request) ;
+//     CutTokenResponse cutToken(UUID studentId, Role role, CutTokenRequest request) ;
     public List<MealTokenStudentResponse> getMyMealToken(UUID studentId, Role role) ;
 
     }

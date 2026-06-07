@@ -39,3 +39,23 @@ server:
 
 jwt:
   secret: ${JWT_SECRET}
+
+
+#  bKash Configuration
+bkash:
+  username: ${BKASH_USERNAME}
+  password: ${BKASH_PASSWORD}
+  apiKey: ${BKASH_API_KEY}
+  secretKey: ${BKASH_SECRET_KEY}
+
+  grantTokenUrl: ${BKASH_GRANT_TOKEN_URL}
+  refreshTokenUrl: ${BKASH_REFRESH_TOKEN_URL}
+  createPaymentUrl: ${BKASH_CREATE_PAYMENT_URL}
+  executePaymentUrl: ${BKASH_EXECUTE_PAYMENT_URL}
+  refundUrl: ${BKASH_REFUND_URL}
+  callbackUrl: ${BKASH_CALLBACK_URL}
+
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  

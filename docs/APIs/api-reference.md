@@ -81,18 +81,30 @@
 
 ---
 
-## Payment Service API (v1)
+## bKash Payment Gateway API (v1)
+
+**Base path:** `/api/payment/bkash`
+
+| REST Method | URL Path    | Headers (Auth)             | Role Access | Description |
+|-------------|-------------|----------------------------|-------------|-------------|
+| POST        | `/create`   | `X-User-Id`, `X-User-Role` | STUDENT     | Validate the meal request, create a bKash payment, and return `paymentID` + `bkashURL`. |
+| POST        | `/execute`  | None                       | PUBLIC      | Execute the bKash payment after redirect and auto-generate meal tokens on success. |
+| POST        | `/refund`   | None                       | HALL_ADMIN, SUPER_ADMIN | Refund a completed bKash payment. |
+
+---
+
+## Student Payment History API (v1)
 
 **Base path:** `/api/v1/payments`
 
-| REST Method | URL Path        | Headers (Auth)             | Role Access            | Description                                      |
-|-------------|-----------------|----------------------------|------------------------|--------------------------------------------------|
-| GET         | `/`             | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF | Get payments with pagination (`page`, `size`).   |
-| GET         | `/my`           | `X-User-Id`, `X-User-Role` | STUDENT                | Get my payment.                                  |
-| PATCH       | `/{id}/approve` | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF | Approve payment and generate QR meal tokens.     |
-| PATCH       | `/{id}/reject`  | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF | Reject payment with a message.                   |
-| GET         | `/test`         | None                       | PUBLIC                 | Health/test endpoint for the payment controller. |
- 
+| REST Method | URL Path  | Headers (Auth)             | Role Access            | Description |
+|-------------|-----------|----------------------------|------------------------|-------------|
+| GET         | `/my`     | `X-User-Id`, `X-User-Role` | STUDENT                | Get the current student's payment history. |
+| GET         | `/`       | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF | Get payments with pagination (`page`, `size`). This is the legacy/manual admin queue. |
+| PATCH       | `/{id}/approve` | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF | Legacy/manual approval path. Approves a payment and generates QR meal tokens. |
+| PATCH       | `/{id}/reject` | `X-User-Id`, `X-User-Role` | HALL_ADMIN, HALL_STAFF | Legacy/manual rejection path with a message. |
+| GET         | `/test`   | None                       | PUBLIC                 | Health/test endpoint for the payment controller. |
+
 ---
 
 ## Summary Service API (v1)
