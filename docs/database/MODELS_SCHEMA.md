@@ -405,7 +405,7 @@ QR codes are generated only after payment verification.
 
 # Table: `payments`
 
-The `payments` table stores submitted payment information from students.  
+The `payments` table stores bKash gateway payment records and legacy manual-payment history.
 One payment may contain one or multiple meal types (`LUNCH`, `DINNER`) for the same date.
 
 | Column Name        | Type                          | Constraints                                | Description |
@@ -415,15 +415,16 @@ One payment may contain one or multiple meal types (`LUNCH`, `DINNER`) for the s
 | `hall_short_name`  | VARCHAR(255)                  | NOT NULL                                   | Hall associated with the payment |
 | `meal_date`        | DATE                          | NOT NULL                                   | Meal serving date |
 | `meal_types`       | LIST<ENUM (`MealType`)>       | NOT NULL                                   | Selected meal types (`LUNCH`, `DINNER`) |
-| `total_amount`     | BIGINT                        | NOT NULL                                   | Total payment amount |
-| `payment_method`   | ENUM (`PaymentMethod`)        | NOT NULL                                   | `BKASH` or `NAGAD` |
-| `sender_number`    | VARCHAR(20)                   | NOT NULL                                   | Student payment wallet number |
-| `screenshot_url`   | TEXT                          | NULLABLE                                   | Uploaded payment proof image URL |
-| `payment_status`   | ENUM (`PaymentStatus`)        | NOT NULL, DEFAULT `SUBMITTED`              | `SUBMITTED`, `VERIFIED`, `REJECTED` |
-| `rejection_reason` | TEXT                          | NULLABLE                                   | Reason for rejection |
-| `verified_by_name` | VARCHAR(100)                  | NULLABLE                                   | Snapshot of verifier name |
-| `verified_at`      | TIMESTAMP                     | NULLABLE                                   | Verification timestamp |
-| `submitted_at`     | TIMESTAMP                     | NOT NULL, AUTO-SET                         | Payment submission timestamp |
+| `total_amount`        | BIGINT                   | NOT NULL                                   | Total payment amount |
+| `payment_method`      | ENUM (`PaymentMethod`)   | NOT NULL                                   | `BKASH` or `NAGAD` |
+| `bkash_payment_id`    | VARCHAR(100)             | NULLABLE, UNIQUE                           | bKash `paymentID` from the create response |
+| `bkash_trx_id`        | VARCHAR(100)             | NULLABLE                                   | bKash `trxID` from the execute response |
+| `customer_msisdn`     | VARCHAR(20)              | NULLABLE                                   | Customer mobile number returned by bKash |
+| `merchant_invoice_no` | VARCHAR(100)             | NULLABLE                                   | Generated invoice number (e.g. `DINING-XXXXXXXX`) |
+| `payment_status`      | ENUM (`PaymentStatus`)   | NOT NULL, DEFAULT `INITIATED`              | Gateway statuses: `INITIATED`, `COMPLETED`, `FAILED`, `REFUNDED` |
+| `created_at`          | TIMESTAMP                | NOT NULL, AUTO-SET                         | Payment creation timestamp |
+
+> Legacy manual-payment fields such as `sender_number`, `screenshot_url`, `rejection_reason`, and manual approval timestamps are no longer part of the active bKash gateway flow.
 
 ---
 
@@ -466,15 +467,15 @@ Used by hall admin/staff to update an existing meal configuration.
 
 # DTO: `CutTokenRequest`
 
-Used by students to request meal token booking and submit payment information.
+Used by students to request meal token booking and start the bKash gateway payment.
 
 | Field Name | Type | Validation | Description |
 |------------|------|------------|-------------|
-| `paymentMethod` | `PaymentMethod` | `@NotNull` | `BKASH` or `NAGAD` |
-| `senderNumber` | `String` | `@NotBlank`, `@Pattern(^01[3-9]\\d{8}$)` | Student payment wallet number |
+| `paymentMethod` | `PaymentMethod` | `@NotNull` | `BKASH` or `NAGAD` (frontend currently uses `BKASH`) |
 | `mealDate` | `LocalDate` | `@NotNull`, `@FutureOrPresent` | Requested meal date |
 | `mealTypes` | `List<MealType>` | `@NotEmpty`, `@Size(max = 2)` | Selected meal types |
-| `screenshotUrl` | `String` | Optional | Payment proof image URL |
+
+> `senderNumber` and `screenshotUrl` were removed from the gateway request because bKash returns the customer number after execute, and no manual screenshot is needed.
 
 ---
 

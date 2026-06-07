@@ -29,18 +29,18 @@ public class MealTokenController {
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("Meal-Service: Meal Token Controller is working!");
     }
-
-    // STUDENT cuts (books) a token — submits payment info
-    @PostMapping
-    public ResponseEntity<CutTokenResponse> cutToken(
-            @RequestHeader("X-User-Id")   UUID studentId,
-            @RequestHeader("X-User-Role") Role role,
-            @Valid @RequestBody CutTokenRequest request) {
-
-        CutTokenResponse response = mealTokenService.cutToken(studentId, role, request);
-        logger.info("[CUT_TOKEN] studentId={} role={} mealDate={} mealTypes={}", studentId, role, request.mealDate(), request.mealTypes());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+//
+//    // STUDENT cuts (books) a token — submits payment info
+//    @PostMapping
+//    public ResponseEntity<CutTokenResponse> cutToken(
+//            @RequestHeader("X-User-Id")   UUID studentId,
+//            @RequestHeader("X-User-Role") Role role,
+//            @Valid @RequestBody CutTokenRequest request) {
+//
+//        CutTokenResponse response = mealTokenService.cutToken(studentId, role, request);
+//        logger.info("[CUT_TOKEN] studentId={} role={} mealDate={} mealTypes={}", studentId, role, request.mealDate(), request.mealTypes());
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//    }
 
 
     // GET /api/v1/meal-tokens/my

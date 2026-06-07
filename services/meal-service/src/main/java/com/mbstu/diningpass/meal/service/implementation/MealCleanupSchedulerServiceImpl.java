@@ -130,7 +130,7 @@ public class MealCleanupSchedulerServiceImpl implements MealCleanupSchedulerServ
 
         missed.forEach(row -> {
             LocalDate missedDate = (LocalDate) row[0];
-            MealType  missedType = MealType.valueOf((String) row[1]);
+            MealType  missedType = (MealType) row[1];
             log.warn("Found orphaned records for {} {} — running missed cleanup", missedDate, missedType);
             cleanupIfNotDone(missedDate, missedType);
         });

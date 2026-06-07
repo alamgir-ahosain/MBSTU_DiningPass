@@ -44,7 +44,7 @@ public class MealToken {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "token_status", nullable = false, length = 30)
-    private TokenStatus tokenStatus = TokenStatus.PAYMENT_SUBMITTED;
+    private TokenStatus tokenStatus = TokenStatus.APPROVED;
 
     @Column(name = "qr_code_data", columnDefinition = "TEXT")
     private String qrCodeData;                  // signed Firebase token — set after approval

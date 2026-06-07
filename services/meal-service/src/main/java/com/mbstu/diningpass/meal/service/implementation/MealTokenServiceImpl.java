@@ -54,101 +54,101 @@ public class MealTokenServiceImpl implements MealTokenService {
 
 
     // Cut token — evict student's token list since a new payment is submitted
-    @Override
-    @Transactional
-    @CacheEvict(value = "mealTokens", key = "'student:' + #studentId")
-    public CutTokenResponse cutToken(UUID studentId, Role role, CutTokenRequest request) {
-
-        logger.warn("meal-service/mealToken: DIRECT DB CALL for cutToken");
-
-        StudentProfileResponse profileResponse= studentFeignClient.getProfile();
-
-        Long totalAmount = 0L;
-        List<UUID> rejectedPaymentIdsToDelete = new ArrayList<>();
-
-
-        // check duplicate requests
-        for (MealType mealType : request.mealTypes()) {
-
-            MealConfig mealConfig = mealConfigRepository.
-                    findByHallShortNameAndMealDateAndMealType(
-                            profileResponse.hallShortName(),
-                            request.mealDate(),
-                            mealType
-                    )
-                    .orElseThrow(() -> new ResourceNotFoundException("Meal config not found"));
-
-//            if (LocalTime.now().isAfter(mealConfig.getCutTokenBefore())) {
-//                throw new BadRequestException("Booking window for " + mealType + " has closed. Deadline was " + mealConfig.getCutTokenBefore());
+//    @Override
+//    @Transactional
+//    @CacheEvict(value = "mealTokens", key = "'student:' + #studentId")
+//    public CutTokenResponse cutToken(UUID studentId, Role role, CutTokenRequest request) {
+//
+//        logger.warn("meal-service/mealToken: DIRECT DB CALL for cutToken");
+//
+//        StudentProfileResponse profileResponse= studentFeignClient.getProfile();
+//
+//        Long totalAmount = 0L;
+//        List<UUID> rejectedPaymentIdsToDelete = new ArrayList<>();
+//
+//
+//        // check duplicate requests
+//        for (MealType mealType : request.mealTypes()) {
+//
+//            MealConfig mealConfig = mealConfigRepository.
+//                    findByHallShortNameAndMealDateAndMealType(
+//                            profileResponse.hallShortName(),
+//                            request.mealDate(),
+//                            mealType
+//                    )
+//                    .orElseThrow(() -> new ResourceNotFoundException("Meal config not found"));
+//
+////            if (LocalTime.now().isAfter(mealConfig.getCutTokenBefore())) {
+////                throw new BadRequestException("Booking window for " + mealType + " has closed. Deadline was " + mealConfig.getCutTokenBefore());
+////            }
+//
+//            // Check booking is open
+//            validateBookingOpen(mealConfig, mealType);
+//            totalAmount += mealConfig.getMealPrice();
+//
+//            boolean pendingExists =
+//                    paymentRepository.existsMealRequest(
+//                            studentId,
+//                            mealConfig.getMealDate(),
+//                            mealType,
+//                            List.of(
+//                                    PaymentStatus.SUBMITTED,
+//                                    PaymentStatus.VERIFIED
+//                            )
+//                    );
+//
+//            boolean approvedTokenExists =
+//                    mealTokenRepository
+//                            .existsByStudentIdAndMealDateAndMealType(
+//                                    studentId,
+//                                    mealConfig.getMealDate(),
+//                                    mealType
+//                            );
+//
+//            if (pendingExists ) {
+//                throw new BadRequestException("You have already submitted a request for " +mealType);
 //            }
-
-            // Check booking is open
-            validateBookingOpen(mealConfig, mealType);
-            totalAmount += mealConfig.getMealPrice();
-
-            boolean pendingExists =
-                    paymentRepository.existsMealRequest(
-                            studentId,
-                            mealConfig.getMealDate(),
-                            mealType,
-                            List.of(
-                                    PaymentStatus.SUBMITTED,
-                                    PaymentStatus.VERIFIED
-                            )
-                    );
-
-            boolean approvedTokenExists =
-                    mealTokenRepository
-                            .existsByStudentIdAndMealDateAndMealType(
-                                    studentId,
-                                    mealConfig.getMealDate(),
-                                    mealType
-                            );
-
-            if (pendingExists ) {
-                throw new BadRequestException("You have already submitted a request for " +mealType);
-            }
-            if (approvedTokenExists) {
-                throw new BadRequestException("You have already completed payment for this meal");
-            }
-            // Collect rejected payments for this meal type to delete before resubmission
-            paymentRepository.findRejectedPayment(studentId, mealConfig.getMealDate(), mealType, PaymentStatus.REJECTED)
-                    .ifPresent(rejected -> {
-                        rejectedPaymentIdsToDelete.add(rejected.getId());
-                        logger.info("Rejected payment found and queued for deletion, paymentId={}, studentId={}", rejected.getId(), studentId);
-                    });
-        }
-
-
-
-
-
-        // Delete all rejected payments before saving the new one
-        if (!rejectedPaymentIdsToDelete.isEmpty()) {
-            paymentRepository.deleteAllById(rejectedPaymentIdsToDelete);
-            logger.info("Deleted {} rejected payment(s) for studentId={}",
-                    rejectedPaymentIdsToDelete.size(), studentId);
-        }
-
-        Payment payment = Payment.builder()
-                .studentId(studentId)
-                .hallShortName(profileResponse.hallShortName())
-                .mealDate(request.mealDate())
-                .mealTypes(request.mealTypes())
-                .paymentMethod(request.paymentMethod())
-                .senderNumber(request.senderNumber())
-                .totalAmount(totalAmount)
-                .screenshotUrl(request.screenshotUrl())
-                .paymentStatus(PaymentStatus.SUBMITTED)
-                .build();
-
-        paymentRepository.save(payment);
-        return new CutTokenResponse(
-                payment.getPaymentStatus(),
-                payment.getSubmittedAt()
-        );
-    }
-
+//            if (approvedTokenExists) {
+//                throw new BadRequestException("You have already completed payment for this meal");
+//            }
+//            // Collect rejected payments for this meal type to delete before resubmission
+//            paymentRepository.findRejectedPayment(studentId, mealConfig.getMealDate(), mealType, PaymentStatus.REJECTED)
+//                    .ifPresent(rejected -> {
+//                        rejectedPaymentIdsToDelete.add(rejected.getId());
+//                        logger.info("Rejected payment found and queued for deletion, paymentId={}, studentId={}", rejected.getId(), studentId);
+//                    });
+//        }
+//
+//
+//
+//
+//
+//        // Delete all rejected payments before saving the new one
+//        if (!rejectedPaymentIdsToDelete.isEmpty()) {
+//            paymentRepository.deleteAllById(rejectedPaymentIdsToDelete);
+//            logger.info("Deleted {} rejected payment(s) for studentId={}",
+//                    rejectedPaymentIdsToDelete.size(), studentId);
+//        }
+//
+//        Payment payment = Payment.builder()
+//                .studentId(studentId)
+//                .hallShortName(profileResponse.hallShortName())
+//                .mealDate(request.mealDate())
+//                .mealTypes(request.mealTypes())
+//                .paymentMethod(request.paymentMethod())
+//                .senderNumber(request.senderNumber())
+//                .totalAmount(totalAmount)
+//                .screenshotUrl(request.screenshotUrl())
+//                .paymentStatus(PaymentStatus.SUBMITTED)
+//                .build();
+//
+//        paymentRepository.save(payment);
+//        return new CutTokenResponse(
+//                payment.getPaymentStatus(),
+//                payment.getSubmittedAt()
+//        );
+//    }
+//
 
 
 
