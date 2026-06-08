@@ -28,7 +28,6 @@ import { HallAdminMealConfigs }  from './pages/HallAdmin/meal/HallAdminMealConfi
 import { HallAdminPayments }     from './pages/HallAdmin/payment/HallAdminPayments';
 import { HallAdminProfile }      from './pages/HallAdmin/my/HallAdminProfile';
 import { HallAdminChangePassword } from './pages/HallAdmin/my/HallAdminChangePassword';
-import { HallAdminForgotPassword } from './pages/HallAdmin/my/HallAdminForgotPassword';
 
 // Hall Staff Pages
 import { HallStaffDashboard }    from './pages/HallStaff/dashboard/HallStaffDashboard';
@@ -123,8 +122,6 @@ function App() {
                                 element={<ProtectedRoute requiredRole="HALL_ADMIN"><HallAdminProfile /></ProtectedRoute>} />
                             <Route path="/hallAdmin/change-password"
                                 element={<ProtectedRoute requiredRole="HALL_ADMIN"><HallAdminChangePassword /></ProtectedRoute>} />
-                            <Route path="/hallAdmin/forgot-password"
-                                element={<ProtectedRoute requiredRole="HALL_ADMIN"><HallAdminForgotPassword /></ProtectedRoute>} />
 
                             {/* ── Hall Staff Routes ────────────────────────── */}
                             <Route path="/hallStaff/dashboard"

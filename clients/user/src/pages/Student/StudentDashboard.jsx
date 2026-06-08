@@ -3,11 +3,17 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './StudentDashboard.css';
 
+
 export const StudentDashboard = () => {
     const { userData } = useAuth();
 
     const fullName = [userData?.firstName, userData?.lastName].filter(Boolean).join(' ') || 'Student';
     const initials = [userData?.firstName?.[0], userData?.lastName?.[0]].filter(Boolean).join('').toUpperCase() || 'S';
+
+    const getInitials = (name) => {
+        if (!name) return '?';
+        return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+    };
 
     return (
         <div className="sd-wrapper">
@@ -15,13 +21,11 @@ export const StudentDashboard = () => {
             {/* ── Banner ── */}
             <div className="sd-banner">
                 <div className="sd-banner-inner">
-                    <div className="sd-avatar" aria-hidden="true">{initials}</div>
+                    <div className="sd-avatar" aria-hidden="true">{getInitials(userData.fullName)}</div>
                     <div className="sd-banner-text">
                         <p className="sd-welcome">Welcome back,</p>
-                        <h1 className="sd-name">{fullName}</h1>
-                        <p className="sd-banner-sub">
-                            {userData?.hallShortName || 'Hall'} &nbsp;·&nbsp; {userData?.department || 'Department'}
-                        </p>
+                        <h1 className="sd-name">{userData?.fullName || userData?.roll || '—'}</h1>
+
                     </div>
                 </div>
             </div>
