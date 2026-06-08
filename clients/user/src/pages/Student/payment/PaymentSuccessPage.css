@@ -1,0 +1,320 @@
+/* ============================================================
+   PaymentSuccessPage.css — MBSTU Academic Portal Style
+   Matches BkashPaymentPage.css tokens exactly:
+   Maroon #7b2236  |  Gold #c9952a  |  Dark #2c0e17
+   Success accent: Green #0f6e56
+   ============================================================ */
+
+/* ── Wrapper ─────────────────────────────────────────────── */
+.ps-wrapper {
+    min-height: 100vh;
+    background-color: #f5f1ee;
+    font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+/* ── Banner ──────────────────────────────────────────────── */
+.ps-banner {
+    background: linear-gradient(135deg, #7b2236 0%, #5c1929 55%, #3d0f1a 100%);
+    border-bottom: 3px solid #c9952a;
+    padding: 2.25rem 1.5rem 1.85rem;
+}
+
+.ps-banner-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.ps-banner-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(201, 149, 42, 0.15);
+    border: 1.5px solid #c9952a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c9952a;
+    flex-shrink: 0;
+}
+
+.ps-banner-title {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 0.25rem;
+    letter-spacing: 0.01em;
+}
+
+.ps-banner-sub {
+    font-family: 'Trebuchet MS', 'Arial', sans-serif;
+    font-size: 0.845rem;
+    color: #d4b8b8;
+    margin: 0;
+}
+
+/* ── Main ────────────────────────────────────────────────── */
+.ps-main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 3rem;
+}
+
+/* ── Card ────────────────────────────────────────────────── */
+.ps-card {
+    background: #ffffff;
+    border: 1px solid #e4d5cc;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(60, 15, 26, 0.08);
+    overflow: hidden;
+}
+
+.ps-card-strip {
+    height: 4px;
+    background: #0f6e56;
+}
+
+.ps-card-body {
+    padding: 2rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+    text-align: center;
+}
+
+/* ── Icon circle ─────────────────────────────────────────── */
+.ps-icon-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #f0faf5;
+    border: 2px solid #9fe1cb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f6e56;
+    margin-bottom: 0.25rem;
+}
+
+/* ── Title ───────────────────────────────────────────────── */
+.ps-title {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #2c0e17;
+    margin: 0;
+}
+
+/* ── Message box ─────────────────────────────────────────── */
+.ps-msg {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.1rem;
+    border-radius: 4px;
+    font-family: 'Trebuchet MS', 'Arial', sans-serif;
+    font-size: 0.875rem;
+    width: 100%;
+    text-align: left;
+    border-left: 3px solid transparent;
+}
+
+.ps-msg--success {
+    background: #f0faf5;
+    border: 1px solid #9fe1cb;
+    border-left: 3px solid #0f6e56;
+    color: #0f6e56;
+}
+
+/* ── Payment summary ─────────────────────────────────────── */
+.ps-summary {
+    background: #faf5f2;
+    border: 1px solid #e4d5cc;
+    border-radius: 6px;
+    padding: 1rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    text-align: left;
+}
+
+.ps-summary-title {
+    font-family: 'Trebuchet MS', 'Arial', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7b2236;
+    margin: 0 0 0.35rem;
+}
+
+.ps-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-family: 'Trebuchet MS', 'Arial', sans-serif;
+    font-size: 0.85rem;
+    color: #7b4040;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #f0e8e4;
+}
+
+.ps-summary-row:last-child {
+    border-bottom: none;
+}
+
+.ps-summary-row--total {
+    padding-top: 0.55rem;
+    border-top: 1.5px solid #e4d5cc;
+    border-bottom: none;
+    margin-top: 0.2rem;
+}
+
+.ps-summary-row strong {
+    color: #2c0e17;
+    font-family: 'Georgia', serif;
+    font-size: 0.88rem;
+    text-align: right;
+}
+
+.ps-status-badge {
+    display: inline-block;
+    background: #f0faf5;
+    color: #0f6e56 !important;
+    border: 1px solid #9fe1cb;
+    border-radius: 20px;
+    font-family: 'Trebuchet MS', 'Arial', sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.15rem 0.65rem;
+}
+
+.ps-mono {
+    font-family: monospace !important;
+    font-size: 0.85rem !important;
+    color: #2c0e17 !important;
+    background: #f5f1ee;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    border: 1px solid #e4d5cc;
+    word-break: break-all;
+}
+
+/* ── Info box ────────────────────────────────────────────── */
+.ps-info-box {
+    background: #faf5f2;
+    border: 1px solid #e4d5cc;
+    border-radius: 6px;
+    padding: 0.9rem 1.1rem;
+    font-family: 'Trebuchet MS', 'Arial', sans-serif;
+    font-size: 0.84rem;
+    color: #7b4040;
+    text-align: left;
+    width: 100%;
+    line-height: 1.65;
+}
+
+.ps-info-box strong {
+    color: #2c0e17;
+    font-weight: 600;
+}
+
+/* ── Countdown ring ──────────────────────────────────────── */
+.ps-countdown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.25rem 0;
+}
+
+.ps-countdown-ring {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+}
+
+.ps-ring-svg {
+    transform: rotate(-90deg);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.ps-ring-number {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f6e56;
+    position: relative;
+    z-index: 1;
+}
+
+.ps-countdown-label {
+    font-family: 'Trebuchet MS', 'Arial', sans-serif;
+    font-size: 0.8rem;
+    color: #8a6060;
+    margin: 0;
+}
+
+/* ── Actions row ─────────────────────────────────────────── */
+.ps-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    margin-top: 0.25rem;
+}
+
+.ps-btn-view {
+    flex: none !important;
+}
+
+.ps-redirect-cancelled {
+    font-family: 'Trebuchet MS', 'Arial', sans-serif;
+    font-size: 0.82rem;
+    color: #8a6060;
+    align-self: center;
+    font-style: italic;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .ps-card-body {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .ps-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ps-banner-inner {
+        flex-wrap: wrap;
+    }
+
+    .ps-summary-row {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .ps-summary-row strong {
+        text-align: left;
+    }
+}
+
+@media (max-width: 400px) {
+    .ps-banner-title { font-size: 1.25rem; }
+    .ps-banner-icon  { width: 44px; height: 44px; }
+}

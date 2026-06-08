@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { paymentAPI } from '../../../services/api';
-import '../StudentPages.css';
 
 const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '-');
 const formatDateTime = (value) => (value ? new Date(value).toLocaleString() : '-');

@@ -70,7 +70,6 @@ export const HallStaffProfile = () => {
 
     return (
         <div className="page-wrapper">
-            <Link to="/hallStaff/dashboard" className="back-link">← Back to Dashboard</Link>
 
             <div className="card">
                 <h1 className="page-title">My Profile</h1>
@@ -136,7 +135,6 @@ export const HallStaffProfile = () => {
                             <p className="detail-subtitle">Manage account password and recovery options.</p>
                             <div className="button-group profile-actions">
                                 <Link to="/hallStaff/change-password" className="btn btn-primary">Change Password</Link>
-                                <Link to="/hallStaff/forgot-password" className="btn btn-cancel">Forgot Password</Link>
                             </div>
                         </div>
                     </>
