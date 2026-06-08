@@ -12,11 +12,9 @@ import { ForgotPasswordPage } from './pages/public/ForgotPasswordPage';
 import { ResetPasswordPage }  from './pages/public/ResetPasswordPage';
 
 // Student Pages
-import { StudentDashboard }   from './pages/Student/dashboard/StudentDashboard';
 import { StudentProfile }     from './pages/Student/profile/StudentProfile';
 import { ChangePassword }     from './pages/Student/ChangePassword';
 import { StudentMealTokens }  from './pages/Student/tokens/StudentMealTokens';
-import { StudentForgotPassword } from './pages/Student/StudentForgotPassword';
 import { BkashPaymentPage }   from './pages/Student/payment/BkashPaymentPage';
 import { PaymentSuccessPage } from './pages/Student/payment/PaymentSuccessPage';
 import { PaymentFailurePage } from './pages/Student/payment/PaymentFailurePage';
@@ -38,7 +36,6 @@ import { HallStaffPayments }     from './pages/HallStaff/payment/HallStaffPaymen
 import { HallStaffMealConfigs }  from './pages/HallStaff/meal/HallStaffMealConfigs';
 import { HallStaffProfile }      from './pages/HallStaff/my/HallStaffProfile';
 import { HallStaffChangePassword } from './pages/HallStaff/my/HallStaffChangePassword';
-import { HallStaffForgotPassword } from './pages/HallStaff/my/HallStaffForgotPassword';
 import { ValidateToken }         from './pages/HallStaff/token/ValidateToken';
 import { HallMealSummary }       from './pages/HallStaff/summary/HallMealSummary';
 
@@ -94,14 +91,12 @@ function App() {
                             <Route path="/dashboard" element={<ProtectedRoute><RoleDashboard /></ProtectedRoute>} />
 
                             {/* ── Student Routes ──────────────────────────── */}
-                            <Route path="/student/dashboard"
-                                element={<ProtectedRoute requiredRole="STUDENT"><StudentDashboard /></ProtectedRoute>} />
+                            {/*<Route path="/student/dashboard"*/}
+                            {/*    element={<ProtectedRoute requiredRole="STUDENT"><StudentDashboard /></ProtectedRoute>} />*/}
                             <Route path="/student/profile"
                                 element={<ProtectedRoute requiredRole="STUDENT"><StudentProfile /></ProtectedRoute>} />
                             <Route path="/student/change-password"
                                 element={<ProtectedRoute requiredRole="STUDENT"><ChangePassword /></ProtectedRoute>} />
-                            <Route path="/student/forgot-password"
-                                element={<ProtectedRoute requiredRole="STUDENT"><StudentForgotPassword /></ProtectedRoute>} />
                             <Route path="/student/my-tokens"
                                 element={<ProtectedRoute requiredRole="STUDENT"><StudentMealTokens /></ProtectedRoute>} />
                             <Route path="/student/payment-history"
@@ -144,8 +139,6 @@ function App() {
                                 element={<ProtectedRoute requiredRole="HALL_STAFF"><HallStaffProfile /></ProtectedRoute>} />
                             <Route path="/hallStaff/change-password"
                                 element={<ProtectedRoute requiredRole="HALL_STAFF"><HallStaffChangePassword /></ProtectedRoute>} />
-                            <Route path="/hallStaff/forgot-password"
-                                element={<ProtectedRoute requiredRole="HALL_STAFF"><HallStaffForgotPassword /></ProtectedRoute>} />
                             <Route path="/hallStaff/validate-token"
                                 element={<ProtectedRoute requiredRole="HALL_STAFF"><ValidateToken /></ProtectedRoute>} />
 
