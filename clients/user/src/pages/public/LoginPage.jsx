@@ -15,12 +15,18 @@ export const LoginPage = () => {
         e.preventDefault();
         setError('');
         setLoading(true);
+
         try {
+            // Sign in with Firebase
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             console.log('Login successful:', userCredential.user.email);
+
+            // Navigate to dashboard - AuthContext will handle role fetching
             navigate('/dashboard');
         } catch (err) {
             console.error('Login error:', err);
+
+            // Show user-friendly error messages
             if (err.code === 'auth/user-not-found') {
                 setError('User not found. Please register first.');
             } else if (err.code === 'auth/wrong-password') {
@@ -36,53 +42,50 @@ export const LoginPage = () => {
     };
 
     return (
-        <div className="pp-page">
-            <div className="form-container">
-                <div className="form-inner">
-                    <div className="rule-badge">MBSTU Dining Pass</div>
-                    <h1>Welcome back</h1>
-                    <p className="form-subtitle">Sign in to your student portal account</p>
-                    <div className="form-divider" />
+        <div className="form-container">
+            <h1>Login</h1>
 
-                    {error && <div className="error-message">{error}</div>}
+            {error && <div className="error-message">{error}</div>}
 
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label htmlFor="email">Email Address</label>
-                            <input
-                                id="email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                placeholder="your@email.com"
-                                disabled={loading}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="password">Password</label>
-                            <input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                placeholder="Enter your password"
-                                disabled={loading}
-                            />
-                        </div>
-
-                        <button type="submit" className="form-button" disabled={loading}>
-                            {loading ? 'Signing in…' : 'Sign In'}
-                        </button>
-                    </form>
-
-                    <div className="form-footer">
-                        <p><Link to="/forgot-password">Forgot your password?</Link></p>
-                        <p>Don't have an account? <Link to="/register">Register here</Link></p>
-                    </div>
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label htmlFor="email">Email Address</label>
+                    <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        placeholder="Enter your email"
+                        disabled={loading}
+                    />
                 </div>
+
+                <div className="form-group">
+                    <label htmlFor="password">Password</label>
+                    <input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        placeholder="Enter your password"
+                        disabled={loading}
+                    />
+                </div>
+
+                <button type="submit" className="form-button" disabled={loading}>
+                    {loading ? 'Logging in...' : 'Login'}
+                </button>
+            </form>
+
+            <div className="form-footer">
+                <p>
+                    <Link to="/forgot-password">Forgot your password?</Link>
+                </p>
+                <p>
+                    Don't have an account? <Link to="/register">Register here</Link>
+                </p>
             </div>
         </div>
     );

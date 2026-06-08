@@ -1,410 +1,230 @@
-/* ============================================================
-   StudentMealTokens.css — MBSTU Academic Portal Style
-   Maroon #7b2236  |  Gold #c9952a  |  Dark #2c0e17
-   ============================================================ */
-
-/* ---------- Wrapper ---------- */
-.mt-wrapper {
-  min-height: 100vh;
-  background-color: #f5f1ee;
-  font-family: 'Georgia', 'Times New Roman', serif;
+.student-tokens-page .card {
+  margin-top: 0.5rem;
 }
 
-/* ---------- Banner ---------- */
-.mt-banner {
-  background: linear-gradient(135deg, #7b2236 0%, #5c1929 55%, #3d0f1a 100%);
-  border-bottom: 3px solid #c9952a;
-  padding: 2.25rem 1.5rem 1.85rem;
+.student-section {
+  margin-top: 1.5rem;
 }
 
-.mt-banner-inner {
-  max-width: 960px;
-  margin: 0 auto;
+.section-header-inline {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
 }
 
-.mt-banner-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgba(201, 149, 42, 0.15);
-  border: 1.5px solid #c9952a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #c9952a;
-  flex-shrink: 0;
-}
-
-.mt-banner-title {
-  font-family: 'Georgia', 'Times New Roman', serif;
-  font-size: 1.55rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 0.25rem;
-  letter-spacing: 0.01em;
-}
-
-.mt-banner-sub {
-  font-family: 'Trebuchet MS', 'Arial', sans-serif;
-  font-size: 0.845rem;
-  color: #d4b8b8;
+.section-title {
   margin: 0;
-}
-
-.mt-banner-count {
-  margin-left: auto;
-  flex-shrink: 0;
-  text-align: center;
-  background: rgba(201, 149, 42, 0.15);
-  border: 1.5px solid rgba(201, 149, 42, 0.4);
-  border-radius: 8px;
-  padding: 0.6rem 1.1rem;
-}
-
-.mt-banner-count-num {
-  display: block;
-  font-family: 'Georgia', serif;
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #c9952a;
-  line-height: 1;
-}
-
-.mt-banner-count-label {
-  display: block;
-  font-family: 'Trebuchet MS', 'Arial', sans-serif;
-  font-size: 0.72rem;
-  color: #d4b8b8;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-top: 0.2rem;
-}
-
-/* ---------- Main ---------- */
-.mt-main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 3rem;
-}
-
-/* ---------- Alert ---------- */
-.mt-alert {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.85rem 1.1rem;
-  border-radius: 4px;
-  font-family: 'Trebuchet MS', 'Arial', sans-serif;
-  font-size: 0.875rem;
-  margin-bottom: 1.5rem;
-}
-
-.mt-alert--error {
-  background: #fdf0f1;
-  color: #7b2236;
-  border-left: 3px solid #7b2236;
-}
-
-/* ---------- Loading ---------- */
-.mt-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 4rem 1rem;
-  color: #7b4040;
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 0.9rem;
-}
-
-.mt-spinner {
-  width: 32px;
-  height: 32px;
-  border: 2px solid #e8d5c4;
-  border-top-color: #7b2236;
-  border-radius: 50%;
-  animation: mt-spin 0.75s linear infinite;
-}
-
-/* ---------- Empty State ---------- */
-.mt-empty {
-  text-align: center;
-  padding: 4rem 1.5rem;
-  background: #ffffff;
-  border: 1px solid #e4d5cc;
-  border-radius: 8px;
-}
-
-.mt-empty-icon {
-  margin: 0 auto 1.25rem;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: #faf5f2;
-  border: 1.5px solid #e4d5cc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #c9952a;
-}
-
-.mt-empty h3 {
-  font-family: 'Georgia', serif;
+  color: #2c3e50;
   font-size: 1.15rem;
-  color: #2c0e17;
-  margin: 0 0 0.5rem;
 }
 
-.mt-empty p {
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 0.875rem;
-  color: #8a6060;
-  margin: 0;
-  max-width: 360px;
-  margin-inline: auto;
+.section-count {
+  min-width: 2rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #edf2f7;
+  color: #34495e;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
 }
 
-/* ---------- Grid ---------- */
-.mt-grid {
+.compact-empty-state {
+  margin-top: 0;
+}
+
+.student-tokens-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.25rem;
+  margin-top: 1.5rem;
 }
 
-/* ---------- Token Card ---------- */
-.mt-card {
-  background: var(--card-bg, #f5f1ee);
-  border: 1px solid var(--card-border, #d4bfb0);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(60, 15, 26, 0.07);
-  display: flex;
-  flex-direction: column;
-  transition: box-shadow 0.2s, transform 0.15s;
+.student-token-card {
+  border: 1px solid #ecf0f1;
+  border-radius: 10px;
+  padding: 1.25rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-.mt-card:hover {
-  box-shadow: 0 6px 16px rgba(60, 15, 26, 0.12);
-  transform: translateY(-2px);
-}
-
-/* Coloured top strip */
-.mt-card-strip {
-  height: 4px;
-  flex-shrink: 0;
-}
-
-/* ---------- Card Head ---------- */
-.mt-card-head {
+.student-token-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.2rem 0.5rem;
-  gap: 0.75rem;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
 }
 
-.mt-meal-type-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.student-token-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
 }
 
-.mt-meal-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.student-token-header p {
+  margin: 0.35rem 0 0;
+  color: #6c757d;
 }
 
-.mt-meal-type {
-  font-family: 'Georgia', serif;
-  font-size: 1.1rem;
+.student-token-badge {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: #d5f4e6;
+  color: #1e8449;
+  font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.01em;
-}
-
-.mt-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.65rem;
-  background: rgba(34, 139, 87, 0.1);
-  color: #1a7a48;
-  border: 1px solid rgba(34, 139, 87, 0.25);
-  border-radius: 20px;
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
-.mt-status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #228b57;
+.student-token-badge.rejected {
+  background: #fdecea;
+  color: #c0392b;
 }
 
-/* ---------- Date ---------- */
-.mt-card-date {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0 1.2rem 0.75rem;
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 0.84rem;
-  color: #8a6060;
+.payment-badge-submitted {
+  background: #fff5d6;
+  color: #b7791f;
 }
 
-/* ---------- Meta Fields ---------- */
-.mt-meta {
-  margin: 0;
-  padding: 0.75rem 1.2rem 0.85rem;
-  border-top: 1px solid rgba(0,0,0,0.06);
+.payment-badge-verified {
+  background: #d5f4e6;
+  color: #1e8449;
+}
+
+.payment-badge-rejected {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.payment-record-card {
+  border-left: 4px solid #5dade2;
+}
+
+.payment-submitted {
+  border-left-color: #f1c40f;
+}
+
+.payment-verified {
+  border-left-color: #27ae60;
+}
+
+.payment-rejected {
+  border-left-color: #e74c3c;
+}
+
+.payment-rejection-card {
+  border-color: #f5b7b1;
+  background: linear-gradient(180deg, #fff8f7 0%, #fff3f1 100%);
+}
+
+.student-token-meta {
   display: grid;
-  gap: 0.45rem;
-}
-
-.mt-meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.75rem;
-}
-
-.mt-meta-row dt {
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 0.8rem;
-  color: #8a6060;
-  font-weight: 500;
-  flex-shrink: 0;
-}
-
-.mt-meta-row dd {
-  font-family: 'Georgia', serif;
-  font-size: 0.88rem;
-  color: #2c0e17;
-  text-align: right;
-  margin: 0;
-  word-break: break-word;
-}
-
-/* ---------- QR Section ---------- */
-.mt-qr-section {
-  margin-top: auto;
-  padding: 1rem 1.2rem 1.2rem;
-  border-top: 1px dashed rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.85rem;
-}
-
-.mt-qr-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #8a6060;
-}
-
-.mt-qr-box {
-  background: #ffffff;
-  border: 1.5px solid #e4d5cc;
-  border-radius: 8px;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 1px 3px rgba(60,15,26,0.05);
-}
-
-.mt-qr-box canvas {
-  max-width: 100%;
-  height: auto !important;
-  display: block;
-}
-
-/* ---------- Download Button ---------- */
-.mt-btn-download {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-  width: 100%;
-  padding: 0.6rem 1rem;
-  background: #7b2236;
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 0.845rem;
+}
+
+.student-token-meta p {
+  margin: 0;
+  color: #495057;
+}
+
+.student-token-code {
+  margin-top: 1rem;
+}
+
+.student-token-code label {
+  display: block;
+  margin-bottom: 0.35rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  color: #2c3e50;
+}
+
+.qr-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.qr-container canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.btn-download-qr {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #27ae60;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.18s, transform 0.1s;
+  transition: all 0.3s ease;
 }
 
-.mt-btn-download:hover {
-  background: #5c1929;
-  transform: translateY(-1px);
+.btn-download-qr:hover {
+  background-color: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.mt-btn-download:active {
+.btn-download-qr:active {
   transform: translateY(0);
 }
 
-/* ---------- Animation ---------- */
-@keyframes mt-spin {
-  to { transform: rotate(360deg); }
+.payment-rejection-proof {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0d6d3;
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 640px) {
-  .mt-banner-inner {
-    flex-wrap: wrap;
+.payment-rejection-proof-title {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+  color: #7f1d1d;
+}
+
+.payment-rejection-proof-image {
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid #f5b7b1;
+  background: #ffffff;
+}
+
+.payment-rejection-proof-note {
+  margin: 0;
+  color: #7f1d1d;
+  font-size: 0.92rem;
+}
+
+.student-token-code code {
+  display: block;
+  padding: 0.85rem;
+  border-radius: 8px;
+  background: #f8f9fa;
+  border: 1px dashed #ced4da;
+  color: #34495e;
+  word-break: break-word;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .student-token-header {
+    flex-direction: column;
   }
 
-  .mt-banner-count {
-    margin-left: 0;
-    flex: 1 0 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    justify-content: center;
-    padding: 0.5rem 1rem;
-  }
-
-  .mt-banner-count-num {
-    font-size: 1.2rem;
-  }
-
-  .mt-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .mt-card-head {
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  .student-token-badge {
+    align-self: flex-start;
   }
 }
 
-@media (max-width: 400px) {
-  .mt-banner-title {
-    font-size: 1.25rem;
-  }
-
-  .mt-banner-icon {
-    width: 44px;
-    height: 44px;
-  }
-}

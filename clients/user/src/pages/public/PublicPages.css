@@ -1,335 +1,290 @@
-/* ============================================================
-   PublicPages.css – MBSTU Academic Portal
-   Light card · Maroon #7b2236 · Gold #c9952a · Dark #2c0e17
-   ============================================================ */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
 
-/* ── Page wrapper ────────────────────────────────────────── */
-.pp-page {
-  min-height: 100vh;
-  background:
-    radial-gradient(ellipse 70% 50% at 15% 20%, rgba(123,34,54,0.22) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 45% at 85% 80%, rgba(44,14,23,0.35) 0%, transparent 55%),
-    #f5f0ed;
+.home-content {
+  text-align: center;
+}
+
+.home-content h1 {
+  font-size: 3rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.home-content p {
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+.home-buttons {
   display: flex;
-  align-items: flex-start;
+  gap: 1rem;
   justify-content: center;
-  padding: 2rem 1rem 3rem;
-  font-family: 'Trebuchet MS', Arial, sans-serif;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
 }
 
-/* ── Card ────────────────────────────────────────────────── */
+.btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+  background-color: #27ae60;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.features {
+  margin-top: 4rem;
+  text-align: left;
+}
+
+.features h2 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.feature-card {
+  background-color: #f8f9fa;
+  padding: 2rem;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.feature-card h3 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+  color: #555;
+  margin: 0;
+}
+
+/* Form Styles */
 .form-container {
-  width: 100%;
-  max-width: 480px;
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid rgba(123,34,54,0.12);
-  box-shadow:
-    0 1px 3px rgba(44,14,23,0.06),
-    0 8px 32px rgba(44,14,23,0.10),
-    0 20px 60px rgba(44,14,23,0.07);
-  overflow: hidden;
+  max-width: 500px;
+  margin: 2rem auto;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* ── Card header strip ───────────────────────────────────── */
-.form-container::before {
-  content: '';
-  display: block;
-  height: 5px;
-  background: linear-gradient(90deg, #7b2236 0%, #c9952a 60%, #7b2236 100%);
-}
-
-/* ── Inner padding wrapper ───────────────────────────────── */
-.form-inner {
-  padding: 1.5rem 1.75rem 1.75rem;
-}
-
-/* ── Badge ───────────────────────────────────────────────── */
-.rule-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.7rem;
-  background: rgba(123,34,54,0.07);
-  border: 1px solid rgba(123,34,54,0.18);
-  border-radius: 999px;
-  color: #7b2236;
-  font-size: 0.67rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 0.6rem;
-}
-
-/* ── Heading ─────────────────────────────────────────────── */
 .form-container h1 {
-  font-family: 'Georgia', 'Times New Roman', serif;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #1a0810;
-  margin: 0 0 0.15rem;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
-.form-subtitle {
-  font-size: 0.8rem;
-  color: #7a6060;
-  margin: 0 0 1rem;
-  line-height: 1.4;
-}
-
-/* ── Divider ─────────────────────────────────────────────── */
-.form-divider {
-  height: 1px;
-  background: rgba(123,34,54,0.1);
-  margin-bottom: 1rem;
-}
-
-/* ── Alerts ──────────────────────────────────────────────── */
-.error-message {
-  background: #fff5f6;
-  border: 1px solid rgba(180,40,65,0.22);
-  border-left: 3px solid #c0314f;
-  border-radius: 6px;
-  color: #8b1f35;
-  font-size: 0.82rem;
-  padding: 0.6rem 0.85rem;
-  margin-bottom: 1rem;
+.form-description {
+  color: #555;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
   line-height: 1.5;
 }
 
-.success-message {
-  background: #f3faf5;
-  border: 1px solid rgba(30,130,70,0.22);
-  border-left: 3px solid #2e9e5a;
-  border-radius: 6px;
-  color: #1a6b3a;
-  font-size: 0.82rem;
-  padding: 0.6rem 0.85rem;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-}
-
-/* ── Section heading inside form ─────────────────────────── */
-.form-section-label {
-  font-size: 0.67rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #c9952a;
-  padding-bottom: 0.35rem;
-  margin: 0.75rem 0 0.6rem;
-  border-bottom: 1px solid rgba(201,149,42,0.2);
-}
-
-.form-section-label:first-of-type {
-  margin-top: 0;
-}
-
-/* ── Form groups ─────────────────────────────────────────── */
 .form-group {
-  margin-bottom: 0.7rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
   display: block;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #4a2030;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-weight: 500;
 }
 
-.form-group small {
-  display: block;
-  font-size: 0.72rem;
-  color: #a08080;
-  margin-top: 0.25rem;
-}
-
-/* ── Two-column grid ─────────────────────────────────────── */
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
-}
-
-/* ── Inputs & Selects ────────────────────────────────────── */
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
   width: 100%;
-  padding: 0.52rem 0.8rem;
-  background: #faf8f7;
-  border: 1.5px solid rgba(123,34,54,0.18);
-  border-radius: 6px;
-  color: #1a0810;
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 0.875rem;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
-  outline: none;
+  padding: 0.75rem;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 1rem;
   box-sizing: border-box;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.form-group input::placeholder {
-  color: #bba8a8;
-}
-
-.form-group select {
-  cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%237b2236' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.8rem center;
-  padding-right: 2.2rem;
-}
-
-.form-group select option {
-  background: #ffffff;
-  color: #1a0810;
 }
 
 .form-group input:focus,
-.form-group select:focus {
-  border-color: #7b2236;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(123,34,54,0.1);
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
-.form-group input:disabled,
-.form-group select:disabled {
-  background: #f0eded;
-  border-color: rgba(123,34,54,0.1);
-  color: #a08080;
-  cursor: not-allowed;
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
 }
 
-.disabled-input {
-  background: #f0eded !important;
-  border-color: rgba(123,34,54,0.1) !important;
-  color: #a08080 !important;
-  cursor: default !important;
-}
-
-/* ── Gender radios ───────────────────────────────────────── */
-.gender-options {
-  display: flex;
-  gap: 0.6rem;
-}
-
-.radio-card {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.52rem 0.8rem;
-  background: #faf8f7;
-  border: 1.5px solid rgba(123,34,54,0.18);
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.855rem;
-  color: #3a1825;
-  font-weight: 500;
-  transition: border-color 0.15s, background 0.15s;
-  user-select: none;
-}
-
-.radio-card:has(input:checked) {
-  border-color: #7b2236;
-  background: rgba(123,34,54,0.05);
-}
-
-.radio-card input[type="radio"] {
-  width: 14px;
-  height: 14px;
-  accent-color: #7b2236;
-  cursor: pointer;
-  margin: 0;
-  padding: 0;
-  flex-shrink: 0;
-  /* Reset browser defaults that add extra spacing */
-  -webkit-appearance: auto;
-  appearance: auto;
-  border: none;
-  background: none;
-}
-
-/* ── Submit button ───────────────────────────────────────── */
 .form-button {
   width: 100%;
-  padding: 0.7rem 1rem;
-  margin-top: 0.6rem;
-  background: #7b2236;
+  padding: 0.75rem;
+  background-color: #3498db;
+  color: white;
   border: none;
-  border-radius: 6px;
-  color: #ffffff;
-  font-family: 'Trebuchet MS', Arial, sans-serif;
-  font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  transition: background-color 0.3s ease;
 }
 
-.form-button:hover:not(:disabled) {
-  background: #8f2840;
-  box-shadow: 0 4px 14px rgba(123,34,54,0.3);
-  transform: translateY(-1px);
-}
-
-.form-button:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: none;
-  background: #6a1c30;
+.form-button:hover {
+  background-color: #2980b9;
 }
 
 .form-button:disabled {
-  background: #c49aab;
+  background-color: #95a5a6;
   cursor: not-allowed;
 }
 
-/* ── Footer ──────────────────────────────────────────────── */
 .form-footer {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(123,34,54,0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
   text-align: center;
-}
-
-.form-footer p {
-  margin: 0;
-  font-size: 0.82rem;
-  color: #7a6060;
+  margin-top: 1.5rem;
 }
 
 .form-footer a {
-  color: #7b2236;
+  color: #3498db;
   text-decoration: none;
-  font-weight: 700;
-  transition: color 0.15s;
 }
 
 .form-footer a:hover {
-  color: #a02d48;
   text-decoration: underline;
 }
 
-/* ── Description text ────────────────────────────────────── */
-.form-description {
-  font-size: 0.855rem;
-  color: #7a6060;
-  line-height: 1.5;
-  margin: 0 0 1rem;
+.rule-badge {
+  display: inline-block;
+  background-color: #f39c12;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+  width: 100%;
 }
 
-/* ── Responsive ──────────────────────────────────────────── */
-@media (max-width: 520px) {
-  .pp-page        { padding: 1rem 0.75rem 2.5rem; }
-  .form-inner     { padding: 1.25rem 1.1rem 1.5rem; }
-  .form-container h1 { font-size: 1.25rem; }
-  .form-row       { grid-template-columns: 1fr; gap: 0; }
+.error-message {
+  background-color: #e74c3c;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.success-message {
+  background-color: #27ae60;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.loading-message {
+  background-color: #3498db;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+/* Gender Options - Radio Button Styling */
+.gender-options {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.radio-label input[type="radio"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Disabled Input Styling */
+.disabled-input {
+  background-color: #ecf0f1 !important;
+  color: #95a5a6 !important;
+  cursor: not-allowed !important;
+}
+
+/* Small Text Styling */
+small {
+  display: block;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* Responsive Design for Form */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 1.5rem;
+    margin: 1rem 0.5rem;
+  }
+
+  .form-container h1 {
+    font-size: 1.5rem;
+  }
+
+  .gender-options {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 }

@@ -16,15 +16,23 @@ export const ForgotPasswordPage = () => {
         setError('');
         setSuccess('');
         setLoading(true);
+
         try {
+            // Send password reset email via Firebase
             await sendPasswordResetEmail(auth, email);
+
             setSuccess(
-                'Password reset email sent! Check your inbox. ' +
-                'You will be redirected to login in 10 seconds…'
+                'Password reset email sent! Check your inbox for a link to reset your password. ' +
+                'You will be redirected to login in 12 seconds...'
             );
-            setTimeout(() => navigate('/login'), 10000);
+
+            // Redirect to login after 12 seconds
+            setTimeout(() => {
+                navigate('/login');
+            }, 10000);
         } catch (err) {
             console.error('Forgot password error:', err);
+
             if (err.code === 'auth/user-not-found') {
                 setError('No account found with this email address.');
             } else if (err.code === 'auth/invalid-email') {
@@ -40,47 +48,46 @@ export const ForgotPasswordPage = () => {
     };
 
     return (
-        <div className="pp-page">
-            <div className="form-container">
-                <div className="form-inner">
-                    <div className="rule-badge">MBSTU Dining Pass</div>
-                    <h1>Reset Password</h1>
-                    <p className="form-subtitle">
-                        Enter your registered email and we'll send a reset link.
-                    </p>
-                    <div className="form-divider" />
+        <div className="form-container">
+            <h1>Forgot Password</h1>
 
-                    {error && <div className="error-message">{error}</div>}
-                    {success && <div className="success-message">{success}</div>}
+            {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
 
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label htmlFor="email">Email Address</label>
-                            <input
-                                id="email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                placeholder="your@email.com"
-                                disabled={loading || !!success}
-                            />
-                        </div>
+            <form onSubmit={handleSubmit}>
+                <p className="form-description">
+                   Enter your registered email to get a password reset link.
+                </p>
 
-                        <button
-                            type="submit"
-                            className="form-button"
-                            disabled={loading || !!success}
-                        >
-                            {loading ? 'Sending…' : 'Send Reset Email'}
-                        </button>
-                    </form>
-
-                    <div className="form-footer">
-                        <p><Link to="/login">← Back to Login</Link></p>
-                        <p>Don't have an account? <Link to="/register">Register here</Link></p>
-                    </div>
+                <div className="form-group">
+                    <label htmlFor="email">Email Address</label>
+                    <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        placeholder="Enter your email"
+                        disabled={loading || success}
+                    />
                 </div>
+
+                <button
+                    type="submit"
+                    className="form-button"
+                    disabled={loading || success}
+                >
+                    {loading ? 'Sending...' : 'Send Reset Email'}
+                </button>
+            </form>
+
+            <div className="form-footer">
+                <p>
+                    <Link to="/login">Back to Login</Link>
+                </p>
+                <p>
+                    Don't have an account? <Link to="/register">Register here</Link>
+                </p>
             </div>
         </div>
     );

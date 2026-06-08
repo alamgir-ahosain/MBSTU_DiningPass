@@ -3,15 +3,18 @@ import { Link } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { mealTokenAPI, paymentAPI } from '../../../services/api';
+import '../StudentPages.css';
 import './StudentMealTokens.css';
-
-
-const formatDate = (value) => (value ? new Date(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
+const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '-');
+const formatDateTime = (value) => (value ? new Date(value).toLocaleString() : '-');
 const formatMealTypes = (mealTypes) => {
-    if (!Array.isArray(mealTypes) || mealTypes.length === 0) return '—';
-    if (mealTypes.includes('LUNCH') && mealTypes.includes('DINNER')) return 'Lunch & Dinner';
-    return mealTypes.map(m => m.charAt(0) + m.slice(1).toLowerCase()).join(' & ');
+    if (!Array.isArray(mealTypes) || mealTypes.length === 0) return '-';
+    if (mealTypes.length === 1) return mealTypes[0];
+    if (mealTypes.includes('LUNCH') && mealTypes.includes('DINNER')) return 'LUNCH & DINNER';
+    return mealTypes.join(' & ');
 };
+const formatPaymentStatus = (status) => (status ? String(status).replaceAll('_', ' ') : 'PENDING');
+const isRenderableScreenshotUrl = (url) => Boolean(url) && !String(url).startsWith('blob:');
 const normalizeList = (payload) => {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.content)) return payload.content;
@@ -29,176 +32,150 @@ const downloadQRCode = (qrRef, mealType, mealDate) => {
         })
         .catch((err) => console.error('Failed to download QR code:', err));
 };
-
-const MEAL_COLORS = {
-    BREAKFAST: { bg: '#fff8ed', border: '#f5c87a', text: '#7a4d00', dot: '#e8a020' },
-    LUNCH:     { bg: '#fdf0f2', border: '#e4a0ae', text: '#7b2236', dot: '#7b2236' },
-    DINNER:    { bg: '#f2f0fd', border: '#b0a8e8', text: '#3d2e8c', dot: '#5b50c9' },
-    DEFAULT:   { bg: '#f5f1ee', border: '#d4bfb0', text: '#4a3030', dot: '#c9952a' },
-};
-const getMealColor = (type) => MEAL_COLORS[String(type || '').toUpperCase()] || MEAL_COLORS.DEFAULT;
-
 export function StudentMealTokens() {
+    const [payments, setPayments] = useState([]);
     const [tokens, setTokens] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const qrRefsMap = useRef({});
-
+    const visiblePayments = payments.filter((payment) => String(payment?.paymentStatus || '').toUpperCase() !== 'VERIFIED');
     const loadData = useCallback(async () => {
         setLoading(true);
         setError('');
-        const [tokenResult] = await Promise.allSettled([
+        const [tokenResult, paymentResult] = await Promise.allSettled([
             mealTokenAPI.getMyTokens(),
+            paymentAPI.getMyPayments(),
         ]);
         setTokens(tokenResult.status === 'fulfilled' ? normalizeList(tokenResult.value.data) : []);
-        if (tokenResult.status === 'rejected') setError('Could not load meal tokens. Please try again.');
+        setPayments(paymentResult.status === 'fulfilled' ? normalizeList(paymentResult.value.data) : []);
+        const partialErrors = [];
+        if (tokenResult.status === 'rejected') partialErrors.push('approved tokens');
+        if (paymentResult.status === 'rejected') partialErrors.push('my payments');
+        if (partialErrors.length > 0) {
+            setError(`Some data could not be loaded: ${partialErrors.join(' and ')}.`);
+        }
         setLoading(false);
     }, []);
-
     useEffect(() => {
-        const id = window.setTimeout(() => { void loadData(); }, 0);
-        return () => window.clearTimeout(id);
+        const timeoutId = window.setTimeout(() => { void loadData(); }, 0);
+        return () => window.clearTimeout(timeoutId);
     }, [loadData]);
-
     return (
-        <div className="mt-wrapper">
-
-            {/* Page Banner */}
-            <div className="mt-banner">
-                <div className="mt-banner-inner">
-                    <div className="mt-banner-icon" aria-hidden="true">
-                        <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 className="mt-banner-title">My Meal Tokens</h1>
-                        <p className="mt-banner-sub">Approved meal tokens issued by hall administration</p>
-                    </div>
-                    {!loading && (
-                        <div className="mt-banner-count">
-                            <span className="mt-banner-count-num">{tokens.length}</span>
-                            <span className="mt-banner-count-label">Token{tokens.length !== 1 ? 's' : ''}</span>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="mt-main">
-
-                {error && (
-                    <div className="mt-alert mt-alert--error">
-                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                        </svg>
-                        {error}
-                    </div>
-                )}
-
+        <div className="page-wrapper student-tokens-page">
+            <Link to="/student/dashboard" className="back-link">← Back to Dashboard</Link>
+            <div className="card">
+                <h1 className="page-title">My Meal Tokens</h1>
+                <p className="page-subtitle">
+                    View your payment submissions and the approved QR meal tokens generated after verification.
+                </p>
+                {error && <div className="message error">{error}</div>}
                 {loading ? (
-                    <div className="mt-loading">
-                        <div className="mt-spinner" />
-                        <p>Loading your meal tokens…</p>
-                    </div>
-                ) : tokens.length === 0 ? (
-                    <div className="mt-empty">
-                        <div className="mt-empty-icon" aria-hidden="true">
-                            <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.2">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
-                        </div>
-                        <h3>No approved tokens yet</h3>
-                        <p>Your meal tokens will appear here once hall staff verifies your payment.</p>
-                    </div>
+                    <div className="empty-state"><p>Loading your meal payments and meal tokens...</p></div>
                 ) : (
-                    <div className="mt-grid">
-                        {tokens.map((token) => {
-                            const color = getMealColor(token.mealType);
-                            return (
-                                <div
-                                    key={token.id}
-                                    className="mt-card"
-                                    style={{ '--card-border': color.border, '--card-bg': color.bg }}
-                                >
-                                    {/* Card Top Strip */}
-                                    <div className="mt-card-strip" style={{ background: color.dot }} />
-
-                                    {/* Card Header */}
-                                    <div className="mt-card-head">
-                                        <div className="mt-meal-type-wrap">
-                                            <span className="mt-meal-dot" style={{ background: color.dot }} />
-                                            <span className="mt-meal-type" style={{ color: color.text }}>
-                                                {token.mealType
-                                                    ? token.mealType.charAt(0) + token.mealType.slice(1).toLowerCase()
-                                                    : '—'}
-                                            </span>
-                                        </div>
-                                        <span className="mt-status-badge">
-                                            <span className="mt-status-dot" />
-                                            {token.tokenStatus || 'Approved'}
-                                        </span>
-                                    </div>
-
-                                    {/* Date */}
-                                    <div className="mt-card-date">
-                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                                        </svg>
-                                        {formatDate(token.mealDate)}
-                                    </div>
-
-                                    {/* Meta Fields */}
-                                    <dl className="mt-meta">
-                                        {token.mealMenu && (
-                                            <div className="mt-meta-row">
-                                                <dt>Menu</dt>
-                                                <dd>{token.mealMenu}</dd>
-                                            </div>
-                                        )}
-                                        {token.tokenExpiry && (
-                                            <div className="mt-meta-row">
-                                                <dt>Expires</dt>
-                                                <dd>{token.tokenExpiry}</dd>
-                                            </div>
-                                        )}
-                                    </dl>
-
-                                    {/* QR Code */}
-                                    {token.qrCodeData && (
-                                        <div className="mt-qr-section">
-                                            <div className="mt-qr-label">
-                                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h3v-3h-3v-3h-3v3z"/>
-                                                </svg>
-                                                Scan to verify
-                                            </div>
-                                            <div
-                                                className="mt-qr-box"
-                                                ref={(el) => { if (el) qrRefsMap.current[token.id] = el; }}
-                                            >
-                                                <QRCodeCanvas
-                                                    value={token.qrCodeData}
-                                                    size={180}
-                                                    level="H"
-                                                    bgColor="#ffffff"
-                                                    fgColor="#2c0e17"
-                                                />
-                                            </div>
-                                            <button
-                                                className="mt-btn-download"
-                                                onClick={() => downloadQRCode(qrRefsMap.current[token.id], token.mealType, token.mealDate)}
-                                            >
-                                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                                </svg>
-                                                Download QR Code
-                                            </button>
-                                        </div>
-                                    )}
+                    <>
+                        <section className="student-section">
+                            <div className="section-header-inline">
+                                <h2 className="section-title">My Payments</h2>
+                                <span className="section-count">{visiblePayments.length}</span>
+                            </div>
+                            {visiblePayments.length === 0 ? (
+                                <div className="empty-state compact-empty-state">
+                                    <h3>No pending or rejected payments</h3>
+                                    <p>Verified payments are hidden from this section.</p>
                                 </div>
-                            );
-                        })}
-                    </div>
+                            ) : (
+                                <div className="student-tokens-grid">
+                                    {visiblePayments.map((payment) => {
+                                        const mealTypesLabel = formatMealTypes(payment.mealTypes);
+                                        const screenshotUrl = payment.screenshotUrl || payment.screenshot_url || '';
+                                        const statusKey = String(payment.paymentStatus || 'PENDING').toLowerCase();
+                                        return (
+                                            <div key={payment.id} className={`student-token-card payment-record-card payment-${statusKey}`}>
+                                                <div className="student-token-header">
+                                                    <div>
+                                                        <h3>{formatPaymentStatus(payment.paymentStatus)}</h3>
+                                                        <p>{mealTypesLabel} • {formatDate(payment.mealDate)}</p>
+                                                    </div>
+                                                    <span className={`student-token-badge payment-badge-${statusKey}`}>
+                                                        {formatPaymentStatus(payment.paymentStatus)}
+                                                    </span>
+                                                </div>
+                                                <div className="student-token-meta">
+                                                    {/*<p><strong>Hall:</strong> {payment.hallShortName || '-'}</p>*/}
+                                                    <p><strong>Meal Types:</strong> {mealTypesLabel}</p>
+                                                    <p><strong>Total Amount:</strong> {payment.totalAmount ?? '-'}</p>
+                                                    <p><strong>Payment Method:</strong> {payment.paymentMethod || '-'}</p>
+                                                    <p><strong>Sender Number:</strong> {payment.senderNumber || '-'}</p>
+                                                    <p><strong>Submitted At:</strong> {formatDateTime(payment.submittedAt)}</p>
+                                                    {payment.verifiedAt ? <p><strong>Verified At:</strong> {formatDateTime(payment.verifiedAt)}</p> : null}
+                                                    {payment.verifiedByName ? <p><strong>Verified By:</strong> {payment.verifiedByName}</p> : null}
+                                                    {payment.rejectionReason ? <p><strong>Rejection Reason:</strong> {payment.rejectionReason}</p> : null}
+                                                </div>
+                                                {screenshotUrl ? (
+                                                    <div className="payment-rejection-proof">
+                                                        <p className="payment-rejection-proof-title">Payment Proof</p>
+                                                        {isRenderableScreenshotUrl(screenshotUrl) ? (
+                                                            <img className="payment-rejection-proof-image" src={screenshotUrl} alt="Student payment proof" />
+                                                        ) : (
+                                                            <p className="payment-rejection-proof-note">The proof was stored as a temporary blob URL and cannot be shown here.</p>
+                                                        )}
+                                                    </div>
+                                                ) : null}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </section>
+                        <section className="student-section">
+                            <div className="section-header-inline">
+                                <h2 className="section-title">My Meal Tokens</h2>
+                                <span className="section-count">{tokens.length}</span>
+                            </div>
+                            {tokens.length === 0 ? (
+                                <div className="empty-state compact-empty-state">
+                                    <h3>No approved tokens yet</h3>
+                                    <p>Your approved meal tokens will appear here after hall staff verifies your payment.</p>
+                                </div>
+                            ) : (
+                                <div className="student-tokens-grid">
+                                    {tokens.map((token) => (
+                                        <div key={token.id} className="student-token-card">
+                                            <div className="student-token-header">
+                                                <div>
+                                                    <h3>{token.mealType || '-'}</h3>
+                                                    <p>{formatDate(token.mealDate)}</p>
+                                                </div>
+                                                <span className="student-token-badge">{token.tokenStatus || 'APPROVED'}</span>
+                                            </div>
+                                            <div className="student-token-meta">
+                                                <p><strong>Menu:</strong> {token.mealMenu || '-'}</p>
+                                                <p><strong>Token Expiry:</strong> {token.tokenExpiry || '-'}</p>
+                                            </div>
+                                            {token.qrCodeData ? (
+                                                <div className="student-token-code">
+                                                    <div
+                                                        className="qr-container"
+                                                        ref={(el) => {
+                                                            if (el) qrRefsMap.current[token.id] = el;
+                                                        }}
+                                                    >
+                                                        <QRCodeCanvas value={token.qrCodeData} size={200} level="H" />
+                                                    </div>
+                                                    <button
+                                                        className="btn-download-qr"
+                                                        onClick={() => downloadQRCode(qrRefsMap.current[token.id], token.mealType, token.mealDate)}
+                                                    >
+                                                        Download QR Code
+                                                    </button>
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    </>
                 )}
             </div>
         </div>
