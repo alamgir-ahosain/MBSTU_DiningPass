@@ -1,0 +1,285 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-gold-soft: var(--gold-soft);
+
+  --color-staff: var(--staff);
+  --color-staff-dark: var(--staff-dark);
+  --color-staff-light: var(--staff-light);
+
+  --color-bkash: var(--bkash);
+  --color-bkash-dark: var(--bkash-dark);
+  --color-bkash-soft: var(--bkash-soft);
+
+  --color-lunch-bg: var(--lunch-bg);
+  --color-lunch-fg: var(--lunch-fg);
+  --color-lunch-ring: var(--lunch-ring);
+  --color-dinner-bg: var(--dinner-bg);
+  --color-dinner-fg: var(--dinner-fg);
+  --color-dinner-ring: var(--dinner-ring);
+
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-pending-fg: var(--status-pending-fg);
+  --color-status-success-bg: var(--status-success-bg);
+  --color-status-success-fg: var(--status-success-fg);
+  --color-status-used-bg: var(--status-used-bg);
+  --color-status-used-fg: var(--status-used-fg);
+  --color-status-error-bg: var(--status-error-bg);
+  --color-status-error-fg: var(--status-error-fg);
+  --color-status-refund-bg: var(--status-refund-bg);
+  --color-status-refund-fg: var(--status-refund-fg);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(0.985 0.003 110);
+  --foreground: oklch(0.22 0.02 240);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.02 240);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.02 240);
+  --muted: oklch(0.95 0.005 240);
+  --muted-foreground: oklch(0.48 0.02 240);
+  --border: oklch(0.9 0.008 240);
+  --input: oklch(0.9 0.008 240);
+  --ring: oklch(0.45 0.12 150);
+
+  /* Brand — MBSTU Green */
+  --primary: #1A6B3A;
+  --primary-foreground: #FFFFFF;
+  --primary-dark: #0D3B20;
+  --primary-light: #D4EDDA;
+
+  --secondary: #F1EFE8;
+  --secondary-foreground: #0D3B20;
+
+  --accent: #D4EDDA;
+  --accent-foreground: #0D3B20;
+
+  --destructive: #E24B4A;
+  --destructive-foreground: #FFFFFF;
+
+  --success: #1A6B3A;
+  --success-foreground: #FFFFFF;
+  --warning: #B8860B;
+  --warning-foreground: #FFFFFF;
+
+  /* Academic Gold */
+  --gold: #B8860B;
+  --gold-foreground: #FFFFFF;
+  --gold-soft: #FFF8E1;
+
+  /* Hall staff teal */
+  --staff: #0F6E56;
+  --staff-dark: #085041;
+  --staff-light: #9FE1CB;
+
+  /* bKash */
+  --bkash: #E2136E;
+  --bkash-dark: #880E4F;
+  --bkash-soft: #FCE4EC;
+
+  /* Meal types */
+  --lunch-bg: #FAEEDA;
+  --lunch-fg: #633806;
+  --lunch-ring: #EF9F27;
+  --dinner-bg: #E6F1FB;
+  --dinner-fg: #0C447C;
+  --dinner-ring: #378ADD;
+
+  /* Statuses */
+  --status-pending-bg: #FAEEDA;
+  --status-pending-fg: #633806;
+  --status-success-bg: #D4EDDA;
+  --status-success-fg: #0D4A22;
+  --status-used-bg: #F1EFE8;
+  --status-used-fg: #444441;
+  --status-error-bg: #FCEBEB;
+  --status-error-fg: #791F1F;
+  --status-refund-bg: #E6F1FB;
+  --status-refund-fg: #0C447C;
+
+  /* Sidebar — light cream with MBSTU green accents */
+  --sidebar: #F7F6F1;
+  --sidebar-foreground: #1F2937;
+  --sidebar-primary: #1A6B3A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E8E6DD;
+  --sidebar-accent-foreground: #0D3B20;
+  --sidebar-border: #E2E0D6;
+  --sidebar-ring: #1A6B3A;
+}
+
+.dark {
+  --background: oklch(0.16 0.015 150);
+  --foreground: oklch(0.96 0.005 110);
+  --card: oklch(0.22 0.02 150);
+  --card-foreground: oklch(0.96 0.005 110);
+  --popover: oklch(0.22 0.02 150);
+  --popover-foreground: oklch(0.96 0.005 110);
+  --muted: oklch(0.25 0.015 150);
+  --muted-foreground: oklch(0.72 0.012 110);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: #2E9B5A;
+
+  --primary: #2E9B5A;
+  --primary-foreground: #FFFFFF;
+  --primary-dark: #1A6B3A;
+  --primary-light: #1E4F31;
+
+  --secondary: oklch(0.28 0.03 150);
+  --secondary-foreground: #E8F5EC;
+
+  --accent: #1E4F31;
+  --accent-foreground: #D4EDDA;
+
+  --destructive: #F25C5B;
+  --destructive-foreground: #FFFFFF;
+
+  --success: #2E9B5A;
+  --success-foreground: #FFFFFF;
+  --warning: #D4A017;
+  --warning-foreground: #1A1A1A;
+
+  --gold: #D4A017;
+  --gold-foreground: #1A1A1A;
+  --gold-soft: #3A2E10;
+
+  --staff: #2A9B7D;
+  --staff-dark: #16725B;
+  --staff-light: #1E4F40;
+
+  --bkash: #E94B8B;
+  --bkash-dark: #B41863;
+  --bkash-soft: #3A1326;
+
+  --lunch-bg: #3A2810;
+  --lunch-fg: #F5D49A;
+  --lunch-ring: #EF9F27;
+  --dinner-bg: #102A4A;
+  --dinner-fg: #B8D6F5;
+  --dinner-ring: #378ADD;
+
+  --status-pending-bg: #3A2810;
+  --status-pending-fg: #F5D49A;
+  --status-success-bg: #1E4F31;
+  --status-success-fg: #D4EDDA;
+  --status-used-bg: #2A2A28;
+  --status-used-fg: #C8C8C4;
+  --status-error-bg: #4A1818;
+  --status-error-fg: #F5C8C8;
+  --status-refund-bg: #102A4A;
+  --status-refund-fg: #B8D6F5;
+
+  --sidebar: oklch(0.20 0.02 150);
+  --sidebar-foreground: #E8E6DD;
+  --sidebar-primary: #2E9B5A;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: oklch(0.28 0.03 150);
+  --sidebar-accent-foreground: #E8F5EC;
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: #2E9B5A;
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html {
+    font-size: 17.5px;
+  }
+  @media (min-width: 768px) {
+    html { font-size: 18px; }
+  }
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+@utility container-academic {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 80rem;
+  padding-inline: 1.5rem;
+}
+
+@utility btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  &:hover { background: var(--primary-dark); }
+}
+@utility btn-staff {
+  background: var(--staff);
+  color: #fff;
+  &:hover { background: var(--staff-dark); }
+}
+@utility btn-bkash {
+  background: var(--bkash);
+  color: #fff;
+  &:hover { background: var(--bkash-dark); }
+}
+@utility card-surface {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
