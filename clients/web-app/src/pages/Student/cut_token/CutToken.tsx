@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Check, ChevronRight, Clock, MapPin, Smartphone, TrendingUp, Utensils } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -22,27 +23,25 @@ function groupByDate(configs: MealConfig[]) {
 
 export function CutToken() {
     const { user, userData } = useAuth();
-    const [configs, setConfigs] = useState<MealConfig[]>([]);
+    const hallShortName = userData?.hallShortName;
+
+    const {
+        data: configs = [],
+        isLoading,
+        isError,
+    } = useQuery({
+        queryKey: ["mealConfigs", hallShortName],
+        queryFn: async () => {
+            const res = await studentAPI.getAvailableMealConfigs(hallShortName!);
+            return (res.data ?? []) as MealConfig[];
+        },
+        enabled: !!hallShortName,
+    });
+
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedTypes, setSelectedTypes] = useState<MealType[]>([]);
     const [step, setStep] = useState<"select" | "pay">("select");
     const [paying, setPaying] = useState(false);
-
-    useEffect(() => {
-        const hallShortName = userData?.hallShortName;
-
-        if (!hallShortName) return;
-
-        (async () => {
-            try {
-                const res = await studentAPI.getAvailableMealConfigs(hallShortName);
-                setConfigs(res.data ?? []);
-            } catch (e) {
-                console.error(e);
-                toast.error("Failed to load meals");
-            }
-        })();
-    }, [userData?.hallShortName]);
 
     const grouped = useMemo(() => groupByDate(configs.filter((c) => c.isActive)), [configs]);
 
@@ -66,7 +65,6 @@ export function CutToken() {
                 mealTypes: selectedTypes,
                 totalAmount: total,
                 paymentMethod: "BKASH",   // Now,will be add more payment method in future
-
             });
             const bkashURL = res.data?.bkashURL;
             if (bkashURL) {
@@ -81,44 +79,48 @@ export function CutToken() {
         }
     };
 
+    if (isError) {
+        toast.error("Failed to load meals");
+    }
+
     if (step === "pay" && selectedDate) {
         return (
-          <AppShell>
-              <div>
-                  <PageHeader title="Confirm payment" subtitle="Pay securely via bKash." />
-                  <div className="max-w-lg rounded-2xl border border-border bg-card p-6 shadow-academic">
-                      <div className="text-sm text-muted-foreground">Order summary</div>
-                      <div className="font-display text-xl mt-1">{new Date(selectedDate).toDateString()}</div>
-                      <div className="mt-4 space-y-2">
-                          {dayConfigs
-                              .filter((c) => selectedTypes.includes(c.mealType))
-                              .map((c) => (
-                                  <div key={c.id} className="flex justify-between text-sm border-b border-border pb-2">
-                                      <div>
-                                          <div className="font-medium">{c.mealType}</div>
-                                          <div className="text-muted-foreground text-xs">{c.mealMenu}</div>
-                                      </div>
-                                      <div className="font-medium">৳{c.mealPrice}</div>
-                                  </div>
-                              ))}
-                      </div>
-                      <div className="flex justify-between items-center mt-4 pt-2">
-                          <div className="text-sm text-muted-foreground">Total</div>
-                          <div className="font-display text-3xl text-primary">৳{total}</div>
-                      </div>
-                      <Button
-                          className="w-full mt-6 bg-[#E2136E] hover:bg-[#c41062] text-white gap-2"
-                          onClick={handlePay}
-                          disabled={paying}
-                          size="lg"
-                      >
-                          <Smartphone className="size-4" />
-                          {paying ? "Redirecting to bKash…" : `Pay ৳${total} with bKash`}
-                      </Button>
-                      <Button variant="ghost" className="w-full mt-2" onClick={() => setStep("select")}>Back</Button>
-                  </div>
-              </div>
-          </AppShell>
+            <AppShell>
+                <div>
+                    <PageHeader title="Confirm payment" subtitle="Pay securely via bKash." />
+                    <div className="max-w-lg rounded-2xl border border-border bg-card p-6 shadow-academic">
+                        <div className="text-sm text-muted-foreground">Order summary</div>
+                        <div className="font-display text-xl mt-1">{new Date(selectedDate).toDateString()}</div>
+                        <div className="mt-4 space-y-2">
+                            {dayConfigs
+                                .filter((c) => selectedTypes.includes(c.mealType))
+                                .map((c) => (
+                                    <div key={c.id} className="flex justify-between text-sm border-b border-border pb-2">
+                                        <div>
+                                            <div className="font-medium">{c.mealType}</div>
+                                            <div className="text-muted-foreground text-xs">{c.mealMenu}</div>
+                                        </div>
+                                        <div className="font-medium">৳{c.mealPrice}</div>
+                                    </div>
+                                ))}
+                        </div>
+                        <div className="flex justify-between items-center mt-4 pt-2">
+                            <div className="text-sm text-muted-foreground">Total</div>
+                            <div className="font-display text-3xl text-primary">৳{total}</div>
+                        </div>
+                        <Button
+                            className="w-full mt-6 bg-[#E2136E] hover:bg-[#c41062] text-white gap-2"
+                            onClick={handlePay}
+                            disabled={paying}
+                            size="lg"
+                        >
+                            <Smartphone className="size-4" />
+                            {paying ? "Redirecting to bKash?" : `Pay ৳${total} with bKash`}
+                        </Button>
+                        <Button variant="ghost" className="w-full mt-2" onClick={() => setStep("select")}>Back</Button>
+                    </div>
+                </div>
+            </AppShell>
         );
     }
 
@@ -127,7 +129,13 @@ export function CutToken() {
             <div>
                 <PageHeader title="Cut Token" subtitle="Book a meal at your hall." />
 
-                {grouped.length === 0 && (
+                {isLoading && (
+                    <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
+                        Loading meals...
+                    </div>
+                )}
+
+                {!isLoading && grouped.length === 0 && (
                     <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
                         No meals are currently available.
                     </div>
@@ -192,7 +200,7 @@ export function CutToken() {
 
                                                 {c.feastNote && (
                                                     <div className="text-sm italic text-accent-foreground bg-accent/40 rounded-md px-3 py-1.5 mb-3">
-                                                        🎉 {c.feastNote}
+                                                        ? {c.feastNote}
                                                     </div>
                                                 )}
 

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
@@ -15,21 +16,27 @@ import type { MealToken } from "@/types";
 
 export function StudentMealTokens() {
     const { user } = useAuth();
-    const [tokens, setTokens] = useState<MealToken[]>([]);
     const [preview, setPreview] = useState<MealToken | null>(null);
 
-    useEffect(() => {
-        if (!user) return;
-        (async () => {
-            try {
-                const res = await mealTokenAPI.getMyTokens();
-                setTokens([...(res.data ?? [])].sort((a: MealToken, b: MealToken) => (a.mealDate < b.mealDate ? 1 : -1)));
-            } catch (e) {
-                console.error(e);
-                toast.error("Failed to load tokens");
-            }
-        })();
-    }, [user]);
+    const {
+        data: tokens = [],
+        isLoading,
+        isError,
+    } = useQuery({
+        queryKey: ["myMealTokens", user?.uid],
+        queryFn: async () => {
+            const res = await mealTokenAPI.getMyTokens();
+            return [...(res.data ?? [])].sort((a: MealToken, b: MealToken) =>
+                a.mealDate < b.mealDate ? 1 : -1
+            );
+        },
+        enabled: !!user,
+        staleTime: 60 * 1000, // tokens don't change every second; 1 min is safe
+    });
+
+    if (isError) {
+        toast.error("Failed to load tokens");
+    }
 
     return (
         <AppShell>
@@ -40,7 +47,13 @@ export function StudentMealTokens() {
                     actions={<Button asChild><Link to="/student/cut-token">Cut new token</Link></Button>}
                 />
 
-                {tokens.length === 0 ? (
+                {isLoading && (
+                    <div className="rounded-xl border border-border bg-card p-10 text-center text-muted-foreground">
+                        Loading tokens...
+                    </div>
+                )}
+
+                {!isLoading && tokens.length === 0 ? (
                     <div className="rounded-xl border border-border bg-card p-10 text-center">
                         <Ticket className="size-10 text-muted-foreground mx-auto mb-3" />
                         <div className="font-display text-lg">No tokens yet</div>
@@ -63,11 +76,11 @@ export function StudentMealTokens() {
                                     <QRCodeSVG value={preview.qrCodeData} size={300} level="M" />
                                 </div>
                                 <Badge className="mt-4 bg-amber-100 text-amber-900 hover:bg-amber-100">
-                                    {preview.mealType === "LUNCH" ? "☀" : "🌙"} {preview.mealType}
+                                    {preview.mealType === "LUNCH" ? "?" : "?"} {preview.mealType}
                                 </Badge>
                                 <div className="mt-3 font-medium text-base">{preview.mealMenu}</div>
                                 <div className="text-sm text-muted-foreground mt-1">
-                                    {new Date(preview.mealDate).toLocaleDateString()} · valid until{" "}
+                                    {new Date(preview.mealDate).toLocaleDateString()} � valid until{" "}
                                     <span className="text-destructive font-medium">{formatTime12(preview.expiresAt ?? "")}</span>
                                 </div>
                                 <Button className="mt-5" onClick={() => setPreview(null)}>
@@ -82,7 +95,7 @@ export function StudentMealTokens() {
     );
 }
 
-// ✅ TokenCard is just a card — no AppShell here
+// ? TokenCard is just a card ? no AppShell here
 function TokenCard({ t, onPreview }: { t: MealToken; onPreview: () => void }) {
     const qrRef = useRef<SVGSVGElement>(null);
 
@@ -121,7 +134,7 @@ function TokenCard({ t, onPreview }: { t: MealToken; onPreview: () => void }) {
                     ? "bg-amber-100 text-amber-900 hover:bg-amber-100 text-sm px-3 py-1"
                     : "bg-indigo-100 text-indigo-900 hover:bg-indigo-100 text-sm px-3 py-1"
                 }>
-                    {t.mealType === "LUNCH" ? "☀" : "🌙"} {t.mealType}
+                    {t.mealType === "LUNCH" ? "?" : "?"} {t.mealType}
                 </Badge>
                 <Badge
                     variant={used ? "secondary" : "outline"}
@@ -153,7 +166,7 @@ function TokenCard({ t, onPreview }: { t: MealToken; onPreview: () => void }) {
                 <div className="flex items-center gap-2 text-sm">
                     <Clock className="size-4 text-destructive" />
                     <span className="text-muted-foreground">Expires:</span>
-                    <span className="font-semibold text-destructive">{t.tokenExpiry }</span>
+                    <span className="font-semibold text-destructive">{t.expiresAt }</span>
                 </div>
             </div>
 
