@@ -32,7 +32,7 @@ apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) =>
   try {
     const user = auth.currentUser;
     if (user) {
-      const token        = await user.getIdToken(true);
+      const token = await user.getIdToken();
       const authState    = getAuthState();
       const databaseRole = authState.databaseRole;
       const claims       = getCustomClaimsFromToken(token);
