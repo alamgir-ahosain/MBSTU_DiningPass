@@ -316,7 +316,7 @@ public class MealConfigServiceImpl implements MealConfigService {
             config.getTokenExpires(),
             config.isActive(),
             config.getFeastNote(),
-            null,    // totalSold    — admin only
+            config.getTotalSold(),
             null,    // totalUsed    — admin only
             null,    // totalPending — admin only
             computeIsBookingOpen(config),

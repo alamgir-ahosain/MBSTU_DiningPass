@@ -52,11 +52,16 @@ function formatDateTime(iso?: string) {
     return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
+// API returns times as "HH:MM:SS" but <input type="time"> needs "HH:MM"
+function toTimeInputValue(value?: string) {
+    if (!value) return "";
+    return value.slice(0, 5);
+}
+
 export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
     const { user, userData } = useAuth();
     const [configs, setConfigs] = useState<MealConfig[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
-    // ✅ Use a separate key to force Switch remount when dialog opens with new config
     const [dialogKey, setDialogKey] = useState(0);
     const [form, setForm] = useState<FormState>(emptyForm());
 
@@ -90,8 +95,8 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
             mealType: c.mealType,
             mealMenu: c.mealMenu,
             mealPrice: c.mealPrice,
-            cutTokenBefore: c.cutTokenBefore,
-            tokenExpires: c.tokenExpires,
+            cutTokenBefore: toTimeInputValue(c.cutTokenBefore),
+            tokenExpires: toTimeInputValue(c.tokenExpires),
             isActive: c.isActive,
             feastNote: c.feastNote || "",
         });
@@ -189,12 +194,12 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
 
                                 {c.feastNote && (
                                     <div className="text-sm italic text-accent-foreground bg-accent/40 rounded-md px-3 py-1.5">
-                                        🎉 {c.feastNote}
+                                        ? {c.feastNote}
                                     </div>
                                 )}
 
                                 <div className="flex items-center justify-between">
-                                    <div className="font-display text-2xl text-primary">৳{c.mealPrice}</div>
+                                    <div className="font-display text-2xl text-primary">?{c.mealPrice}</div>
                                     <div className="flex items-center gap-1 text-sm text-destructive font-medium">
                                         <Clock className="size-4" /> Cut by {formatTime12(c.cutTokenBefore)}
                                     </div>
@@ -203,15 +208,15 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
                                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border">
                                     <div className="flex items-center gap-2 text-sm">
                                         <TrendingUp className="size-4 text-primary" />
-                                        <span><span className="font-semibold">{c.totalTokensSold ?? '-'}</span> <span className="text-muted-foreground">sold</span></span>
+                                        <span><span className="font-semibold">{c.tokensSold ?? 0}</span> <span className="text-muted-foreground">sold</span></span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm">
                                         <Hourglass className="size-4 text-warning" />
-                                        <span><span className="font-semibold">{c.totalTokenPending ?? '-'}</span> <span className="text-muted-foreground">pending</span></span>
+                                        <span><span className="font-semibold">{c.tokensPending ?? 0}</span> <span className="text-muted-foreground">pending</span></span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm">
                                         <CheckCircle2 className="size-4 text-success" />
-                                        <span><span className="font-semibold">{c.totalTokensUsed ?? '-'}</span> <span className="text-muted-foreground">used</span></span>
+                                        <span><span className="font-semibold">{c.tokensUsed ?? 0}</span> <span className="text-muted-foreground">used</span></span>
                                     </div>
                                 </div>
 
@@ -219,13 +224,13 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
                                     <div className="flex items-center gap-1.5">
                                         <User className="size-3" />
                                         Created by <span className="font-medium text-foreground">{c.createdByName}</span>
-                                        {c.createdAt && <> · {formatDateTime(c.createdAt)}</>}
+                                        {c.createdAt && <> � {formatDateTime(c.createdAt)}</>}
                                     </div>
                                     {c.updatedByName && (
                                         <div className="flex items-center gap-1.5">
                                             <Pencil className="size-3" />
                                             Updated by <span className="font-medium text-foreground">{c.updatedByName}</span>
-                                            {c.updatedAt && <> · {formatDateTime(c.updatedAt)}</>}
+                                            {c.updatedAt && <> � {formatDateTime(c.updatedAt)}</>}
                                         </div>
                                     )}
                                 </div>
@@ -234,7 +239,7 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
                     })}
                 </div>
 
-                {/* ✅ key prop forces full remount when opening a different config */}
+                {/* ? key prop forces full remount when opening a different config */}
                 <Dialog key={dialogKey} open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogContent>
                         <DialogHeader>
@@ -291,7 +296,7 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
                             <div className="space-y-1.5">
                                 <Label>Active</Label>
                                 <div className="h-10 flex items-center gap-3">
-                                    {/* ✅ functional updater avoids stale closure; key forces remount */}
+                                    {/* ? functional updater avoids stale closure; key forces remount */}
                                     <Switch
                                         key={`active-${form.id ?? "new"}-${dialogKey}`}
                                         checked={form.isActive}

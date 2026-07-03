@@ -56,10 +56,9 @@ export interface MealConfig {
   createdAt?: string;
   updatedByName?: string;
   updatedAt?: string;
-  // Backend-provided aggregates (avoids fetching all tokens client side)
-  tokensSold?: number;
-  tokensUsed?: number;
-  tokensPending?: number;
+  totalTokensSold?: number;
+  totalTokensUsed?: number;
+  totalTokenPending?: number;
 }
 
 export interface MealToken {

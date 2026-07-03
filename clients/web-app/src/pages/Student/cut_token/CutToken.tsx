@@ -205,7 +205,7 @@ export function CutToken() {
 
                                                 <div className="flex items-center gap-2 pt-3 border-t border-border text-sm">
                                                     <TrendingUp className="size-4 text-primary" />
-                                                    <span className="font-semibold">{c.tokensSold ?? 0}</span>
+                                                    <span className="font-semibold">{c.totalTokensSold ?? 0}</span>
                                                     <span className="text-muted-foreground">tokens sold so far</span>
                                                 </div>
                                             </button>
