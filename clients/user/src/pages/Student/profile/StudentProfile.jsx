@@ -82,15 +82,6 @@ export const StudentProfile = () => {
                     </div>
                     <div className="sp-banner-info">
                         <h1 className="sp-name">{userData.fullName}</h1>
-                        <p className="sp-meta">
-                            <span>{userData.studentId || '—'}</span>
-                            <span className="sp-meta-divider">·</span>
-                            <span>{userData.department || 'Department N/A'}</span>
-                            <span className="sp-meta-divider">·</span>
-                            <span className={`sp-status-badge ${userData.isActive ? 'active' : 'inactive'}`}>
-                                {userData.isActive ? 'Active' : 'Inactive'}
-                            </span>
-                        </p>
                     </div>
                 </div>
             </div>

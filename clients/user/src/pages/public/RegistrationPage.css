@@ -1,0 +1,410 @@
+/* ============================================================
+   RegistrationPage.css — MBSTU Academic Portal
+   Multi-step form. Maroon #7b2236 | Gold #c9952a | Dark #2c0e17
+   ============================================================ */
+
+.rp-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 20%, rgba(123,34,54,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 45% at 85% 80%, rgba(44,14,23,0.35) 0%, transparent 55%),
+    #f5f0ed;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem 3rem;
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+}
+
+/* ── Card ── */
+.rp-card {
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(123,34,54,0.12);
+  box-shadow:
+    0 1px 3px rgba(44,14,23,0.06),
+    0 8px 32px rgba(44,14,23,0.10),
+    0 20px 60px rgba(44,14,23,0.07);
+  overflow: hidden;
+}
+
+.rp-card::before {
+  content: '';
+  display: block;
+  height: 5px;
+  background: linear-gradient(90deg, #7b2236 0%, #c9952a 60%, #7b2236 100%);
+}
+
+.rp-inner {
+  padding: 1.5rem 1.75rem 1.75rem;
+}
+
+/* ── Branding ── */
+.rp-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  background: rgba(123,34,54,0.07);
+  border: 1px solid rgba(123,34,54,0.18);
+  border-radius: 999px;
+  color: #7b2236;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.rp-title {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a0810;
+  margin: 0 0 0.15rem;
+  letter-spacing: -0.01em;
+}
+
+.rp-subtitle {
+  font-size: 0.8rem;
+  color: #7a6060;
+  margin: 0 0 1.1rem;
+}
+
+/* ── Step Indicator ── */
+.rp-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 1.25rem;
+}
+
+.rp-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 1;
+  position: relative;
+}
+
+/* connector line between steps */
+.rp-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: calc(50% + 14px);
+  width: calc(100% - 28px);
+  height: 2px;
+  background: #e8d5cc;
+  z-index: 0;
+}
+
+.rp-step:not(:last-child).rp-step--done::after {
+  background: #7b2236;
+}
+
+.rp-step-bubble {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #e8d5cc;
+  background: #ffffff;
+  color: #bba8a8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  position: relative;
+}
+
+.rp-step--active .rp-step-bubble {
+  border-color: #7b2236;
+  background: #7b2236;
+  color: #ffffff;
+}
+
+.rp-step--done .rp-step-bubble {
+  border-color: #7b2236;
+  background: #7b2236;
+  color: #ffffff;
+}
+
+.rp-step-label {
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: #bba8a8;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.rp-step--active .rp-step-label,
+.rp-step--done .rp-step-label {
+  color: #7b2236;
+}
+
+/* ── Divider ── */
+.rp-divider {
+  height: 1px;
+  background: rgba(123,34,54,0.1);
+  margin-bottom: 1.1rem;
+}
+
+/* ── Alerts ── */
+.rp-error {
+  background: #fff5f6;
+  border: 1px solid rgba(180,40,65,0.22);
+  border-left: 3px solid #c0314f;
+  border-radius: 6px;
+  color: #8b1f35;
+  font-size: 0.82rem;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.rp-success {
+  background: #f3faf5;
+  border: 1px solid rgba(30,130,70,0.22);
+  border-left: 3px solid #2e9e5a;
+  border-radius: 6px;
+  color: #1a6b3a;
+  font-size: 0.82rem;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+/* ── Section label ── */
+.rp-section-label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c9952a;
+  padding-bottom: 0.35rem;
+  margin: 0 0 0.75rem;
+  border-bottom: 1px solid rgba(201,149,42,0.2);
+}
+
+/* ── Field ── */
+.rp-field {
+  margin-bottom: 0.75rem;
+}
+
+.rp-field label {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #4a2030;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+}
+
+.rp-field small {
+  display: block;
+  font-size: 0.71rem;
+  color: #a08080;
+  margin-top: 0.2rem;
+}
+
+.rp-field input,
+.rp-field select {
+  width: 100%;
+  padding: 0.52rem 0.8rem;
+  background: #faf8f7;
+  border: 1.5px solid rgba(123,34,54,0.18);
+  border-radius: 6px;
+  color: #1a0810;
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+  font-size: 0.875rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.rp-field input::placeholder { color: #bba8a8; }
+
+.rp-field select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%237b2236' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  padding-right: 2.2rem;
+}
+
+.rp-field input:focus,
+.rp-field select:focus {
+  border-color: #7b2236;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(123,34,54,0.1);
+}
+
+.rp-field input:disabled,
+.rp-field select:disabled {
+  background: #f0eded;
+  border-color: rgba(123,34,54,0.1);
+  color: #a08080;
+  cursor: not-allowed;
+}
+
+.rp-field--disabled input {
+  background: #f0eded !important;
+  border-color: rgba(123,34,54,0.1) !important;
+  color: #a08080 !important;
+  cursor: default !important;
+}
+
+/* ── Two-column row ── */
+.rp-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+/* ── Gender radios ── */
+.rp-gender {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.rp-radio {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.52rem 0.8rem;
+  background: #faf8f7;
+  border: 1.5px solid rgba(123,34,54,0.18);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.855rem;
+  color: #3a1825;
+  font-weight: 500;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.rp-radio:has(input:checked) {
+  border-color: #7b2236;
+  background: rgba(123,34,54,0.05);
+}
+
+.rp-radio input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #7b2236;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  -webkit-appearance: auto;
+  appearance: auto;
+  border: none;
+  background: none;
+}
+
+/* ── Navigation buttons ── */
+.rp-nav {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+
+.rp-btn {
+  flex: 1;
+  padding: 0.68rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.rp-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.rp-btn--primary {
+  background: #7b2236;
+  color: #ffffff;
+}
+
+.rp-btn--primary:hover:not(:disabled) {
+  background: #8f2840;
+  box-shadow: 0 4px 14px rgba(123,34,54,0.28);
+  transform: translateY(-1px);
+}
+
+.rp-btn--primary:active:not(:disabled) {
+  background: #6a1c30;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.rp-btn--ghost {
+  background: transparent;
+  color: #7b2236;
+  border: 1.5px solid rgba(123,34,54,0.25);
+  flex: 0 0 auto;
+  padding-left: 0.85rem;
+  padding-right: 0.85rem;
+}
+
+.rp-btn--ghost:hover:not(:disabled) {
+  background: rgba(123,34,54,0.05);
+  border-color: #7b2236;
+}
+
+/* ── Footer ── */
+.rp-footer {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(123,34,54,0.1);
+  text-align: center;
+}
+
+.rp-footer p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #7a6060;
+}
+
+.rp-footer a {
+  color: #7b2236;
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 0.15s;
+}
+
+.rp-footer a:hover {
+  color: #a02d48;
+  text-decoration: underline;
+}
+
+/* ── Responsive ── */
+@media (max-width: 520px) {
+  .rp-page  { padding: 1rem 0.75rem 2.5rem; }
+  .rp-inner { padding: 1.25rem 1.1rem 1.5rem; }
+  .rp-title { font-size: 1.25rem; }
+  .rp-row   { grid-template-columns: 1fr; gap: 0; }
+  .rp-step-label { font-size: 0.6rem; }
+}

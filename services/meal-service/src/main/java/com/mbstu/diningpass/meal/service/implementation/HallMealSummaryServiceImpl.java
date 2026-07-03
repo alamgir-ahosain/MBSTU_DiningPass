@@ -75,6 +75,8 @@ public class HallMealSummaryServiceImpl implements HallMealSummaryService {
     @Override
     public Page<HallMealSummaryResponse> getAllHallMealSummary(UUID id, Role requesterRole, int page, int size) {
 
+        logger.info("[HallMealSummary]: Fetching meal summaries for requester role: {}, page: {}, size: {}", requesterRole, page, size);
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("mealDate").ascending().and(Sort.by("mealType").ascending()));
 
         if (requesterRole != Role.HALL_ADMIN && requesterRole != Role.HALL_STAFF) {

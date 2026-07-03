@@ -58,7 +58,7 @@ public class MealConfigServiceImpl implements MealConfigService {
     @Transactional
     public MealConfigAdminResponse createMealConfig(UUID requesterId, Role role, CreateMealConfigRequest request) {
 
-     //        logger.warn("meal-service/mealConfig: DIRECT DB CALL for createMealConfig");
+        logger.info("meal-service/mealConfig: DIRECT DB CALL for createMealConfig");
 
         HallAssociateProfileResponse creatorProfile =
                 getAuthorizedHallProfile(
@@ -115,75 +115,37 @@ public class MealConfigServiceImpl implements MealConfigService {
 
 
 
-@Override
-@Transactional(readOnly = true)
-public List<MealConfigAdminResponse> getAllMealConfigs(UUID requesterId, Role role) {
+    @Override
+    @Transactional(readOnly = true)
+    public List<MealConfigAdminResponse> getAllMealConfigs(UUID requesterId, Role role) {
 
-    String hallShortName;
-    if (role == Role.STUDENT) {
+        String hallShortName;
+        if (role == Role.STUDENT) {
 
-        // Fetch student's hall from auth-service
-        StudentProfileResponse studentProfile = studentFeignClient.getProfile();
-        hallShortName = studentProfile.hallShortName();
+            StudentProfileResponse studentProfile = studentFeignClient.getProfile();
+            hallShortName = studentProfile.hallShortName();
+            logger.info("[MEAL_CONFIG][GET_ALL] STUDENT requester={} hall={}", requesterId, hallShortName);
 
-        // Students always hit DB directly — no cache (they see only active configs,
-        // which is a different dataset from the admin cache keyed by hallShortName)
-        logger.info("[MEAL_CONFIG][GET_ALL] STUDENT requester={} hall={}", requesterId, hallShortName);
+            return mealConfigRepository
+                    .findByHallShortNameAndIsActiveTrueOrderByMealDateDesc(hallShortName)
+                    .stream()
+                    .filter(this::computeIsBookingOpen)
+                    .map(this::mapToStudentResponse)
+                    .collect(Collectors.toList());
+        }
+
+        // Admin / Staff
+        HallAssociateProfileResponse creatorProfile = getAuthorizedHallProfile(requesterId, role, "view meal configurations");
+        hallShortName = creatorProfile.hallShortName();
+        logger.info("[MEAL_CONFIG][GET_ALL] CACHE MISS — querying DB hall={}", hallShortName);
 
         return mealConfigRepository
                 .findByHallShortNameAndIsActiveTrueOrderByMealDateDesc(hallShortName)
                 .stream()
-                .map(this::mapToStudentResponse)
+                .filter(this::computeIsBookingOpen) // Only return configs that are still open for booking
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
-
-    //  Admin / Staff path (unchanged from before)
-    HallAssociateProfileResponse creatorProfile =
-            getAuthorizedHallProfile(requesterId, role, "view meal configurations");
-
-    hallShortName = creatorProfile.hallShortName();
-
-    //  Cache read
-    Cache cache = resolveCache();
-    if (cache != null) {
-        Cache.ValueWrapper wrapper = cache.get(hallShortName);
-        if (wrapper != null) {
-            try {
-                @SuppressWarnings("unchecked")
-                List<MealConfigAdminResponse> cached = (List<MealConfigAdminResponse>) wrapper.get();
-                if (cached != null) {
-                    logger.info("[MEAL_CONFIG][GET_ALL] CACHE HIT hall={} entries={}", hallShortName, cached.size());
-                    return cached;
-                }
-            } catch (Exception e) {
-                logger.warn("[MEAL_CONFIG][CACHE] GET cast failed hall={}: {} — falling back to DB", hallShortName, e.getMessage());
-            }
-        }
-    }
-
-    //  Cache miss -> DB
-    logger.info("[MEAL_CONFIG][GET_ALL] CACHE MISS — querying DB hall={}", hallShortName);
-
-    List<MealConfigAdminResponse> result =
-            mealConfigRepository
-                    .findByHallShortNameOrderByMealDateDesc(hallShortName)
-                    .stream()
-                    .map(this::mapToResponse)
-                    .collect(Collectors.toList());
-
-    //  Populate cache
-    if (cache != null && !result.isEmpty()) {
-        try {
-            cache.put(hallShortName, result);
-            logger.info("[MEAL_CONFIG][GET_ALL] CACHE PUT hall={} entries={}", hallShortName, result.size());
-        } catch (Exception e) {
-            logger.warn("[MEAL_CONFIG][CACHE] PUT failed hall={}: {}", hallShortName, e.getMessage());
-        }
-    }
-
-    return result;
-}
-
 
 
 
@@ -335,7 +297,6 @@ public List<MealConfigAdminResponse> getAllMealConfigs(UUID requesterId, Role ro
                 config.getTotalUsed(),
                 totalTokenPending,
                 computeIsBookingOpen(config),
-                computeIsTokenValid(config),     // bonus field for admin UI to show if tokens are still valid
                 config.getCreatedByName(),
                 config.getUpdatedByName(),
                 config.getCreatedAt(),
@@ -355,11 +316,10 @@ public List<MealConfigAdminResponse> getAllMealConfigs(UUID requesterId, Role ro
             config.getTokenExpires(),
             config.isActive(),
             config.getFeastNote(),
-            null,    // totalSold    — admin only
+            config.getTotalSold(),
             null,    // totalUsed    — admin only
             null,    // totalPending — admin only
             computeIsBookingOpen(config),
-            computeIsTokenValid(config),
             null,    // createdByName — admin only
             null,    // updatedByName — admin only
             config.getCreatedAt(),

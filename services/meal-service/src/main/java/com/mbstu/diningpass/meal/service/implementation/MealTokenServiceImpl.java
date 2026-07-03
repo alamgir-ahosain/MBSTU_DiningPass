@@ -199,13 +199,20 @@ public class MealTokenServiceImpl implements MealTokenService {
                 ? tokenExpiry.format(DateTimeFormatter.ofPattern("hh:mm a"))
                 : null;
 
+            //just show APPROVED tokens as UNUSED to students, actual status is still APPROVED in DB.
+            // This way they won't worry about the token being "used" until they actually use it in the dining hall.
+            // It's more intuitive for them to see UNUSED until they scan it, then it becomes USED.
+            TokenStatus status = null;
+            if (token.getTokenStatus() == TokenStatus.APPROVED)  {
+                status = TokenStatus.UNUSED;
+            }
             return new MealTokenStudentResponse(
                     token.getId(),              // ← id included now
                     token.getMealDate(),
                     token.getMealType(),
                     menu,
                     formattedTokenExpiry,       // Now using formatted String instead of LocalTime
-                    token.getTokenStatus(),
+                    status,
                     token.getQrCodeData()
             );
         }).toList();

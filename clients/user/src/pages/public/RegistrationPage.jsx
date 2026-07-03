@@ -1,298 +1,367 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { studentAPI } from '../../services/api';
-import './PublicPages.css';
+import './RegistrationPage.css';
+
+const HALL_OPTIONS = [
+    { shortName: 'JAMH',  fullName: 'Jananeta Abdul Mannan Hall'      },
+    { shortName: 'SOHH',  fullName: 'Shaheed Osman Hadi Hall'         },
+    { shortName: 'SAFH',  fullName: 'Shaheed Abrar Fahad Hall'        },
+    { shortName: 'SZRH',  fullName: 'Shahid Ziaur Rahman Hall'        },
+    { shortName: 'SJJIM', fullName: 'Shahid Janoni Jahanara Imam Hall'},
+    { shortName: 'AKBH',  fullName: 'Alema Khatun Bhashani Hall'      },
+    { shortName: 'BFZH',  fullName: 'Begum Fazilatunnessa Zoha Hall'  },
+];
+
+const DEPT_OPTIONS = [
+    'Computer Science and Engineering',
+    'Information and Communication Technology',
+    'Criminology and Police Science',
+    'Textile Engineering',
+];
+
+const STEPS = [
+    { label: 'Personal'  },
+    { label: 'Academic'  },
+    { label: 'Security'  },
+];
+
+const CheckIcon = () => (
+    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+    </svg>
+);
 
 export const RegistrationPage = () => {
-    const hallOptions = [
-        { shortName: 'JAMH', fullName: 'Jananeta Abdul Mannan Hall' },
-        { shortName: 'SOHH', fullName: 'Shaheed Osman Hadi Hall' },
-        { shortName: 'SAFH', fullName: 'Shaheed Abrar Fahad Hall' },
-        { shortName: 'SZRH', fullName: 'Shahid Ziaur Rahman Hall' },
-        { shortName: 'SJJIM', fullName: 'Shahid Janoni Jahanara Imam Hall' },
-        { shortName: 'AKBH', fullName: 'Alema Khatun Bhashani Hall' },
-        { shortName: 'BFZH', fullName: 'Begum Fazilatunnessa Zoha Hall' },
-    ];
-
-    const departmentOptions = [
-        'Computer Science and Engineering',
-        'Information and Communication Technology',
-        'Criminology and Police Science',
-        'Textile Engineering',
-    ];
-
-    const [formData, setFormData] = useState({
-        studentId: '',
-        fullName: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        hallShortName: '',
-        roomNumber: '',
-        department: '',
-        gender: '',
-    });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+    const [step, setStep]       = useState(0);   // 0 | 1 | 2
+    const [loading, setLoading] = useState(false);
+    const [error, setError]     = useState('');
+    const [success, setSuccess] = useState('');
+
+    const [formData, setFormData] = useState({
+        studentId:       '',
+        fullName:        '',
+        email:           '',
+        gender:          '',
+        roomNumber:      '',
+        department:      '',
+        hallShortName:   '',
+        password:        '',
+        confirmPassword: '',
+    });
+
+    const set = (field) => (e) =>
+        setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+
+    // ── Per-step validation ──────────────────────────────────
+    const validateStep = () => {
+        setError('');
+        if (step === 0) {
+            if (!formData.studentId.trim()) return setError('Student ID is required.'),    false;
+            if (!formData.fullName.trim())  return setError('Full name is required.'),     false;
+            if (!formData.email.trim())     return setError('Email address is required.'), false;
+            if (!formData.gender)           return setError('Please select a gender.'),    false;
+        }
+        if (step === 1) {
+            if (!formData.department)    return setError('Please select a department.'), false;
+            if (!formData.hallShortName) return setError('Please select a hall.'),       false;
+        }
+        if (step === 2) {
+            if (!formData.password)                                return setError('Password is required.'),          false;
+            if (formData.password.length < 6)                     return setError('Password must be at least 6 characters.'), false;
+            if (formData.password !== formData.confirmPassword)   return setError('Passwords do not match.'),         false;
+        }
+        return true;
+    };
+
+    const handleNext = () => {
+        if (!validateStep()) return;
+        setStep((s) => s + 1);
+    };
+
+    const handleBack = () => {
+        setError('');
+        setStep((s) => s - 1);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateStep()) return;
+
+        setLoading(true);
         setError('');
         setSuccess('');
-        setLoading(true);
-
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match.');
-            setLoading(false);
-            return;
-        }
-        if (!formData.fullName || !formData.studentId || !formData.hallShortName || !formData.department || !formData.gender) {
-            setError('Please fill in all required fields.');
-            setLoading(false);
-            return;
-        }
-
         try {
-            const studentData = {
-                studentId: formData.studentId,
-                fullName: formData.fullName,
-                email: formData.email,
-                password: formData.password,
+            await studentAPI.register({
+                studentId:     formData.studentId,
+                fullName:      formData.fullName,
+                email:         formData.email,
+                password:      formData.password,
                 hallShortName: formData.hallShortName,
-                roomNumber: formData.roomNumber || null,
-                department: formData.department,
-                gender: formData.gender,
-            };
-            const response = await studentAPI.register(studentData);
-            console.log('Student registered successfully:', response);
+                roomNumber:    formData.roomNumber || null,
+                department:    formData.department,
+                gender:        formData.gender,
+            });
             setSuccess('Registration successful! Redirecting to login…');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
-            console.error('Registration error:', err);
-            if (err.response?.status === 400) {
-                setError(err.response.data.message || 'Invalid registration data.');
-            } else if (err.response?.status === 409) {
-                setError('Email or Student ID already exists.');
-            } else {
-                setError(err.message || 'Registration failed. Please try again.');
-            }
+            if      (err.response?.status === 409) setError('Email or Student ID already exists.');
+            else if (err.response?.status === 400) setError(err.response.data?.message || 'Invalid registration data.');
+            else                                   setError(err.message || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
+    // ── Step content ─────────────────────────────────────────
+    const renderStep = () => {
+        if (step === 0) return (
+            <>
+                <div className="rp-section-label">Personal Information</div>
+
+                <div className="rp-row">
+                    <div className="rp-field">
+                        <label htmlFor="rp-studentId">Student ID</label>
+                        <input
+                            id="rp-studentId"
+                            type="text"
+                            value={formData.studentId}
+                            onChange={set('studentId')}
+                            placeholder="CE21012"
+                            maxLength="20"
+                            disabled={loading}
+                            required
+                        />
+                    </div>
+                    <div className="rp-field">
+                        <label htmlFor="rp-roomNumber">
+                            Room No.{' '}
+                            <span style={{ fontWeight: 400, textTransform: 'none', fontSize: '0.68rem', color: '#a08080' }}>
+                                (optional)
+                            </span>
+                        </label>
+                        <input
+                            id="rp-roomNumber"
+                            type="text"
+                            value={formData.roomNumber}
+                            onChange={set('roomNumber')}
+                            placeholder="112"
+                            maxLength="15"
+                            disabled={loading}
+                        />
+                    </div>
+                </div>
+
+                <div className="rp-field">
+                    <label htmlFor="rp-fullName">Full Name</label>
+                    <input
+                        id="rp-fullName"
+                        type="text"
+                        value={formData.fullName}
+                        onChange={set('fullName')}
+                        placeholder="Alamgir Hosain"
+                        maxLength="100"
+                        disabled={loading}
+                        required
+                    />
+                </div>
+
+                <div className="rp-field">
+                    <label htmlFor="rp-email">Email Address</label>
+                    <input
+                        id="rp-email"
+                        type="email"
+                        value={formData.email}
+                        onChange={set('email')}
+                        placeholder="CE21012@mbstu.ac.bd"
+                        disabled={loading}
+                        required
+                        autoComplete="email"
+                    />
+                </div>
+
+                <div className="rp-field">
+                    <label>Gender</label>
+                    <div className="rp-gender">
+                        <label className="rp-radio">
+                            <input
+                                type="radio"
+                                name="rp-gender"
+                                value="MALE"
+                                checked={formData.gender === 'MALE'}
+                                onChange={set('gender')}
+                                disabled={loading}
+                            />
+                            Male
+                        </label>
+                        <label className="rp-radio">
+                            <input
+                                type="radio"
+                                name="rp-gender"
+                                value="FEMALE"
+                                checked={formData.gender === 'FEMALE'}
+                                onChange={set('gender')}
+                                disabled={loading}
+                            />
+                            Female
+                        </label>
+                    </div>
+                </div>
+            </>
+        );
+
+        if (step === 1) return (
+            <>
+                <div className="rp-section-label">Academic Details</div>
+
+                <div className="rp-field">
+                    <label htmlFor="rp-department">Department</label>
+                    <select
+                        id="rp-department"
+                        value={formData.department}
+                        onChange={set('department')}
+                        disabled={loading}
+                        required
+                    >
+                        <option value="">Select department</option>
+                        {DEPT_OPTIONS.map((d) => (
+                            <option key={d} value={d}>{d}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="rp-field">
+                    <label htmlFor="rp-hall">Residential Hall</label>
+                    <select
+                        id="rp-hall"
+                        value={formData.hallShortName}
+                        onChange={set('hallShortName')}
+                        disabled={loading}
+                        required
+                    >
+                        <option value="">Select hall</option>
+                        {HALL_OPTIONS.map((h) => (
+                            <option key={h.shortName} value={h.shortName}>
+                                {h.fullName} ({h.shortName})
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="rp-field rp-field--disabled">
+                    <label htmlFor="rp-role">Role</label>
+                    <input id="rp-role" type="text" value="STUDENT" disabled />
+                    <small>Automatically assigned to all student registrations.</small>
+                </div>
+            </>
+        );
+
+        if (step === 2) return (
+            <>
+                <div className="rp-section-label">Set Password</div>
+
+                <div className="rp-field">
+                    <label htmlFor="rp-password">Password</label>
+                    <input
+                        id="rp-password"
+                        type="password"
+                        value={formData.password}
+                        onChange={set('password')}
+                        placeholder="Min. 6 characters"
+                        minLength="6"
+                        disabled={loading}
+                        required
+                        autoComplete="new-password"
+                    />
+                </div>
+
+                <div className="rp-field">
+                    <label htmlFor="rp-confirmPassword">Confirm Password</label>
+                    <input
+                        id="rp-confirmPassword"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={set('confirmPassword')}
+                        placeholder="Re-enter password"
+                        minLength="6"
+                        disabled={loading}
+                        required
+                        autoComplete="new-password"
+                    />
+                </div>
+            </>
+        );
+    };
+
     return (
-        <div className="pp-page">
-            <div className="form-container">
-                <div className="form-inner">
-                    <div className="rule-badge">Registration as MBSTUian</div>
-                    <h1>Create Account</h1>
-                    <p className="form-subtitle">Fill in your details to register as a student</p>
-                    <div className="form-divider" />
+        <div className="rp-page">
+            <div className="rp-card">
+                <div className="rp-inner">
 
-                    {error && <div className="error-message">{error}</div>}
-                    {success && <div className="success-message">{success}</div>}
+                    {/* Branding */}
+                    <div className="rp-badge">Registration — MBSTUian</div>
+                    <h1 className="rp-title">Create Account</h1>
+                    <p className="rp-subtitle">
+                        Step {step + 1} of {STEPS.length} —{' '}
+                        {['Personal details', 'Academic details', 'Set your password'][step]}
+                    </p>
 
-                    <form onSubmit={handleSubmit}>
-
-                        {/* ── Personal Info ── */}
-                        <div className="form-section-label">Personal Information</div>
-
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="studentId">Student ID</label>
-                                <input
-                                    id="studentId"
-                                    type="text"
-                                    name="studentId"
-                                    value={formData.studentId}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="CE21012"
-                                    maxLength="20"
-                                    disabled={loading}
-                                />
+                    {/* Step indicator */}
+                    <div className="rp-steps">
+                        {STEPS.map((s, i) => (
+                            <div
+                                key={s.label}
+                                className={`rp-step${i === step ? ' rp-step--active' : ''}${i < step ? ' rp-step--done' : ''}`}
+                            >
+                                <div className="rp-step-bubble">
+                                    {i < step ? <CheckIcon /> : i + 1}
+                                </div>
+                                <span className="rp-step-label">{s.label}</span>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="roomNumber">
-                                    Room No.{' '}
-                                    <span style={{ fontWeight: 400, textTransform: 'none', fontSize: '0.68rem', color: '#a08080' }}>
-                                        (optional)
-                                    </span>
-                                </label>
-                                <input
-                                    id="roomNumber"
-                                    type="text"
-                                    name="roomNumber"
-                                    value={formData.roomNumber}
-                                    onChange={handleChange}
-                                    placeholder="112"
-                                    maxLength="15"
-                                    disabled={loading}
-                                />
-                            </div>
-                        </div>
+                        ))}
+                    </div>
 
-                        <div className="form-group">
-                            <label htmlFor="fullName">Full Name</label>
-                            <input
-                                id="fullName"
-                                type="text"
-                                name="fullName"
-                                value={formData.fullName}
-                                onChange={handleChange}
-                                required
-                                placeholder="Alamgir Hosain"
-                                maxLength="100"
-                                disabled={loading}
-                            />
-                        </div>
+                    <div className="rp-divider" />
 
-                        <div className="form-group">
-                            <label htmlFor="email">Email Address</label>
-                            <input
-                                id="email"
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                                placeholder="CE21012@mbstu.ac.bd"
-                                disabled={loading}
-                            />
-                        </div>
+                    {error   && <div className="rp-error">{error}</div>}
+                    {success && <div className="rp-success">{success}</div>}
 
-                        <div className="form-group">
-                            <label>Gender</label>
-                            <div className="gender-options">
-                                <label className="radio-card">
-                                    <input
-                                        type="radio"
-                                        name="gender"
-                                        value="MALE"
-                                        checked={formData.gender === 'MALE'}
-                                        onChange={handleChange}
-                                        required
-                                        disabled={loading}
-                                    />
-                                    Male
-                                </label>
-                                <label className="radio-card">
-                                    <input
-                                        type="radio"
-                                        name="gender"
-                                        value="FEMALE"
-                                        checked={formData.gender === 'FEMALE'}
-                                        onChange={handleChange}
-                                        required
-                                        disabled={loading}
-                                    />
-                                    Female
-                                </label>
-                            </div>
-                        </div>
+                    {/* Step content */}
+                    <form onSubmit={step < 2 ? (e) => { e.preventDefault(); handleNext(); } : handleSubmit}>
+                        {renderStep()}
 
-                        {/* ── Academic Info ── */}
-                        <div className="form-section-label">Academic Details</div>
-
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="department">Department</label>
-                                <select
-                                    id="department"
-                                    name="department"
-                                    value={formData.department}
-                                    onChange={handleChange}
-                                    required
+                        <div className="rp-nav">
+                            {step > 0 && (
+                                <button
+                                    type="button"
+                                    className="rp-btn rp-btn--ghost"
+                                    onClick={handleBack}
                                     disabled={loading}
                                 >
-                                    <option value="">Select department</option>
-                                    {departmentOptions.map((dept) => (
-                                        <option key={dept} value={dept}>{dept}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="hallShortName">Residential Hall</label>
-                                <select
-                                    id="hallShortName"
-                                    name="hallShortName"
-                                    value={formData.hallShortName}
-                                    onChange={handleChange}
-                                    required
-                                    disabled={loading}
-                                >
-                                    <option value="">Select hall</option>
-                                    {hallOptions.map((hall) => (
-                                        <option key={hall.shortName} value={hall.shortName}>
-                                            {hall.fullName} ({hall.shortName})
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                                    ← Back
+                                </button>
+                            )}
+                            <button
+                                type="submit"
+                                className="rp-btn rp-btn--primary"
+                                disabled={loading}
+                            >
+                                {step < 2
+                                    ? <>Next →</>
+                                    : loading
+                                        ? 'Creating account…'
+                                        : 'Create Account'
+                                }
+                            </button>
                         </div>
-
-                        {/* ── Security ── */}
-                        <div className="form-section-label">Security</div>
-
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="password">Password</label>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Min. 6 characters"
-                                    minLength="6"
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="confirmPassword">Confirm Password</label>
-                                <input
-                                    id="confirmPassword"
-                                    type="password"
-                                    name="confirmPassword"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Re-enter password"
-                                    minLength="6"
-                                    disabled={loading}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="role">Role</label>
-                            <input
-                                id="role"
-                                type="text"
-                                value="STUDENT"
-                                disabled
-                                className="disabled-input"
-                            />
-                            <small>Automatically set to STUDENT for all registrations</small>
-                        </div>
-
-                        <button type="submit" className="form-button" disabled={loading}>
-                            {loading ? 'Creating account…' : 'Create Account'}
-                        </button>
                     </form>
 
-                    <div className="form-footer">
+                    <div className="rp-footer">
                         <p>Already have an account? <Link to="/login">Sign in here</Link></p>
                     </div>
+
                 </div>
             </div>
         </div>
