@@ -48,6 +48,7 @@ export function HallAdminStaff() {
                 password: form.password,
                 phone: form.phone || undefined,
                 role: "HALL_STAFF",
+                hallShortName: userData?.hallShortName,
             });
             setDialogOpen(false);
             setForm({ fullName: "", email: "", password: "", phone: "" });

@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 // import { User, onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 // import { User, onAuthStateChanged, signOut as firebaseSignOut, signInWithEmailAndPassword, } from "firebase/auth";
-import { User, onAuthStateChanged, signOut as firebaseSignOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, } from "firebase/auth";
+import { User, onAuthStateChanged, signOut as firebaseSignOut, signInWithEmailAndPassword } from "firebase/auth";
 import axios from "axios";
 import { auth } from "../firebase";
 import {
@@ -9,7 +9,7 @@ import {
     updateUserId,
     clearAuthState,
 } from "../services/authState";
-
+import { studentAPI } from "../services/api"; // adjust path to match your project
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface TokenClaims {
@@ -228,46 +228,31 @@ export const AuthProvider = ({
         }
     };
 
+
     const register = async (data: RegisterData): Promise<void> => {
         try {
             setError(null);
 
-            // Create Firebase account
-            const credential = await createUserWithEmailAndPassword(
-                auth,
-                data.email,
-                data.password
-            );
+            // Backend creates Firebase user + DB record + sets custom claims
+            await studentAPI.register({
+                studentId: data.studentId,
+                fullName: data.fullName,
+                email: data.email,
+                password: data.password,
+                hallShortName: data.hallShortName,
+                roomNumber: data.roomNumber,
+                department: data.department,
+                gender: data.gender,
+            });
 
-            const token = await credential.user.getIdToken();
-
-            // Create student in backend
-            await axios.post(
-                `${API}/api/v1/auth/register`,
-                {
-                    studentId: data.studentId,
-                    fullName: data.fullName,
-                    email: data.email,
-                    hallShortName: data.hallShortName,
-                    roomNumber: data.roomNumber,
-                    department: data.department,
-                    gender: data.gender,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
+            // Now sign in normally — this gets us a Firebase session + fresh token with claims
+            const credential = await signInWithEmailAndPassword(auth, data.email, data.password);
             await fetchUserData(credential.user, true);
+
         } catch (err) {
             console.error(err);
-
             throw new Error(
-                err instanceof Error
-                    ? err.message
-                    : "Registration failed"
+                err instanceof Error ? err.message : "Registration failed", { cause: err }
             );
         }
     };
