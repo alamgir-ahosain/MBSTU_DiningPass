@@ -74,7 +74,7 @@ export interface MealToken {
   qrGeneratedAt: string;
   usedAt?: string;
   scanMode?: "STAFF_SCANNED" | "STUDENT_SCANNED";
-  expiresAt?: string;
+  tokenExpiry?: string;
 }
 
 export interface Payment {
@@ -93,14 +93,17 @@ export interface Payment {
 }
 
 export interface SummaryRow {
+
+  hallShortName: string;
   mealDate: string;
   mealType: MealType;
   mealMenu: string;
   mealPrice: number;
-  feastNote?: string;
-  sold: number;
-  used: number;
-  unused: number;
-  revenue: number;
+  feastNote: string;
+  totalTokensSold: number;
+  totalTokensUsed: number;
+  totalTokensUnused: number;
+  totalRevenue: number;
   isFinalized: boolean;
+  finalizedAt: string;
 }
