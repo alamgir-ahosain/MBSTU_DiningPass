@@ -11,8 +11,8 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 
   jpa:
@@ -31,6 +31,6 @@ spring:
       include-exception: false
 
 server:
-  port: 8081
+  port: ${AUTH_SERVICE_SERVER_PORT}
 firebase:
   service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON}

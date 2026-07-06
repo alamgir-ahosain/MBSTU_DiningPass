@@ -41,7 +41,7 @@ const emptyForm = (type: MealType = "LUNCH"): FormState => ({
     mealType: type,
     mealMenu: "",
     mealPrice: 30,
-    cutTokenBefore: type === "LUNCH" ? "10:00" : "17:00",
+    cutTokenBefore: type === "LUNCH" ? "00:00" : "00:00",
     tokenExpires: type === "LUNCH" ? "15:00" : "22:00",
     isActive: true,
     feastNote: "",
@@ -260,7 +260,7 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
                                         setForm((prev) => ({
                                             ...prev,
                                             mealType: mt,
-                                            cutTokenBefore: mt === "LUNCH" ? "10:00" : "17:00",
+                                            cutTokenBefore: mt === "LUNCH" ? "00:00" : "00:00",
                                             tokenExpires: mt === "LUNCH" ? "15:00" : "22:00",
                                         }));
                                     }}
