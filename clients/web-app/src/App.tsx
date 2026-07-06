@@ -7,6 +7,7 @@ import HomePage from "./pages/public/HomePage";
 import LoginPage from "./pages/public/LoginPage";
 import RegistrationPage from "./pages/public/RegistrationPage";
 import ForgotPasswordPage from "./pages/public/ForgotPasswordPage";
+import { NotFoundPage } from "@/pages/public/NotFoundPage";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient } from "@tanstack/react-query";
@@ -85,6 +86,8 @@ export default function App() {
               <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
               <Route path="/register" element={<PublicRoute><RegistrationPage /></PublicRoute>} />
               <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+              <Route path="/not-found" element={<NotFoundPage />} />
+
 
               {/* bKash result pages — public (browser redirect from backend) */}
               <Route path="/payment/success" element={<PaymentSuccessPage />} />
@@ -129,7 +132,7 @@ export default function App() {
               <Route path="/superAdmin/change-password" element={<ProtectedRoute requiredRole="SUPER_ADMIN"><SuperAdminChangePassword /></ProtectedRoute>} />
               <Route path="/superAdmin/students" element={<ProtectedRoute requiredRole="SUPER_ADMIN"><SuperAdminStudents /></ProtectedRoute>} />
 
-
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </AuthProvider>
         </BrowserRouter>
