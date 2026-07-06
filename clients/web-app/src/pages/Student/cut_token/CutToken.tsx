@@ -11,6 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { MealConfig, MealType } from "@/types";
 
+const MEAL_ICONS: Record<string, string> = {
+    LUNCH: "☀️",
+    DINNER: "🌙",
+};
+const mealIcon = (mealType: string) => MEAL_ICONS[mealType] ?? "🍴";
 function groupByDate(configs: MealConfig[]) {
     const map = new Map<string, MealConfig[]>();
     for (const c of configs) {
@@ -20,6 +25,7 @@ function groupByDate(configs: MealConfig[]) {
     }
     return Array.from(map.entries()).sort(([a], [b]) => (a < b ? -1 : 1));
 }
+
 
 export function CutToken() {
     const { user, userData } = useAuth();
@@ -97,7 +103,7 @@ export function CutToken() {
                                 .map((c) => (
                                     <div key={c.id} className="flex justify-between text-sm border-b border-border pb-2">
                                         <div>
-                                            <div className="font-medium">{c.mealType}</div>
+                                            <div className="font-medium">{c.mealType=='LUNCH'? "*":"🌙"}</div>
                                             <div className="text-muted-foreground text-xs">{c.mealMenu}</div>
                                         </div>
                                         <div className="font-medium">৳{c.mealPrice}</div>
@@ -179,7 +185,13 @@ export function CutToken() {
                                             >
                                                 <div className="flex items-start justify-between mb-3">
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <Badge variant={c.mealType === "LUNCH" ? "default" : "secondary"}>{c.mealType}</Badge>
+                                                        <Badge className={c.mealType === "LUNCH"
+                                                            ? "bg-amber-100 text-amber-900 hover:bg-amber-100 gap-1"
+                                                            : "bg-indigo-100 text-indigo-900 hover:bg-indigo-100 gap-1"
+                                                        }>
+                                                            {mealIcon(c.mealType)} {c.mealType}
+                                                        </Badge>
+
                                                         <Badge variant="outline" className="gap-1"><MapPin className="size-3" />{c.hallShortName}</Badge>
                                                         {!open && <Badge variant="outline">Closed</Badge>}
                                                         {c.feastNote && <Badge className="bg-accent text-accent-foreground">Feast</Badge>}

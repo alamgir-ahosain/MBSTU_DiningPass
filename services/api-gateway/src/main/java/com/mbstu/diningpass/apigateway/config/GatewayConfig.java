@@ -1,5 +1,6 @@
 package com.mbstu.diningpass.apigateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +28,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GatewayConfig {
 
+
+    @Value("${services.auth-service.url}")
+    String authServiceUrl;
+
+    @Value("${services.meal-service.url}")
+    String mealServiceUrl;
+
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
@@ -36,48 +44,48 @@ public class GatewayConfig {
 
                 .route("auth-service-students", r -> r
                         .path("/api/v1/students", "/api/v1/students/**")
-                        .uri("http://localhost:8081"))
+                        .uri(authServiceUrl))
 
                 .route("auth-service-students-register-legacy", r -> r
                         .path("/api/v1/students/register")
                         .filters(f -> f.setPath("/api/v1/students"))
-                        .uri("http://localhost:8081"))
+                        .uri(authServiceUrl))
 
                 .route("auth-service-students-profile-legacy", r -> r
                         .path("/api/v1/students/profile")
                         .filters(f -> f.setPath("/api/v1/students/me"))
-                        .uri("http://localhost:8081"))
+                        .uri(authServiceUrl))
 
                 .route("auth-service-halls", r -> r
                         .path("/api/v1/halls", "/api/v1/halls/**")
-                        .uri("http://localhost:8081"))
+                        .uri(authServiceUrl))
 
                 .route("auth-service-admins", r -> r
                         .path("/api/v1/admins", "/api/v1/admins/**")
-                        .uri("http://localhost:8081"))
+                        .uri(authServiceUrl))
 
 
                 // _______________ Meal Service routes ___________________-
 
                 .route("meal-service-configs", r -> r
                         .path("/api/v1/meal-configs", "/api/v1/meal-configs/**")
-                        .uri("http://localhost:8082"))
+                        .uri(mealServiceUrl))
 
                 .route("meal-service-tokens", r -> r
                         .path("/api/v1/meal-tokens", "/api/v1/meal-tokens/**")
-                        .uri("http://localhost:8082"))
+                        .uri(mealServiceUrl))
 
                 .route("meal-service-payments", r -> r
                         .path("/api/v1/payments", "/api/v1/payments/**")
-                        .uri("http://localhost:8082"))
+                        .uri(mealServiceUrl))
 
                 .route("meal-service-bkash-payments", r -> r
                         .path("/api/payment/bkash", "/api/payment/bkash/**")
-                        .uri("http://localhost:8082"))
+                        .uri(mealServiceUrl))
 
                 .route("meal-service-summary", r -> r
                         .path("/api/v1/summary", "/api/v1/summary/**")
-                        .uri("http://localhost:8082"))
+                        .uri(mealServiceUrl))
 
                 .build();
     }

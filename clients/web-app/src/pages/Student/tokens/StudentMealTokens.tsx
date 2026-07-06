@@ -7,7 +7,6 @@ import { Ticket, Download, Clock, UtensilsCrossed, Calendar, X } from "lucide-re
 import { useAuth } from "@/context/AuthContext";
 import { AppShell } from "@/components/AppShell";
 import { mealTokenAPI } from "@/services/api";
-import { formatTime12 } from "@/lib/utils";
 import { PageHeader } from "@/components/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -76,12 +75,12 @@ export function StudentMealTokens() {
                                     <QRCodeSVG value={preview.qrCodeData} size={300} level="M" />
                                 </div>
                                 <Badge className="mt-4 bg-amber-100 text-amber-900 hover:bg-amber-100">
-                                    {preview.mealType === "LUNCH" ? "?" : "?"} {preview.mealType}
+                                    {preview.mealType === "LUNCH" ? "☀" : "🌙"} {preview.mealType}
                                 </Badge>
                                 <div className="mt-3 font-medium text-base">{preview.mealMenu}</div>
                                 <div className="text-sm text-muted-foreground mt-1">
-                                    {new Date(preview.mealDate).toLocaleDateString()} � valid until{" "}
-                                    <span className="text-destructive font-medium">{formatTime12(preview.expiresAt ?? "")}</span>
+                                    {new Date(preview.mealDate).toLocaleDateString()} · valid until{" "}
+                                    <span className="text-destructive font-medium">{preview.tokenExpiry ?? ""}</span>
                                 </div>
                                 <Button className="mt-5" onClick={() => setPreview(null)}>
                                     <X className="size-4" /> Close
@@ -134,7 +133,7 @@ function TokenCard({ t, onPreview }: { t: MealToken; onPreview: () => void }) {
                     ? "bg-amber-100 text-amber-900 hover:bg-amber-100 text-sm px-3 py-1"
                     : "bg-indigo-100 text-indigo-900 hover:bg-indigo-100 text-sm px-3 py-1"
                 }>
-                    {t.mealType === "LUNCH" ? "?" : "?"} {t.mealType}
+                    {t.mealType === "LUNCH" ? "☀" : "🌙"} {t.mealType}
                 </Badge>
                 <Badge
                     variant={used ? "secondary" : "outline"}
@@ -166,7 +165,7 @@ function TokenCard({ t, onPreview }: { t: MealToken; onPreview: () => void }) {
                 <div className="flex items-center gap-2 text-sm">
                     <Clock className="size-4 text-destructive" />
                     <span className="text-muted-foreground">Expires:</span>
-                    <span className="font-semibold text-destructive">{t.expiresAt }</span>
+                    <span className="font-semibold text-destructive">{t.tokenExpiry }</span>
                 </div>
             </div>
 

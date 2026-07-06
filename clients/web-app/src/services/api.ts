@@ -96,7 +96,7 @@ export const hallStaffAPI = {
     apiClient.patch(`/api/v1/payments/${id}/reject`, { rejectionReason: reason }),
   scanQrToken: (qrCodeData: string) =>
     apiClient.post("/api/v1/meal-tokens/staff-scan", { qrCodeData }),
-  getHallSummaries: (params: object = {}) => {
+  getHallSummaries: (page: number, pageSize: number, params: object = {}) => {
     const try_ = (ep: string) => apiClient.get(ep, { params });
     if (__hallSummaryEndpoint) return try_(__hallSummaryEndpoint);
     return try_("/api/v1/summary/hall")
