@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AppShell } from "@/components/AppShell";
+import axios from "axios";
 
 export function ChangePasswordPage({
   changePassword,
@@ -33,8 +34,10 @@ export function ChangePasswordPage({
       setNext("");
       setConfirm("");
       toast.success("Password updated successfully");
-    } catch (e: any) {
-      setErr(e?.response?.data?.message ?? "Failed to update password.");
+    }
+    catch (e: unknown) {
+      const message = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
+      setErr(message ?? "Failed to update password.");
     } finally {
       setLoading(false);
     }

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import type { Admin } from "@/types";
 import { AppShell } from "@/components/AppShell";
+import axios from "axios";
 
 export function HallAdminStaff() {
     const { user, userData } = useAuth();
@@ -34,7 +35,19 @@ export function HallAdminStaff() {
         }
     };
 
-    useEffect(() => { load(); }, []);
+    useEffect(() => {
+        let ignore = false;
+        (async () => {
+            try {
+                const res = await hallAdminAPI.getHallStaff();
+                if (!ignore) setStaff(res.data ?? []);
+            } catch (e) {
+                console.error(e);
+                if (!ignore) toast.error("Failed to load staff");
+            }
+        })();
+        return () => { ignore = true; };
+    }, []);
 
     if (!user) return null;
 
@@ -54,8 +67,9 @@ export function HallAdminStaff() {
             setForm({ fullName: "", email: "", password: "", phone: "" });
             toast.success("Staff member created");
             load();
-        } catch (e: any) {
-            setErr(e?.response?.data?.message ?? "Failed to create staff member.");
+        } catch (e: unknown) {
+            const message = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
+            setErr(message ?? "Failed to create staff member.");
         }
     };
 

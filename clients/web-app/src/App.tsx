@@ -26,7 +26,7 @@ import { StudentMealTokens } from "./pages/Student/tokens/StudentMealTokens";
 import { CutToken } from "./pages/Student/cut_token/CutToken"; // replaces BkashPaymentPage
 import { PaymentSuccessPage } from "./pages/Student/payment/PaymentSuccessPage";
 import { PaymentFailurePage } from "./pages/Student/payment/PaymentFailurePage";
-import { PaymentHistoryPage } from "./pages/Student/payment/PaymentHistoryPage";
+// import { PaymentHistoryPage } from "./pages/Student/payment/PaymentHistoryPage";
 
 // Hall Admin
 // import { HallAdminDashboard } from "./pages/HallAdmin/dashboard/HallAdminDashboard";
@@ -98,7 +98,7 @@ export default function App() {
               <Route path="/student/profile" element={<ProtectedRoute requiredRole="STUDENT"><StudentProfile /></ProtectedRoute>} />
               <Route path="/student/change-password" element={<ProtectedRoute requiredRole="STUDENT"><ChangePassword /></ProtectedRoute>} />
               <Route path="/student/my-tokens" element={<ProtectedRoute requiredRole="STUDENT"><StudentMealTokens /></ProtectedRoute>} />
-              <Route path="/student/payment-history" element={<ProtectedRoute requiredRole="STUDENT"><PaymentHistoryPage /></ProtectedRoute>} />
+              {/*<Route path="/student/payment-history" element={<ProtectedRoute requiredRole="STUDENT"><PaymentHistoryPage /></ProtectedRoute>} />*/}
               <Route path="/student/cut-token" element={<ProtectedRoute requiredRole="STUDENT"><CutToken /></ProtectedRoute>} />
               <Route path="/student/bkash-payment" element={<ProtectedRoute requiredRole="STUDENT"><CutToken /></ProtectedRoute>} />
 

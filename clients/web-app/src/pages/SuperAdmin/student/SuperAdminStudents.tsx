@@ -14,15 +14,21 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { StudentProfile } from "@/types";
 import { AppShell } from "@/components/AppShell";
+import type { AxiosResponse } from "axios";
 
 // Normalizes whatever shape the API returns into a plain StudentProfile[].
 // Handles: res.data being the array directly, or nested under
 // res.data.students / res.data.data, or missing entirely.
-function extractStudents(res: any): StudentProfile[] {
-    const payload = res?.data;
+
+function extractStudents(
+    res: AxiosResponse<StudentProfile[] | { students?: StudentProfile[]; data?: StudentProfile[] }>
+): StudentProfile[] {
+    const payload = res.data;
+
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.students)) return payload.students;
     if (Array.isArray(payload?.data)) return payload.data;
+
     return [];
 }
 

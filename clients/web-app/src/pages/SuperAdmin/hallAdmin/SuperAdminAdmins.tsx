@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import type { Admin, Hall } from "@/types";
 import { AppShell } from "@/components/AppShell";
+import axios from "axios";
 
 type FormState = { fullName: string; email: string; phone: string; password: string; hallShortName: string };
 const EMPTY: FormState = { fullName: "", email: "", phone: "", password: "password", hallShortName: "" };
@@ -44,8 +45,27 @@ export function SuperAdminAdmins() {
         }
     };
 
-    useEffect(() => { load(); }, []);
+    useEffect(() => {
+        let ignore = false;
 
+        (async () => {
+            try {
+                const [adminsRes, hallsRes] = await Promise.all([
+                    superAdminAPI.getAllAdmins({ role: "HALL_ADMIN" }),
+                    hallAPI.getAll({ isActive: true }),
+                ]);
+                if (!ignore) {
+                    setAdmins(adminsRes.data ?? []);
+                    setHalls(hallsRes.data ?? []);
+                }
+            } catch (e) {
+                console.error(e);
+                if (!ignore) toast.error("Failed to load hall admins");
+            }
+        })();
+
+        return () => { ignore = true; };
+    }, []);
 
     if (loading) {
         return null;
@@ -75,8 +95,9 @@ export function SuperAdminAdmins() {
             setOpen(false);
             setForm(EMPTY);
             load();
-        } catch (e: any) {
-            toast.error(e?.response?.data?.message ?? "Failed to create hall admin");
+        } catch (e: unknown) {
+            const message = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
+            toast.error(message ?? "Failed to create hall admin. Please try again later.");
         }
     };
 
@@ -86,9 +107,9 @@ export function SuperAdminAdmins() {
             else await superAdminAPI.activateAdmin(a.id);
             toast.success(a.isActive ? "Suspended" : "Activated");
             load();
-        } catch (e) {
-            console.error(e);
-            toast.error("Failed to update status");
+        } catch (e: unknown) {
+            const message = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
+            toast.error(message ?? "Failed to update status");
         }
     };
 
