@@ -219,11 +219,9 @@ export const AuthProvider = ({
             await fetchUserData(credential.user, true);
         } catch (err) {
             console.error(err);
-
             throw new Error(
-                err instanceof Error
-                    ? err.message
-                    : "Invalid email or password"
+                err instanceof Error ? err.message : "Invalid email or password",
+                { cause: err }
             );
         }
     };
@@ -252,8 +250,10 @@ export const AuthProvider = ({
         } catch (err) {
             console.error(err);
             throw new Error(
-                err instanceof Error ? err.message : "Registration failed", { cause: err }
+                err instanceof Error ? err.message : "Registration failed",
+                { cause: err }
             );
+
         }
     };
     const logout = async (): Promise<void> => {
