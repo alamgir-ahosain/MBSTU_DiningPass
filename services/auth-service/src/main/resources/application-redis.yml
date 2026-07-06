@@ -1,0 +1,12 @@
+spring:
+  # Un-exclude RedisAutoConfiguration for this profile — overrides the base exclude entirely
+  autoconfigure:
+    exclude:
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+#
+#logging:
+#  level:
+#    org.springframework.data.redis: DEBUG

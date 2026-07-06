@@ -104,7 +104,7 @@ public class BkashPaymentController {
     private final Logger logger = LoggerFactory.getLogger(BkashPaymentController.class);
 
     // React base URL for redirecting the browser after callback
-    @Value("${app.frontend-url:http://localhost:5173}")
+    @Value("${app.frontend.url}")
     private String frontendUrl;
 
     // ── STEP 1: Create Payment ────────────────────────────────────────────────
