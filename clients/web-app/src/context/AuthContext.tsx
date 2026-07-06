@@ -217,6 +217,8 @@ export const AuthProvider = ({
             );
 
             await fetchUserData(credential.user, true);
+            setUser(credential.user);
+            setLoading(false);
         } catch (err) {
             console.error(err);
             throw new Error(
@@ -246,7 +248,8 @@ export const AuthProvider = ({
             // Now sign in normally — this gets us a Firebase session + fresh token with claims
             const credential = await signInWithEmailAndPassword(auth, data.email, data.password);
             await fetchUserData(credential.user, true);
-
+            setUser(credential.user);
+            setLoading(false);
         } catch (err) {
             console.error(err);
             throw new Error(
