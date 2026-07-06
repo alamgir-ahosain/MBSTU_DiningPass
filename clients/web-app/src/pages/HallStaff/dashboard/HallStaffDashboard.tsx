@@ -42,7 +42,7 @@ export function HallStaffDashboard() {
                 const dinner = configs.find((c) => c.mealType === "DINNER");
 
                 setData({
-                    totalTokensToday: (lunch?.tokensSold ?? 0) + (dinner?.tokensSold ?? 0),
+                    totalTokensToday: (lunch?.totalTokensUsed ?? 0) + (dinner?.totalTokensUsed ?? 0),
                     pendingPayments: allPayments.filter((p) => p.paymentStatus === "PENDING").length,
                     lunch,
                     dinner,

@@ -96,7 +96,8 @@ export const hallStaffAPI = {
     apiClient.patch(`/api/v1/payments/${id}/reject`, { rejectionReason: reason }),
   scanQrToken: (qrCodeData: string) =>
     apiClient.post("/api/v1/meal-tokens/staff-scan", { qrCodeData }),
-  getHallSummaries: (page: number, pageSize: number, params: object = {}) => {
+  getHallSummaries: (_page: number, _pageSize: number, params: object = {}) => {
+  // getHallSummaries: (page: number, pageSize: number, params: object = {}) => {
     const try_ = (ep: string) => apiClient.get(ep, { params });
     if (__hallSummaryEndpoint) return try_(__hallSummaryEndpoint);
     return try_("/api/v1/summary/hall")
@@ -121,7 +122,7 @@ export const mealTokenAPI = {
 // ── Payment ───────────────────────────────────────────────────────────────────
 export const paymentAPI = {
   // getMyPayments: () => apiClient.get("/api/v1/payments/my"),
-  getPayments: (f: object = {}) => apiClient.get("/api/v1/payments", { params: f }),
+  // getPayments: (f: object = {}) => apiClient.get("/api/v1/payments", { params: f }),
   getPaymentById: (id: string) => apiClient.get(`/api/v1/payments/${id}`),
   approvePayment: (id: string) => apiClient.patch(`/api/v1/payments/${id}/approve`),
   rejectPayment: (id: string, reason: string) =>
@@ -133,5 +134,5 @@ export const bkashPaymentAPI = {
   createPayment: (payload: unknown) => apiClient.post("/api/payment/bkash/create", payload),
   cancelPayment: (payload: unknown) => apiClient.post("/api/payment/bkash/cancel", payload),
   refundPayment: (payload: unknown) => apiClient.post("/api/payment/bkash/refund", payload),
-  getHistory: () => apiClient.get("/api/v1/payments/my"),
+  // getHistory: () => apiClient.get("/api/v1/payments/my"),
 };
