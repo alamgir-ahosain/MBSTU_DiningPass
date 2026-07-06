@@ -9,12 +9,6 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -36,7 +30,8 @@ services:
     url: ${AUTH_SERVICE_URL}
 
 app:
-  frontend-url: ${FRONTEND_URL}
+  frontend:
+   url: ${FRONTEND_URL}
 
 server:
   port: ${MEAL_SERVICE_SERVER_PORT}
