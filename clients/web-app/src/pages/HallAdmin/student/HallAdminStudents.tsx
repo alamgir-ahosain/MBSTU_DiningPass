@@ -25,7 +25,7 @@ export function HallAdminStudents() {
     const load = async () => {
         try {
             const res = await superAdminAPI.getAllStudents(q.trim() ? { search: q.trim() } : {});
-            setStudents(res.data ?? []);
+            setStudents(res.data?.content ?? []);   //  pull out the content array
         } catch (e) {
             console.error(e);
             toast.error("Failed to load students");
