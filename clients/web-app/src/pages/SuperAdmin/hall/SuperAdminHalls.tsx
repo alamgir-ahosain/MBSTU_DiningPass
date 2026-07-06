@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import type { Admin, Hall } from "@/types";
 import { AppShell } from "@/components/AppShell";
+import axios from "axios";
 
 
 type FormState = {
@@ -110,8 +111,10 @@ export function SuperAdminHalls() {
             }
             setOpen(false);
             load();
-        } catch (e: any) {
-            toast.error(e?.response?.data?.message ?? "Failed to save hall");
+        }
+        catch (e: unknown) {
+            const message = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
+            toast.error(message ?? "Failed to save hall");
         }
     };
 

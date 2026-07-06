@@ -17,6 +17,7 @@ import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import type { MealConfig, MealType } from "@/types";
+import axios from "axios";
 
 interface MealConfigsApi {
     getMealConfigs: (f?: object) => Promise<{ data: MealConfig[] }>;
@@ -56,7 +57,7 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
     const { user, userData } = useAuth();
     const [configs, setConfigs] = useState<MealConfig[]>([]);
     const [dialogOpen, setDialogOpen] = useState(false);
-    // ✅ Use a separate key to force Switch remount when dialog opens with new config
+    //  Use a separate key to force Switch remount when dialog opens with new config
     const [dialogKey, setDialogKey] = useState(0);
     const [form, setForm] = useState<FormState>(emptyForm());
 
@@ -71,7 +72,21 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
     };
 
     useEffect(() => {
-        load();
+        let ignore = false;
+
+        (async () => {
+            try {
+                const res = await api.getMealConfigs();
+                if (!ignore) {
+                    setConfigs([...res.data].sort((a, b) => (a.mealDate < b.mealDate ? 1 : -1)));
+                }
+            } catch (e) {
+                console.error(e);
+                if (!ignore) toast.error("Failed to load meal configs");
+            }
+        })();
+
+        return () => { ignore = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -126,8 +141,9 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
             }
             setDialogOpen(false);
             load();
-        } catch (e: any) {
-            toast.error(e?.response?.data?.message ?? "Failed to save meal config");
+        } catch (e: unknown) {
+            const message = axios.isAxiosError(e) ? e.response?.data?.message : undefined;
+            toast.error(message ?? "Failed to save meal config");
         }
     };
 
@@ -234,7 +250,7 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
                     })}
                 </div>
 
-                {/* ✅ key prop forces full remount when opening a different config */}
+                {/*  key prop forces full remount when opening a different config */}
                 <Dialog key={dialogKey} open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogContent>
                         <DialogHeader>
@@ -291,7 +307,7 @@ export function MealConfigsPage({ api }: { api: MealConfigsApi }) {
                             <div className="space-y-1.5">
                                 <Label>Active</Label>
                                 <div className="h-10 flex items-center gap-3">
-                                    {/* ✅ functional updater avoids stale closure; key forces remount */}
+                                    {/*  functional updater avoids stale closure; key forces remount */}
                                     <Switch
                                         key={`active-${form.id ?? "new"}-${dialogKey}`}
                                         checked={form.isActive}
