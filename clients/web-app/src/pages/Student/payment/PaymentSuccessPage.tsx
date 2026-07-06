@@ -9,7 +9,7 @@ import type { Payment } from "@/types";
 
 export function PaymentSuccessPage() {
     const [searchParams] = useSearchParams();
-    const paymentId = searchParams.get("paymentId");
+    const paymentId = searchParams.get("paymentID");
     const [payment, setPayment] = useState<Payment | null>(null);
 
     useEffect(() => {
