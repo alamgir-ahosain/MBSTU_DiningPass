@@ -487,7 +487,7 @@ Startup catch-up:
 
 ```mermaid
 flowchart TD
-    A[@Scheduled / startup catch-up] --> B[cleanupIfNotDone(date, mealType)]
+    A["@Scheduled / startup catch-up"] --> B["cleanupIfNotDone(date, mealType)"]
     B --> C[Find halls with tokens]
     C --> D[Per hall: if not finalized]
     D --> E[Mark APPROVED no-shows as CANCELLED]
@@ -591,8 +591,4 @@ cd /home/alamgir/Alamgir/workingProject/MBSTU_DiningPass/services/api-gateway
 - `GET /api/v1/payments/my`
 - `GET /api/v1/summary`
 - `GET /api/v1/summary/hall`
-
----
-
-This README is derived from the current backend source code under `services/*` and reflects the implementation as of the repository state reviewed.
 

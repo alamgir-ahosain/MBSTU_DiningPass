@@ -39,6 +39,25 @@ public class GatewayConfig {
     public RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
 
+                // _______________ Health routes _________________
+                .route("auth-service-health", r -> r
+                        .path("/api/v1/auth/health")
+                        .filters(f -> f.setPath("/health"))
+                        .uri(authServiceUrl))
+                .route("auth-service-root", r -> r
+                        .path("/api/v1/auth/")
+                        .filters(f -> f.setPath("/"))
+                        .uri(authServiceUrl))
+
+                .route("meal-service-health", r -> r
+                        .path("/api/v1/meal/health")
+                        .filters(f -> f.setPath("/health"))
+                        .uri(mealServiceUrl))
+                .route("meal-service-root", r -> r
+                        .path("/api/v1/meal/")
+                        .filters(f -> f.setPath("/"))
+                        .uri(mealServiceUrl))
+
 
                 // _______________ Auth Service routes _________________-
 

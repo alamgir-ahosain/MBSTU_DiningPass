@@ -54,6 +54,16 @@ public class GatewayFirebaseFilter implements GlobalFilter, Ordered {
             "/api/v1/students/register"
     );
 
+    // Health check endpoints — no auth required
+    private static final Set<String> PUBLIC_GET_PATHS = Set.of(
+            "/",
+            "/health",
+            "/api/v1/auth/",
+            "/api/v1/auth/health",
+            "/api/v1/meal/",
+            "/api/v1/meal/health"
+    );
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
@@ -71,6 +81,12 @@ public class GatewayFirebaseFilter implements GlobalFilter, Ordered {
         // 2. Skip documented public endpoint(s) only
         if (HttpMethod.POST.matches(method) && PUBLIC_POST_PATHS.contains(path)) {
             log.info(" Skipping public endpoint (no auth required): {} {}", method, path);
+            return chain.filter(exchange);
+        }
+
+        // 2b. Skip health check endpoints
+        if (HttpMethod.GET.matches(method) && PUBLIC_GET_PATHS.contains(path)) {
+            log.info("Skipping public health endpoint (no auth required): {} {}", method, path);
             return chain.filter(exchange);
         }
 
