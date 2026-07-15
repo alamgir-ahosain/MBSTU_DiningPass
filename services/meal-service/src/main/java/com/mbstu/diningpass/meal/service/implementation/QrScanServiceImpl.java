@@ -14,6 +14,7 @@ import com.mbstu.diningpass.meal.repository.MealTokenRepository;
 import com.mbstu.diningpass.meal.service.abstraction.HallMealSummaryService;
 import com.mbstu.diningpass.meal.service.abstraction.QrScanService;
 import com.mbstu.diningpass.meal.service.abstraction.QrTokenService;
+import com.mbstu.diningpass.meal.service.abstraction.TokenLockService;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,6 +34,7 @@ public class QrScanServiceImpl implements QrScanService {
 
     private final MealTokenRepository       tokenRepo;
     private final QrTokenService            qrTokenService;
+    private final TokenLockService          tokenLockService;
     private final RedisTemplate<String, String> redisTemplate;
     private final HallAssociateFeignClient hallAssociateFeignClient;
     private final HallMealSummaryService hallMealSummaryService;
@@ -48,6 +50,12 @@ public class QrScanServiceImpl implements QrScanService {
         QrClaims qr = qrTokenService.parseAndValidate(rawQrJwt);
         HallAssociateProfileResponse profileResponse= hallAssociateFeignClient.getMyProfile();
 
+        try {
+            profileResponse = hallAssociateFeignClient.getMyProfile();
+        } catch (Exception ex) {
+            return fail("PROFILE_LOOKUP_FAILED", "Could not verify your hall profile. Please try again.");
+        }
+
         if (!qr.hallShortName().equals(profileResponse.hallShortName())) return fail("WRONG_HALL", "This token belongs to a different hall.");
         if (!qr.mealDate().equals(LocalDate.now(DHAKA))) return fail("WRONG_DATE", "This token is not for today.");
 
@@ -57,9 +65,12 @@ public class QrScanServiceImpl implements QrScanService {
         if (token.getTokenStatus() != TokenStatus.APPROVED) return fail("NOT_APPROVED", "Payment not verified yet.");
 
         String redisKey = "qr:used:" + token.getId();
-        Boolean claimed = redisTemplate.opsForValue().setIfAbsent(redisKey, "USED", Duration.ofHours(12));
+//        Boolean claimed = redisTemplate.opsForValue().setIfAbsent(redisKey, "USED", Duration.ofHours(12));
+//        if (Boolean.FALSE.equals(claimed)) return fail("ALREADY_USED", "This meal has already been collected.");
 
-        if (Boolean.FALSE.equals(claimed)) return fail("ALREADY_USED", "This meal has already been collected.");
+        boolean claimed = tokenLockService.tryClaim(redisKey, Duration.ofHours(12));
+        if (!claimed) return fail("ALREADY_USED", "This meal has already been collected.");
+
 
         token.setTokenStatus(TokenStatus.USED);
         token.setUsedAt(LocalDateTime.now(DHAKA));
