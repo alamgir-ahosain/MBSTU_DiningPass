@@ -16,6 +16,7 @@ import java.security.Key;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.UUID;
 
@@ -39,12 +40,13 @@ class QrTokenServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        ZoneId dhaka = ZoneId.of("Asia/Dhaka");
         qrTokenService = new QrTokenServiceImpl(KEY);
         token = MealToken.builder()
                 .id(UUID.randomUUID())
                 .studentId(UUID.randomUUID())
                 .hallShortName("JAMH")
-                .mealDate(LocalDate.now())
+                .mealDate(LocalDate.now(dhaka))
                 .mealType(MealType.LUNCH)
                 .build();
     }
@@ -52,7 +54,9 @@ class QrTokenServiceImplTest {
     @Test
     @DisplayName("generates a JWT that parses back into the same claims")
     void generatesAndParsesRoundTrip() {
-        LocalTime tokenExpires = LocalTime.now().plusHours(2);
+
+        ZoneId dhaka = ZoneId.of("Asia/Dhaka");
+        LocalTime tokenExpires = LocalTime.now(dhaka).plusHours(2);
 
         String jwt = qrTokenService.generateMealQrToken(token, tokenExpires);
         assertThat(jwt).isNotBlank();
