@@ -79,8 +79,7 @@ jobs:
           BKASH_API_KEY: test-api-key
           BKASH_SECRET_KEY: test-secret-key
 
-          # --- Real secrets (keep these as GitHub Secrets) ---
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_SECRET: ci-test-only-jwt-secret-not-used-in-current-test-suite-32bytes-min
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
