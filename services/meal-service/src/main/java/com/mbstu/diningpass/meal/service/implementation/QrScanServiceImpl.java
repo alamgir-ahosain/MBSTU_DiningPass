@@ -16,8 +16,10 @@ import com.mbstu.diningpass.meal.service.abstraction.QrScanService;
 import com.mbstu.diningpass.meal.service.abstraction.QrTokenService;
 import com.mbstu.diningpass.meal.service.abstraction.TokenLockService;
 import lombok.AllArgsConstructor;
-import lombok.Value;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -31,13 +33,17 @@ import java.util.UUID;
 public class QrScanServiceImpl implements QrScanService {
 
     private static final ZoneId DHAKA = ZoneId.of("Asia/Dhaka");
+    private static final String MEAL_TOKENS_CACHE = "mealTokens";
+    private static final Logger logger = LoggerFactory.getLogger(QrScanServiceImpl.class);
+
 
     private final MealTokenRepository       tokenRepo;
     private final QrTokenService            qrTokenService;
     private final TokenLockService          tokenLockService;
-    private final RedisTemplate<String, String> redisTemplate;
     private final HallAssociateFeignClient hallAssociateFeignClient;
     private final HallMealSummaryService hallMealSummaryService;
+    private final CacheManager cacheManager;
+
 
 
 
@@ -78,6 +84,12 @@ public class QrScanServiceImpl implements QrScanService {
         token.setScannedById(staffId);
         tokenRepo.save(token);
 
+        // Student's cached "my tokens" list still shows this as APPROVED/UNUSED
+        // until evicted — without this, students see a scanned token as unused
+        // until the cache TTL expires (or forever, with the in-memory !redis cache).
+        evictStudentTokenCache(token.getStudentId());
+
+
         hallMealSummaryService.onTokenUsed(
                 token.getHallShortName(),
                 token.getMealDate(),
@@ -88,6 +100,18 @@ public class QrScanServiceImpl implements QrScanService {
     }
 
     //  helpers
+
+    private void evictStudentTokenCache(UUID studentId) {
+        try{
+            Cache cache = cacheManager.getCache(MEAL_TOKENS_CACHE);
+            if (cache != null) {
+                cache.evict("student:" + studentId);
+                logger.info("[QR_SCAN][CACHE] evicted mealTokens for student={}", studentId);
+            }
+        } catch (Exception e) {
+            logger.warn("[QR_SCAN][CACHE] evict failed for student={}: {}", studentId, e.getMessage());
+        }
+    }
 
     private QrScanResponse fail(String resultCode, String message) {
         return new QrScanResponse(false, resultCode, null, null, message);

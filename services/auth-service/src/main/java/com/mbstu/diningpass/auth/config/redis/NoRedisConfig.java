@@ -1,4 +1,4 @@
-package com.mbstu.diningpass.auth.config;
+package com.mbstu.diningpass.auth.config.redis;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
